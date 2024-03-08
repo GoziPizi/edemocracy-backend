@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -13,7 +7,6 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Un utilisateur peut avoir une seule affilliation, entre droite, gauche, extrême droite, extrême gauche, centre, etc.
 enum Affiliation {
   DROITE
   GAUCHE
@@ -30,42 +23,80 @@ enum Role {
 }
 
 model User {
-  id          String      @id @default(uuid())
-  email       String      @unique
+  id            String          @id @default(uuid())
+  email         String          @unique
+  name          String
+  firstName     String
+  password      String
+  telephone     String
+  address       String
+  profession    String
+  affiliation   Affiliation
+  follows       String[] //ids of groups parties personalities and topics
+  notifications Notifications[]
+  isVerified    Boolean         @default(false)
+  language      String
+  role          Role
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  Personality   Personality[]
+  Argument      Argument[]
+}
+
+model Notifications {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  message   String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Groupe {
+  id String @id @default(uuid())
+}
+
+model Party {
+  id          String        @id @default(uuid())
   name        String
-  firstName   String
-  password    String
-  telephone   String
-  profession  String
-  affiliation Affiliation
-  isVerified  Boolean     @default(false)
-  language    String
-  role        Role
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-}
-
-enum PoliticFigureType {
-  PERSONALITY
-  PARTY
-}
-
-model PoliticFigure {
-  id          String            @id @default(uuid())
-  name        String
-  type        PoliticFigureType
-  affiliation Affiliation
-  creation    String
+  logo        String
   description String
-  createdAt   DateTime          @default(now())
-  updatedAt   DateTime          @updatedAt
+  reason      String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  for         String[]
+  against     String[]
+  Personality Personality[]
 }
 
-model Debate {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  date        DateTime
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+model Personality {
+  id      String   @id @default(uuid())
+  user    User     @relation(fields: [userId], references: [id])
+  userId  String
+  party   Party?   @relation(fields: [partyId], references: [id])
+  partyId String?
+  for     String[]
+  against String[]
+}
+
+model Topic {
+  id            String     @id @default(uuid())
+  title         String
+  parentTopicId String?
+  childrenId    String[]
+  description   String
+  medias        String[]
+  arguments     Argument[]
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model Argument {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [id], references: [id])
+  Topic     Topic?   @relation(fields: [topicId], references: [id])
+  topicId   String?
+  content   String
+  responses String[]
 }
