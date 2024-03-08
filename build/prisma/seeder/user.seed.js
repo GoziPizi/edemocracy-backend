@@ -8,17 +8,21 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const RawQueryRepository_1 = __importDefault(require("@/repositories/RawQueryRepository"));
 const client_1 = require("@prisma/client");
 const default_password = 'password';
 function seedUser(prisma) {
     return __awaiter(this, void 0, void 0, function* () {
-        const default_hash = 'hash';
+        const hashedDefaultPassword = yield new RawQueryRepository_1.default().getSha256(default_password);
         yield prisma.user.createMany({
             data: [
                 {
                     email: 'pierre.dujean@gmail.com',
-                    password: default_hash,
+                    password: hashedDefaultPassword,
                     firstName: 'Pierre',
                     name: 'Dujean',
                     role: 'ADMIN',

@@ -1,14 +1,15 @@
+import RawQueryRepository from '@/repositories/RawQueryRepository';
 import { Affiliation, PrismaClient } from '@prisma/client'
 
 const default_password = 'password';
 
 async function seedUser(prisma: PrismaClient) {
-    const default_hash = 'hash'
+    const hashedDefaultPassword = await new RawQueryRepository().getSha256(default_password)
     await prisma.user.createMany({
         data: [
             {
                 email: 'pierre.dujean@gmail.com',
-                password: default_hash,
+                password: hashedDefaultPassword,
                 firstName: 'Pierre',
                 name: 'Dujean',
                 role: 'ADMIN',

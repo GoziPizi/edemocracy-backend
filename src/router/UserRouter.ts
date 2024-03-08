@@ -8,6 +8,8 @@ UserRouter.post('/', async (req, res) => {
         #swagger.description = 'Create a new user'
         #swagger.parameters['body'] = {
             description: 'User information',
+            required: true,
+            schema: { $ref: "#/definitions/UserCreateInputDtoDefinition" }
         }
         #swagger.responses[201] = {
             description: 'User created',
@@ -22,8 +24,15 @@ UserRouter.post('/', async (req, res) => {
 });
 
 UserRouter.get('/:id', async (req, res) => {
-    //TODO
-    //Accessible seulement si l'on est l'utilisateur ou admin
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Get user by id'
+        #swagger.parameters['id'] = { description: 'User id', required: true }
+        #swagger.responses[200] = {
+            description: 'User found',
+            schema: { $ref: "#/definitions/UserOutputDefinition" }
+        }
+     */
     try {
         //TODO
         res.status(200)
@@ -33,8 +42,15 @@ UserRouter.get('/:id', async (req, res) => {
 });
 
 UserRouter.get('/:id/public', async (req, res) => {
-    //TODO
-    //Accessible si connecté
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Get public user by id'
+        #swagger.parameters['id'] = { description: 'User id', required: true }
+        #swagger.responses[200] = {
+            description: 'User found',
+            schema: { $ref: "#/definitions/UserPublicOutputDefinition" }
+        }
+     */
     try {
         //TODO
         res.status(200)
@@ -44,8 +60,20 @@ UserRouter.get('/:id/public', async (req, res) => {
 });
 
 UserRouter.put('/:id', async (req, res) => {
-    //TODO
-    //Accessible seulement si l'on est l'utilisateur ou admin
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Update user by id'
+        #swagger.parameters['id'] = { description: 'User id', required: true }
+        #swagger.parameters['body'] = {
+            description: 'User information',
+            required: true,
+            schema: { $ref: "#/definitions/UserUpdateInputDefinition" }
+        }
+        #swagger.responses[200] = {
+            description: 'User updated',
+            schema: { $ref: "#/definitions/UserOutputDefinition" }
+        }
+     */
     try {
         //TODO
         res.status(200)

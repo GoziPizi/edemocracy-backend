@@ -21,10 +21,11 @@
           {
             "name": "body",
             "description": "User information",
-            "in": "query",
+            "required": true,
             "schema": {
-              "type": "string"
-            }
+              "$ref": "#/components/schemas/UserCreateInputDtoDefinition"
+            },
+            "in": "query"
           }
         ],
         "responses": {
@@ -36,7 +37,10 @@
     },
     "/api/users/{id}": {
       "get": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "description": "Get user by id",
         "parameters": [
           {
             "name": "id",
@@ -44,17 +48,33 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "User id"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOutputDefinition"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOutputDefinition"
+                }
+              }
+            }
           }
         }
       },
       "put": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "description": "Update user by id",
         "parameters": [
           {
             "name": "id",
@@ -62,19 +82,44 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "User id"
+          },
+          {
+            "name": "body",
+            "description": "User information",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/UserUpdateInputDefinition"
+            },
+            "in": "query"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOutputDefinition"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserOutputDefinition"
+                }
+              }
+            }
           }
         }
       }
     },
     "/api/users/{id}/public": {
       "get": {
-        "description": "",
+        "tags": [
+          "User"
+        ],
+        "description": "Get public user by id",
         "parameters": [
           {
             "name": "id",
@@ -82,13 +127,211 @@
             "required": true,
             "schema": {
               "type": "string"
-            }
+            },
+            "description": "User id"
           }
         ],
         "responses": {
           "200": {
-            "description": "OK"
+            "description": "User found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPublicOutputDefinition"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserPublicOutputDefinition"
+                }
+              }
+            }
           }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserCreateInputDtoDefinition": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "string"
+          },
+          "password": {
+            "type": "string",
+            "example": "string"
+          },
+          "name": {
+            "type": "string",
+            "example": "string"
+          },
+          "address": {
+            "type": "string",
+            "example": "string"
+          },
+          "profession": {
+            "type": "string",
+            "example": "string"
+          },
+          "telephone": {
+            "type": "string",
+            "example": "string"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "string"
+          },
+          "language": {
+            "type": "string",
+            "example": "string"
+          },
+          "affiliation": {
+            "type": "string",
+            "example": "DROITE"
+          }
+        },
+        "xml": {
+          "name": "UserCreateInputDtoDefinition"
+        }
+      },
+      "UserOutputDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1"
+          },
+          "email": {
+            "type": "string",
+            "example": "string"
+          },
+          "name": {
+            "type": "string",
+            "example": "string"
+          },
+          "address": {
+            "type": "string",
+            "example": "string"
+          },
+          "profession": {
+            "type": "string",
+            "example": "string"
+          },
+          "telephone": {
+            "type": "string",
+            "example": "string"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "string"
+          },
+          "language": {
+            "type": "string",
+            "example": "string"
+          },
+          "affiliation": {
+            "type": "string",
+            "example": "DROITE"
+          },
+          "follows": {
+            "type": "array",
+            "example": [
+              "1"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "role": {
+            "type": "string",
+            "example": "USER"
+          },
+          "createdAt": {
+            "type": "object",
+            "properties": {}
+          },
+          "updatedAt": {
+            "type": "object",
+            "properties": {}
+          }
+        },
+        "xml": {
+          "name": "UserOutputDefinition"
+        }
+      },
+      "UserPublicOutputDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1"
+          },
+          "name": {
+            "type": "string",
+            "example": "string"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "string"
+          },
+          "language": {
+            "type": "string",
+            "example": "string"
+          },
+          "createdAt": {
+            "type": "object",
+            "properties": {}
+          },
+          "updatedAt": {
+            "type": "object",
+            "properties": {}
+          }
+        },
+        "xml": {
+          "name": "UserPublicOutputDefinition"
+        }
+      },
+      "UserUpdateInputDefinition": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "string"
+          },
+          "name": {
+            "type": "string",
+            "example": "string"
+          },
+          "address": {
+            "type": "string",
+            "example": "string"
+          },
+          "profession": {
+            "type": "string",
+            "example": "string"
+          },
+          "telephone": {
+            "type": "string",
+            "example": "string"
+          },
+          "firstName": {
+            "type": "string",
+            "example": "string"
+          },
+          "language": {
+            "type": "string",
+            "example": "string"
+          },
+          "affiliation": {
+            "type": "string",
+            "example": "DROITE"
+          }
+        },
+        "xml": {
+          "name": "UserUpdateInputDefinition"
         }
       }
     }

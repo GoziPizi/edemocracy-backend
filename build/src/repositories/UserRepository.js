@@ -25,6 +25,35 @@ class UserRepository extends PrismaRepository_1.default {
             });
             return createdUser;
         });
+        this.findById = (id) => __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.prismaClient.user.findUnique({
+                where: {
+                    id
+                }
+            });
+            return user;
+        });
+        this.checkUser = (email, password) => __awaiter(this, void 0, void 0, function* () {
+            const hashedPassword = yield this.RawQueryRepository.getSha256(password);
+            const user = yield this.prismaClient.user.findFirst({
+                where: {
+                    email,
+                    password: hashedPassword
+                }
+            });
+            return user;
+        });
+        this.updateLastLogin = (id, date) => __awaiter(this, void 0, void 0, function* () {
+            yield this.prismaClient.user.update({
+                where: {
+                    id
+                },
+                data: {
+                    updatedAt: date
+                }
+            });
+            return true;
+        });
     }
 }
 exports.default = UserRepository;
