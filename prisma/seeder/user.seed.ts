@@ -21,3 +21,5 @@ async function seedUser(prisma: PrismaClient) {
         ]
     });
 }
+
+export default seedUser;
