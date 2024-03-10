@@ -149,6 +149,174 @@
           }
         }
       }
+    },
+    "/api/login/": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Endpoint to login",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "description": "password and email",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/LoginPasswordDefinition"
+            },
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "example": "any"
+                  },
+                  "password": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login/check": {
+      "post": {
+        "tags": [
+          "Login"
+        ],
+        "summary": "Endpoint to check if token is valid",
+        "description": "",
+        "parameters": [
+          {
+            "name": "body",
+            "description": "token",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/TokenDefinition"
+            },
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        },
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "example": "any"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/topics/": {
+      "post": {
+        "description": "",
+        "responses": {
+          "201": {
+            "description": "Created"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Topic"
+        ],
+        "summary": "Endpoint to get topics.",
+        "description": "",
+        "parameters": [
+          {
+            "name": "query",
+            "page": 1,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Topics found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicOutputDefinition"
+                }
+              },
+              "application/xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicOutputDefinition"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "An error occured"
+          }
+        }
+      }
+    },
+    "/api/topics/{id}": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/topics/{id}/children": {
+      "get": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -332,6 +500,72 @@
         },
         "xml": {
           "name": "UserUpdateInputDefinition"
+        }
+      },
+      "LoginPasswordDefinition": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "example": "string"
+          },
+          "password": {
+            "type": "string",
+            "example": "string"
+          }
+        },
+        "xml": {
+          "name": "LoginPasswordDefinition"
+        }
+      },
+      "TopicOutputDefinition": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "example": "1"
+          },
+          "title": {
+            "type": "string",
+            "example": "string"
+          },
+          "description": {
+            "type": "string",
+            "example": "string"
+          },
+          "parentTopicId": {
+            "type": "string",
+            "example": "2"
+          },
+          "childrenId": {
+            "type": "array",
+            "example": [
+              "1"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "medias": {
+            "type": "array",
+            "example": [
+              "https://www.google.com"
+            ],
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "type": "object",
+            "properties": {}
+          },
+          "updatedAt": {
+            "type": "object",
+            "properties": {}
+          }
+        },
+        "xml": {
+          "name": "TopicOutputDefinition"
         }
       }
     }

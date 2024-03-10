@@ -15,8 +15,29 @@ LoginRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
      */
     try {
         const { email, password } = req.body;
+        console.log(email, password);
         const jwt = await AuthentificationService.login(email, password);
         res.status(200).send(jwt);
+    } catch (error) {
+        next(error);
+    }
+});
+
+LoginRouter.post('/check', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+    #swagger.tags = ['Login']
+    #swagger.summary = 'Endpoint to check if token is valid'
+    #swagger.parameters['body] = {
+        description: 'token',
+        required: true,
+        schema: { $ref: "#/definitions/TokenDefinition" }
+    }
+     */
+    try {
+        const { token } = req.body;
+        const isValid = await AuthentificationService.checkToken(token);
+        console.log(isValid);
+        res.status(200).send(isValid);
     } catch (error) {
         next(error);
     }

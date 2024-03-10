@@ -1,5 +1,6 @@
 import swaggerAutogen from 'swagger-autogen';
 import { UserCreateInputDefinition, UserOutputDefinition, UserPublicOutputDefinition, UserUpdateInputDefinition } from './swagger/UserDefinition';
+import { TopicOutputDefinition } from './swagger/TopicDefinition';
 
 const doc = {
     info: {
@@ -22,7 +23,10 @@ const doc = {
         LoginPasswordDefinition: {
             email: 'string',
             password: 'string'
-        }
+        },
+
+        //Topic Router Definitions
+        TopicOutputDefinition: TopicOutputDefinition
     }
 };
 

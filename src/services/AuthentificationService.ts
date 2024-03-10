@@ -2,6 +2,7 @@ import UserRepository from "@/repositories/UserRepository";
 import UserService from "./UserService";
 import { JwtPayload } from "@/types/JwtPayload";
 import Jwt from "@/classes/Jwt";
+import { JwtCheckException } from "@/exceptions/JwtExceptions";
 
 class AuthentificationService {
     private static userRepository: UserRepository = new UserRepository()
@@ -17,6 +18,15 @@ class AuthentificationService {
         UserService.updateUserLastLogin(user.id, currentDate)
         const payload: JwtPayload = {id: Number(user.id), lastConnexion: currentDate}
         return new Jwt(payload, this.timeExpiration).jwt
+    }
+
+    static async checkToken(token: string): Promise<boolean> {
+        try {
+            Jwt.checkToken(token)
+            return true
+        } catch (error) {
+            throw JwtCheckException
+        }
     }
 }
 
