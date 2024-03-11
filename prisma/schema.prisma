@@ -8,12 +8,11 @@ datasource db {
 }
 
 enum Affiliation {
-  DROITE
-  GAUCHE
-  EXTREME_DROITE
-  EXTREME_GAUCHE
-  CENTRE
-  AUTRE
+  RIGHT
+  LEFT
+  FAR_RIGHT
+  FAR_LEFT
+  CENTER
 }
 
 enum Role {
@@ -31,7 +30,7 @@ model User {
   telephone     String
   address       String
   profession    String
-  affiliation   Affiliation
+  politicSide   Affiliation
   follows       String[] //ids of groups parties personalities and topics
   notifications Notifications[]
   isVerified    Boolean         @default(false)

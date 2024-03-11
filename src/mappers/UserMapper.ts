@@ -10,7 +10,7 @@ export const toUserOutput = (user: User): UserOutputDto => {
         telephone: user.telephone,
         address: user.address,
         profession: user.profession,
-        affiliation: user.affiliation,
+        politicSide: user.politicSide,
         follows: user.follows,
         language: user.language,
         role: user.role,
@@ -24,6 +24,7 @@ export const toPublicUserOutput = (user: User): UserPublicOutputDto => {
         id: user.id,
         name: user.name,
         firstName: user.firstName,
+        politicSide: user.politicSide,
         language: user.language,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt
