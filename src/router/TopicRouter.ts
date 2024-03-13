@@ -45,25 +45,27 @@ TopicRouter.get('/', async (req: Request, res: Response, next: NextFunction) => 
     }
 });
 
-TopicRouter.get('/:id', async (req, res) => {
-    //TODO
+TopicRouter.get('/parentlist', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Topic']
+        #swagger.summary = 'Endpoint to get parent topics, as a list of name-ids.'
+        #swagger.responses[200] = {
+            description: 'Returned the list',
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
     try {
-        //TODO
-        //Accessible si connecté
-        res.status(200)
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const topics = await TopicService.getParentsList();
+        res.status(200).send(topics);
     } catch (error) {
-        console.log(error);
-    }
-});
-
-TopicRouter.get('/:id/children', async (req, res) => {
-    //TODO
-    try {
-        //TODO
-        //Accessible si connecté
-        res.status(200)
-    } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

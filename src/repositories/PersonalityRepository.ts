@@ -12,10 +12,23 @@ class PersonalityRepository extends PrismaRepository {
         return personality
     }
 
+    getPersonalityWithUser = async (id: string) => {
+        const personality = await this.prismaClient.personality.findUnique({
+            where: {
+                id
+            },
+            include: {
+                user: true
+            }
+        })
+        return personality
+    }
+
     searchPersonality = async (criterias: any) => {
+        console.log(criterias);
         const where: Prisma.PersonalityWhereInput = {};
-        if(criterias.for && criterias.for.length > 0) where.for = { has: criterias.for };
-        if(criterias.against && criterias.against.length > 0) where.against = { has: criterias.against };
+        if(criterias.for && criterias.for.length > 0) where.for = { hasEvery: criterias.for };
+        if(criterias.against && criterias.against.length > 0) where.against = { hasEvery: criterias.against };
         if (criterias.politicSide) {
             // Ajouter un filtre qui traverse la relation avec User
             where.user = {

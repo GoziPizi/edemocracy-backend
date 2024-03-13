@@ -14,6 +14,10 @@ class TopicService {
         const topics = await TopicService.topicRepository.findTopics(page);
         return topics
     }
+
+    static getParentsList() {
+        return TopicService.topicRepository.getParentsList();
+    }
 }
 
 export default TopicService;

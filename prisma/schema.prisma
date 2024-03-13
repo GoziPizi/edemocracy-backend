@@ -30,6 +30,7 @@ model User {
   telephone     String
   address       String
   profession    String
+  description   String
   politicSide   Affiliation
   follows       String[] //ids of groups parties personalities and topics
   notifications Notifications[]
@@ -38,7 +39,7 @@ model User {
   role          Role
   createdAt     DateTime        @default(now())
   updatedAt     DateTime        @updatedAt
-  Personality   Personality[]
+  Personality   Personality?
   Argument      Argument[]
   SurveyAnswer  SurveyAnswer[]
 }
@@ -71,13 +72,14 @@ model Party {
 }
 
 model Personality {
-  id      String   @id @default(uuid())
-  user    User     @relation(fields: [userId], references: [id])
-  userId  String
-  party   Party?   @relation(fields: [partyId], references: [id])
-  partyId String?
-  for     String[]
-  against String[]
+  id          String   @id @default(uuid())
+  user        User     @relation(fields: [userId], references: [id])
+  userId      String   @unique
+  party       Party?   @relation(fields: [partyId], references: [id])
+  partyId     String?
+  description String
+  for         String[]
+  against     String[]
 }
 
 model Topic {

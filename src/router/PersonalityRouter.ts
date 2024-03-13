@@ -37,18 +37,28 @@ PersonalityRouter.post('/search', async (req: Request, res: Response, next: Next
         const result = await PersonalityService.searchPersonality(req.body);
         res.status(201).send(result);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
-PersonalityRouter.get('/:id', async (req, res) => {
-    //TODO
+PersonalityRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Personality']
+        #swagger.description = 'Endpoint to get a personality'
+        #swagger.parameters['id'] = { description: 'Personality id' }
+        #swagger.responses[200] = {
+            description: 'Personality found',
+        }
+     */
     try {
-        //TODO
-        //Accessible si connecté
-        res.status(200)
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const result = await PersonalityService.getPersonality(req.params.id);
+        res.status(200).send(result);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

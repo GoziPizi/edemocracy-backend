@@ -1,8 +1,22 @@
 import { toPublicUserOutput } from "@/mappers/UserMapper";
 import PersonalityRepository from "@/repositories/PersonalityRepository";
+import { PersonalityOutput } from "@/types/dtos/PersonalityDtos";
 
 class PersonalityService {
     private static personalityRepository: PersonalityRepository = new PersonalityRepository()
+
+    static async getPersonality(id: string): Promise<PersonalityOutput> {
+        let result = await PersonalityService.personalityRepository.getPersonalityWithUser(id);
+        if(!result) {
+            throw new Error("Personality not found");
+        }
+        const publicUser = toPublicUserOutput(result.user);
+        const personality = {
+            ...result,
+            user: publicUser
+        }
+        return personality;
+    }
 
     static async searchPersonality(criterias: any) {
         let finalCriterias = {};
