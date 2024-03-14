@@ -28,6 +28,10 @@ class AuthentificationService {
             throw JwtCheckException
         }
     }
+
+    static getUserId(token: string): string {
+        return Jwt.decode(token).payload.id
+    }
 }
 
 export default AuthentificationService;
