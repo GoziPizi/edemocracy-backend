@@ -6,12 +6,14 @@ import LoginRouter from './LoginRouter';
 import { EndpointNotFoundException } from '@/exceptions/BaseExceptions';
 import TopicRouter from './TopicRouter';
 import PersonalityRouter from './PersonalityRouter';
+import DebateRouter from './DebateRouter';
 
 const router = express.Router();
 
 router.use('/api/users', UserRouter);
 router.use('/api/login', LoginRouter);
 router.use('/api/topics', TopicRouter);
+router.use('/api/debates', DebateRouter);
 router.use('/api/personality', PersonalityRouter);
 
 router.all('*', (req: Request, res: Response) => {

@@ -3,7 +3,7 @@ import { Jwt } from 'jsonwebtoken'
 type JwtWithoutPayload = Omit<Jwt, 'payload'>
 
 export type JwtPayload = {
-  id: number
+  id: string
   lastConnexion: Date
 }
 

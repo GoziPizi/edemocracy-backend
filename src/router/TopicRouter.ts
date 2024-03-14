@@ -69,4 +69,62 @@ TopicRouter.get('/parentlist', async (req: Request, res: Response, next: NextFun
     }
 });
 
+TopicRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Topic']
+        #swagger.summary = 'Endpoint to get a topic by its id.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Topic found',
+            schema: { $ref: "#/definitions/TopicOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const id = String(req.params.id);
+        const topic = await TopicService.getTopicById(id);
+        res.status(200).send(topic);
+    } catch (error) {
+        next(error);
+    }
+});
+
+TopicRouter.get('/:id/debates', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Topic']
+        #swagger.summary = 'Endpoint to get debates of a topic by its id.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Debates found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const id = String(req.params.id);
+        const debates = await TopicService.getDebatesByTopicId(id);
+        res.status(200).send(debates);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default TopicRouter;

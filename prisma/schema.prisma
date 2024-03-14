@@ -30,7 +30,7 @@ model User {
   telephone     String
   address       String
   profession    String
-  description   String
+  description   String          @default("")
   politicSide   Affiliation
   follows       String[] //ids of groups parties personalities and topics
   notifications Notifications[]
@@ -42,6 +42,7 @@ model User {
   Personality   Personality?
   Argument      Argument[]
   SurveyAnswer  SurveyAnswer[]
+  Vote          Vote[]
 }
 
 model Notifications {
@@ -62,8 +63,8 @@ model Party {
   id          String        @id @default(uuid())
   name        String
   logo        String
-  description String
-  reason      String
+  description String        @default("")
+  reason      String        @default("")
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
   for         String[]
@@ -83,24 +84,51 @@ model Personality {
 }
 
 model Topic {
-  id            String     @id @default(uuid())
+  id            String   @id @default(uuid())
   title         String
   parentTopicId String?
   childrenId    String[]
   description   String
   medias        String[]
-  arguments     Argument[]
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+  debates       String[]
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model Debate {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  arguments   Argument[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  topicId     String?
 }
 
 model Argument {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [id], references: [id])
-  Topic     Topic?   @relation(fields: [topicId], references: [id])
-  topicId   String?
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  debateId  String
   content   String
   responses String[]
+  votes     Vote[]
+  nbGood    Int      @default(0)
+  nbBad     Int      @default(0)
+  Debate    Debate   @relation(fields: [debateId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Vote {
+  id         String   @id @default(uuid())
+  value      Boolean
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+  argument   Argument @relation(fields: [argumentId], references: [id])
+  argumentId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 }
 
 model Survey {

@@ -30,10 +30,8 @@ class PersonalityRepository extends PrismaRepository {
         if(criterias.for && criterias.for.length > 0) where.for = { hasEvery: criterias.for };
         if(criterias.against && criterias.against.length > 0) where.against = { hasEvery: criterias.against };
         if (criterias.politicSide) {
-            // Ajouter un filtre qui traverse la relation avec User
             where.user = {
                 is: {
-                    // Supposons que l'orientation politique est un champ dans User, ajustez selon votre modèle
                     politicSide: { equals: criterias.politicSide as Affiliation},
                 },
             };

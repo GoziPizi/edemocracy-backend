@@ -66,7 +66,7 @@ class Jwt {
  ```js
   {
     header: { alg: 'HS256', typ: 'JWT' },
-    payload: { id: 1332, update: 13245698736, iat: 1659537319, exp: 1659540919 },
+    payload: { id: z67bd..., update: 13245698736, iat: 1659537319, exp: 1659540919 },
     signature: 'Tmskyec8JxNX9FgP0xyyCJ0X3ptW2hVZy0vSWYQAnWg'
   }
  ```

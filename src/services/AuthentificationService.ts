@@ -16,7 +16,7 @@ class AuthentificationService {
         }
         const currentDate = new Date()
         UserService.updateUserLastLogin(user.id, currentDate)
-        const payload: JwtPayload = {id: Number(user.id), lastConnexion: currentDate}
+        const payload: JwtPayload = {id: user.id, lastConnexion: currentDate}
         return new Jwt(payload, this.timeExpiration).jwt
     }
 
