@@ -63,4 +63,64 @@ DebateRouter.get('/:id/arguments', async (req: Request, res: Response, next: Nex
     }
 });
 
+DebateRouter.post('/:id/vote', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to vote for a debate.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.parameters['formData'] = {
+            value: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Vote registered'
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const id = String(req.params.id);
+        const value = req.body.value;
+        const userId = AuthentificationService.getUserId(token);
+        await DebateService.voteForDebate(id, userId, value);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
+DebateRouter.delete('/:id/vote', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to delete a vote for a debate.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Vote deleted'
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const id = String(req.params.id);
+        const userId = AuthentificationService.getUserId(token);
+        await DebateService.deleteVoteForDebate(id, userId);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default DebateRouter;

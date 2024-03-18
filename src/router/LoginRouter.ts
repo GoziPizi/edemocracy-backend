@@ -41,4 +41,23 @@ LoginRouter.post('/check', async (req: Request, res: Response, next: NextFunctio
     }
 });
 
+LoginRouter.post('/register', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+    #swagger.tags = ['Login', 'Register']
+    #swagger.summary = 'Endpoint to register an account'
+    #swagger.parameters['body] = {
+        description: 'password and email',
+        required: true,
+        schema: { $ref: "#/definitions/LoginPasswordDefinition" }
+    }
+     */
+    try {
+        const userInput = req.body;
+        const jwt = await AuthentificationService.register(userInput);
+        res.status(200).send(jwt);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default LoginRouter;

@@ -3,6 +3,7 @@ import UserService from "./UserService";
 import { JwtPayload } from "@/types/JwtPayload";
 import Jwt from "@/classes/Jwt";
 import { JwtCheckException } from "@/exceptions/JwtExceptions";
+import { Role } from "@prisma/client";
 
 class AuthentificationService {
     private static userRepository: UserRepository = new UserRepository()
@@ -14,6 +15,18 @@ class AuthentificationService {
         if(!user) {
             throw new Error('User not found')
         }
+        const currentDate = new Date()
+        UserService.updateUserLastLogin(user.id, currentDate)
+        const payload: JwtPayload = {id: user.id, lastConnexion: currentDate}
+        return new Jwt(payload, this.timeExpiration).jwt
+    }
+
+    static async register(userInput: any) {
+        let finalUser = {
+            ...userInput,
+            role: Role.USER
+        }
+        const user = await this.userRepository.create(finalUser)
         const currentDate = new Date()
         UserService.updateUserLastLogin(user.id, currentDate)
         const payload: JwtPayload = {id: user.id, lastConnexion: currentDate}

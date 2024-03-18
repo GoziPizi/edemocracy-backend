@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Debate" ADD COLUMN     "nbVotes" INTEGER NOT NULL DEFAULT 0;

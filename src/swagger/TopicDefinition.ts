@@ -7,6 +7,7 @@ export const TopicOutputDefinition: TopicOutputDto = {
     parentTopicId: '2',
     childrenId: ['1'],
     medias: ['https://www.google.com'],
+    debates: ['ids'],
     createdAt: new Date(),
     updatedAt: new Date()
 }

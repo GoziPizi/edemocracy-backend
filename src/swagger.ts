@@ -1,6 +1,7 @@
 import swaggerAutogen from 'swagger-autogen';
 import { UserCreateInputDefinition, UserOutputDefinition, UserPublicOutputDefinition, UserUpdateInputDefinition } from './swagger/UserDefinition';
 import { TopicOutputDefinition } from './swagger/TopicDefinition';
+import { PartyCreateInputDefinition } from './swagger/PartyDefinition';
 
 const doc = {
     info: {
@@ -26,7 +27,10 @@ const doc = {
         },
 
         //Topic Router Definitions
-        TopicOutputDefinition: TopicOutputDefinition
+        TopicOutputDefinition: TopicOutputDefinition,
+
+        //Party Router Definitions
+        PartyCreateInputDtoDefinition: PartyCreateInputDefinition
     }
 };
 

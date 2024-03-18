@@ -43,6 +43,8 @@ model User {
   Argument      Argument[]
   SurveyAnswer  SurveyAnswer[]
   Vote          Vote[]
+  DebateVote    DebateVote[]
+  Party         Party[]
 }
 
 model Notifications {
@@ -61,8 +63,11 @@ model Groupe {
 
 model Party {
   id          String        @id @default(uuid())
+  founderId   String
+  founder     User          @relation(fields: [founderId], references: [id])
   name        String
   logo        String
+  politicSide Affiliation
   description String        @default("")
   reason      String        @default("")
   createdAt   DateTime      @default(now())
@@ -96,13 +101,35 @@ model Topic {
 }
 
 model Debate {
-  id          String     @id @default(uuid())
+  id          String       @id @default(uuid())
   title       String
   description String
   arguments   Argument[]
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  score       Float        @default(0)
+  nbVotes     Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   topicId     String?
+  DebateVote  DebateVote[]
+}
+
+enum DebateVoteType {
+  FOR
+  AGAINST
+  NEUTRAL
+  REALLY_FOR
+  REALLY_AGAINST
+}
+
+model DebateVote {
+  id        String         @id @default(uuid())
+  value     DebateVoteType
+  user      User           @relation(fields: [userId], references: [id])
+  userId    String
+  debate    Debate         @relation(fields: [debateId], references: [id])
+  debateId  String
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
 }
 
 model Argument {

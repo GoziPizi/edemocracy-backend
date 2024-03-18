@@ -2,7 +2,17 @@ import { Argument } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 
 class DebateRepository extends PrismaRepository {
-    
+  
+  update = async (id: string, data: any) => {
+    const debate = await this.prismaClient.debate.update({
+      where: {
+        id,
+      },
+      data,
+    });
+    return debate;
+  }
+
   getDebateById = async (id: string) => {
     const debate = await this.prismaClient.debate.findUnique({
       where: {
@@ -30,6 +40,16 @@ class DebateRepository extends PrismaRepository {
       },
     });
     return debates;
+  }
+
+  getDebateVote = async (debateId: string, userId: string) => {
+    const vote = await this.prismaClient.debateVote.findFirst({
+      where: {
+        debateId,
+        userId,
+      },
+    });
+    return vote;
   }
 
   getDebateArguments = async (id: string): Promise<Argument[]> => {
