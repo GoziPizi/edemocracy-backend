@@ -40,6 +40,36 @@ class PartyService {
 
     }
 
+    static async searchParty(criterias: any) {
+        let finalCriterias = {};
+        if(criterias.name) {
+            finalCriterias = {
+                ...finalCriterias,
+                name: criterias.name
+            }
+        }
+        if(criterias.politicSide) {
+            finalCriterias = {
+                ...finalCriterias,
+                politicSide: criterias.politicSide
+            }
+        }
+        if(criterias.for) {
+            finalCriterias = {
+                ...finalCriterias,
+                for: criterias.for
+            }
+        }
+        if(criterias.against) {
+            finalCriterias = {
+                ...finalCriterias,
+                against: criterias.against
+            }
+        }
+        let result = await PartyService.partyRepository.searchParty(finalCriterias);
+        return result;
+    }
+
 }
 
 export default PartyService;

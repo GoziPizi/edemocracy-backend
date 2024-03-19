@@ -34,6 +34,31 @@ PartyRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
     }
 });
 
+PartyRouter.post('/search', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party', 'Search']
+        #swagger.description = 'Endpoint to search some parties'
+        #swagger.parameters['body'] = {
+            description: 'criterias to search',
+            required: true,
+        }
+        #swagger.responses[201] = {
+            description: 'List of the parties found',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const result = await PartyService.searchParty(req.body);
+        res.status(201).send(result);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 PartyRouter.get('/:id', async (req, res) => {
     /**
         #swagger.tags = ['Party']

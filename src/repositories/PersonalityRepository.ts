@@ -12,6 +12,15 @@ class PersonalityRepository extends PrismaRepository {
         return personality
     }
 
+    findPersonalityByUserId = async (userId: string) => {
+        const personality = await this.prismaClient.personality.findFirst({
+            where: {
+                userId
+            }
+        })
+        return personality
+    }
+
     getPersonalityWithUser = async (id: string) => {
         const personality = await this.prismaClient.personality.findUnique({
             where: {

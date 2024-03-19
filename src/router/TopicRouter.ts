@@ -69,6 +69,30 @@ TopicRouter.get('/parentlist', async (req: Request, res: Response, next: NextFun
     }
 });
 
+TopicRouter.get('/fulllist', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Topic']
+        #swagger.summary = 'Endpoint to get all topics, as a list of name-ids.'
+        #swagger.responses[200] = {
+            description: 'Returned the list',
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const topics = await TopicService.getFullList();
+        res.status(200).send(topics);
+    } catch (error) {
+        next(error);
+    }
+});
+
 TopicRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Topic']

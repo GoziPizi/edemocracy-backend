@@ -19,6 +19,10 @@ class TopicService {
         return TopicService.topicRepository.getParentsList();
     }
 
+    static getFullList() {
+        return TopicService.topicRepository.getFullList();
+    }
+
     static async getDebatesByTopicId(id: string) {
         const topic = await TopicService.topicRepository.findTopicById(id);
         if (!topic) {

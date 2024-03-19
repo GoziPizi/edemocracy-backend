@@ -22,29 +22,29 @@ enum Role {
 }
 
 model User {
-  id            String          @id @default(uuid())
-  email         String          @unique
-  name          String
-  firstName     String
-  password      String
-  telephone     String
-  address       String
-  profession    String
-  description   String          @default("")
-  politicSide   Affiliation
-  follows       String[] //ids of groups parties personalities and topics
-  notifications Notifications[]
-  isVerified    Boolean         @default(false)
-  language      String
-  role          Role
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
-  Personality   Personality?
-  Argument      Argument[]
-  SurveyAnswer  SurveyAnswer[]
-  Vote          Vote[]
-  DebateVote    DebateVote[]
-  Party         Party[]
+  id              String            @id @default(uuid())
+  email           String            @unique
+  name            String
+  firstName       String
+  password        String
+  telephone       String
+  address         String
+  profession      String
+  description     String            @default("")
+  politicSide     Affiliation
+  follows         String[] //ids of groups parties personalities and topics
+  notifications   Notifications[]
+  isVerified      Boolean           @default(false)
+  language        String
+  role            Role
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  Personality     Personality?
+  Argument        Argument[]
+  SurveyAnswer    SurveyAnswer[]
+  Vote            Vote[]
+  DebateVote      DebateVote[]
+  PartyMembership PartyMembership[]
 }
 
 model Notifications {
@@ -57,24 +57,38 @@ model Notifications {
   updatedAt DateTime @updatedAt
 }
 
-model Groupe {
-  id String @id @default(uuid())
-}
-
 model Party {
-  id          String        @id @default(uuid())
+  id          String      @id @default(uuid())
   founderId   String
-  founder     User          @relation(fields: [founderId], references: [id])
   name        String
   logo        String
   politicSide Affiliation
-  description String        @default("")
-  reason      String        @default("")
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  description String      @default("")
+  reason      String      @default("")
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
   for         String[]
   against     String[]
-  Personality Personality[]
+
+  Personality     Personality[]
+  PartyMembership PartyMembership[]
+}
+
+enum PartyRole {
+  MEMBER
+  FOUNDER
+  ADMIN
+}
+
+model PartyMembership {
+  id        String    @id @default(uuid())
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String
+  party     Party     @relation(fields: [partyId], references: [id])
+  partyId   String
+  role      PartyRole
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Personality {

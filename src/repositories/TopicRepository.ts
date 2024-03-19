@@ -32,6 +32,16 @@ class TopicRepository extends PrismaRepository {
         return topics
     }
 
+    getFullList = async () => {
+        const topics = await this.prismaClient.topic.findMany({
+            select: {
+                id: true,
+                title: true
+            }
+        })
+        return topics
+    }
+
 }
 
 export default TopicRepository;
