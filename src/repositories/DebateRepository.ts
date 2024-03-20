@@ -3,6 +3,13 @@ import PrismaRepository from "./PrismaRepository";
 
 class DebateRepository extends PrismaRepository {
   
+  createDebate = async (data: any) => {
+    const debate = await this.prismaClient.debate.create({
+      data,
+    });
+    return debate;
+  }
+
   update = async (id: string, data: any) => {
     const debate = await this.prismaClient.debate.update({
       where: {

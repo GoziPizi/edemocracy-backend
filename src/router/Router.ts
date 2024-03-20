@@ -9,6 +9,7 @@ import PersonalityRouter from './PersonalityRouter';
 import DebateRouter from './DebateRouter';
 import ArgumentRouter from './ArgumentRouter';
 import PartyRouter from './PartyRouter';
+import PartyInvitationRouter from './PartyInvitationRouter';
 
 const router = express.Router();
 
@@ -19,6 +20,7 @@ router.use('/api/debates', DebateRouter);
 router.use('/api/arguments', ArgumentRouter);
 router.use('/api/personality', PersonalityRouter);
 router.use('/api/parties', PartyRouter);
+router.use('/api/invitations', PartyInvitationRouter);
 
 router.all('*', (req: Request, res: Response) => {
     throw new EndpointNotFoundException(req.path, req.method)

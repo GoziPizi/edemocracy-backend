@@ -5,6 +5,11 @@ class TopicService {
     private static topicRepository: TopicRepository = new TopicRepository()
     private static debateRepository: DebateRepository = new DebateRepository()
 
+    static async createTopic(topic: any) {
+        const createdTopic = await TopicService.topicRepository.createTopic(topic);
+        return createdTopic;
+    }
+
     static async getTopicById(id: string) {
         const topic = await TopicService.topicRepository.findTopicById(id);
         return topic

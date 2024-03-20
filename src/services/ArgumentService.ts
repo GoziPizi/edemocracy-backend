@@ -20,6 +20,14 @@ class ArgumentService {
         }
     }
 
+    static async createArgument(content: string, userId: string, debateId: string): Promise<void>  {
+        const argument = await this.argumentRepository.createArgument(content, userId, debateId);
+        if(!argument) {
+            throw new Error('Error creating argument');
+        }
+        return ;
+    }
+
     static async voteForArgument(id: string, userId: string, value: boolean): Promise<void> {
         const userVote = await this.argumentRepository.getUserVote(userId, id);
         const argument = await this.argumentRepository.getArgumentById(id);

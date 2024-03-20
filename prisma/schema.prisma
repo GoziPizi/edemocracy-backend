@@ -22,29 +22,32 @@ enum Role {
 }
 
 model User {
-  id              String            @id @default(uuid())
-  email           String            @unique
-  name            String
-  firstName       String
-  password        String
-  telephone       String
-  address         String
-  profession      String
-  description     String            @default("")
-  politicSide     Affiliation
-  follows         String[] //ids of groups parties personalities and topics
-  notifications   Notifications[]
-  isVerified      Boolean           @default(false)
-  language        String
-  role            Role
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  Personality     Personality?
-  Argument        Argument[]
-  SurveyAnswer    SurveyAnswer[]
-  Vote            Vote[]
-  DebateVote      DebateVote[]
-  PartyMembership PartyMembership[]
+  id          String   @id @default(uuid())
+  email       String   @unique
+  name        String
+  firstName   String
+  password    String
+  telephone   String
+  address     String
+  profession  String
+  description String   @default("")
+  follows     String[] //ids of groups parties personalities and topics
+  isVerified  Boolean  @default(false)
+  language    String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  politicSide Affiliation
+  role        Role
+
+  notifications     Notifications[]
+  Personality       Personality?
+  Argument          Argument[]
+  SurveyAnswer      SurveyAnswer[]
+  Vote              Vote[]
+  DebateVote        DebateVote[]
+  PartyMembership   PartyMembership[]
+  MembershipInvites MembershipInvite[]
 }
 
 model Notifications {
@@ -70,14 +73,25 @@ model Party {
   for         String[]
   against     String[]
 
-  Personality     Personality[]
-  PartyMembership PartyMembership[]
+  Personality       Personality[]
+  PartyMembership   PartyMembership[]
+  MembershipInvites MembershipInvite[]
 }
 
 enum PartyRole {
   MEMBER
   FOUNDER
   ADMIN
+}
+
+model MembershipInvite {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  party     Party    @relation(fields: [partyId], references: [id])
+  partyId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model PartyMembership {

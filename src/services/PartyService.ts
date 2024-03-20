@@ -1,9 +1,12 @@
+import { toPublicUserOutput } from "@/mappers/UserMapper";
 import PartyRepository from "@/repositories/PartyRepository";
+import UserRepository from "@/repositories/UserRepository";
 import { PartyCreateInput } from "@/types/dtos/PartyDto";
 
 class PartyService {
 
     private static partyRepository: PartyRepository = new PartyRepository();
+    private static userRepository: UserRepository = new UserRepository();
 
     static async createParty(party: PartyCreateInput, userId: string) {
         let createdParty = await this.partyRepository.createParty({
@@ -40,6 +43,23 @@ class PartyService {
 
     }
 
+    static async addMember(partyId: string, userId: string, newMemberEmail: string) {
+        const party = await this.partyRepository.getPartyById(partyId);
+        if(!party) {
+            throw new Error('Party not found');
+        }
+        const hasAdminRights = await this.checkAdminRights(partyId, userId);
+        if(!hasAdminRights) {
+            throw new Error('You are not allowed to do this');
+        }
+        const newMember = await this.userRepository.getUserByEmail(newMemberEmail);
+        if(!newMember) {
+            throw new Error('User not found');
+        }
+        const invitation = await this.partyRepository.addMember(partyId, newMember.id);
+        return invitation;
+    }
+
     static async searchParty(criterias: any) {
         let finalCriterias = {};
         if(criterias.name) {
@@ -68,6 +88,12 @@ class PartyService {
         }
         let result = await PartyService.partyRepository.searchParty(finalCriterias);
         return result;
+    }
+
+    static async getMembers(id: string) {
+        const users = await this.partyRepository.getMembersUser(id);
+        const returnUsers = users.map(toPublicUserOutput);
+        return returnUsers;
     }
 
 }

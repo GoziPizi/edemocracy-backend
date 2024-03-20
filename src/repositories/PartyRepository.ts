@@ -56,6 +56,41 @@ class PartyRepository extends PrismaRepository {
         return party
     }
 
+    addMember = async (partyId: string, userId: string) => {
+        const invitation = await this.prismaClient.membershipInvite.create({
+            data: {
+                partyId,
+                userId
+            }
+        })
+        return invitation
+    }
+
+    getMembersId = async (partyId: string) => {
+        const partyMembershipIds = await this.prismaClient.partyMembership.findMany({
+            where: {
+                partyId
+            }
+        })
+        return partyMembershipIds
+    }
+
+    getMembersUser = async (partyId: string) => {
+        const partyMembershipIds = await this.prismaClient.partyMembership.findMany({
+            where: {
+                partyId
+            }
+        })
+        const userIds = partyMembershipIds.map(p => p.userId)
+        const users = await this.prismaClient.user.findMany({
+            where: {
+                id: {
+                    in: userIds
+                }
+            }
+        })
+        return users
+    }
 }
 
 export default PartyRepository;

@@ -6,11 +6,30 @@ import express, { NextFunction, Request, Response } from 'express';
 const TopicRouter = express.Router();
 
 TopicRouter.post('/', async (req, res) => {
-    //TODO
+    /**
+        #swagger.tags = ['Topic']
+        #swagger.summary = 'Endpoint to create a new topic.'
+        #swagger.parameters['body'] = {
+            title: "Title",
+            description: "Description",
+            parentTopicId: 1
+        }
+        #swagger.responses[201] = {
+            description: 'Topic created',
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
     try {
-        //TODO
-        //Accessible si connecté
-        res.status(201)
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const topic = req.body;
+        const newTopic = await TopicService.createTopic(topic);
+        res.status(201).send(newTopic);
     } catch (error) {
         console.log(error);
     }

@@ -2,6 +2,17 @@ import PrismaRepository from "./PrismaRepository";
 
 class ArgumentRepository extends PrismaRepository {
 
+    createArgument = async (content: string, userId: string, debateId: string) => {
+        const argument = await this.prismaClient.argument.create({
+            data: {
+                content,
+                userId,
+                debateId
+            }
+        });
+        return argument;
+    }
+
     updateArgument = async (id: string, data: any) => {
         const updatedArgument = await this.prismaClient.argument.update({
             where: { id }, data

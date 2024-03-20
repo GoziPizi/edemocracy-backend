@@ -2,6 +2,13 @@ import PrismaRepository from "./PrismaRepository";
 
 class TopicRepository extends PrismaRepository {
 
+    createTopic = async (topic: any) => {
+        const newTopic = await this.prismaClient.topic.create({
+            data: topic
+        })
+        return newTopic
+    }   
+
     findTopicById = async (id: string) => {
         const topic = await this.prismaClient.topic.findUnique({
             where: {
@@ -40,6 +47,22 @@ class TopicRepository extends PrismaRepository {
             }
         })
         return topics
+    }
+
+    addDebateToTopic = async (topicId: string, debateId: string) => {
+        const topic = await this.prismaClient.topic.findFirst({where: {id: topicId}})
+        if (!topic) {
+            throw new Error('Topic not found')
+        }
+        const updatedTopic = await this.prismaClient.topic.update({
+            where: {
+                id: topicId
+            },
+            data: {
+                debates: topic.debates ? [...topic.debates, debateId] : [debateId]
+            }
+        })
+        return updatedTopic
     }
 
 }

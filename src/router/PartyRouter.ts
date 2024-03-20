@@ -93,6 +93,57 @@ PartyRouter.get('/:id/private-infos', async (req, res) => {
     }
 });
 
+//get members list
+PartyRouter.get('/:id/members', async (req, res) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to get the members of a party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.responses[200] = {
+            description: 'List of the members',
+            schema: { $ref: "#/definitions/PartyMembersOutputDtoDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const members = await PartyService.getMembers(req.params.id);
+        res.status(200).send(members);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+PartyRouter.post('/:id/members', async (req: Request, res: Response, next: NextFunction) => {
+
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to add a member to a party, can only be used by admins of the party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.responses[201] = {
+            description: 'User joined the party',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const id = req.params.id;
+        const newMemberEmail = req.body.email;
+        const invitation = await PartyService.addMember(id, userId, newMemberEmail);
+        res.status(201).send(invitation);
+    } catch (error) {
+        next(error);
+    }
+
+});
+
 PartyRouter.get('/:id/check-admin', async (req, res) => {
     /**
         #swagger.tags = ['Party']

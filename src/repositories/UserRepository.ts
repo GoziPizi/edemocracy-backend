@@ -25,6 +25,15 @@ class UserRepository extends PrismaRepository {
         return user
     }
 
+    getUserByEmail = async (email: string) => {
+        const user = await this.prismaClient.user.findFirst({
+            where: {
+                email
+            }
+        })
+        return user
+    }
+
     checkUser = async (email: string, password: string) => {
         const hashedPassword = await this.RawQueryRepository.getSha256(password)
         const user = await this.prismaClient.user.findFirst({

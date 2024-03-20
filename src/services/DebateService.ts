@@ -3,6 +3,7 @@ import { toValue } from "@/mappers/DebateVoteMapper";
 import ArgumentRepository from "@/repositories/ArgumentRepository";
 import DebateRepository from "@/repositories/DebateRepository";
 import DebateVoteRepository from "@/repositories/DebateVoteRepository";
+import TopicRepository from "@/repositories/TopicRepository";
 import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
 import { Argument, DebateVoteType } from "@prisma/client";
 
@@ -11,10 +12,33 @@ class DebateService {
     private static debateRepository: DebateRepository = new DebateRepository()
     private static argumentRepository: ArgumentRepository = new ArgumentRepository()
     private static debateVoteRepository: DebateVoteRepository = new DebateVoteRepository()
+    private static topicRepository: TopicRepository = new TopicRepository()
+
+    static async createDebate(debate: string) {
+        const newDebate = await this.debateRepository.createDebate(debate);
+        if(!newDebate) {
+            throw new Error('Debate not created');
+        }
+        if(!newDebate.topicId) {
+            throw new Error('Topic not found');
+        }
+        await this.topicRepository.addDebateToTopic(newDebate.topicId, newDebate.id);
+        return newDebate;
+    }
 
     static async getDebateById(id: string) {
         const debate = await this.debateRepository.getDebateById(id);
         return debate
+    }
+
+    static async getDebateWithUserVote(id: string, userId: string) {
+        const debate = await this.debateRepository.getDebateById(id);
+        const userVote = await this.debateRepository.getDebateVote(id, userId);
+        const vote = userVote ? userVote.value : null;
+        return {
+            ...debate,
+            hasVote: vote
+        }
     }
 
     static async getDebateArguments(id: string, token: string) {
