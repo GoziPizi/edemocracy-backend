@@ -117,7 +117,7 @@ PartyRouter.get('/:id/members', async (req, res) => {
     }
 });
 
-PartyRouter.post('/:id/members', async (req: Request, res: Response, next: NextFunction) => {
+PartyRouter.post('/:id/members/invite', async (req: Request, res: Response, next: NextFunction) => {
 
     /**
         #swagger.tags = ['Party']
@@ -136,7 +136,7 @@ PartyRouter.post('/:id/members', async (req: Request, res: Response, next: NextF
         const userId = AuthentificationService.getUserId(token);
         const id = req.params.id;
         const newMemberEmail = req.body.email;
-        const invitation = await PartyService.addMember(id, userId, newMemberEmail);
+        const invitation = await PartyService.inviteMember(id, userId, newMemberEmail);
         res.status(201).send(invitation);
     } catch (error) {
         next(error);

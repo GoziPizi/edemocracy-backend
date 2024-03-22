@@ -43,7 +43,7 @@ class PartyService {
 
     }
 
-    static async addMember(partyId: string, userId: string, newMemberEmail: string) {
+    static async inviteMember(partyId: string, userId: string, newMemberEmail: string) {
         const party = await this.partyRepository.getPartyById(partyId);
         if(!party) {
             throw new Error('Party not found');
@@ -56,7 +56,7 @@ class PartyService {
         if(!newMember) {
             throw new Error('User not found');
         }
-        const invitation = await this.partyRepository.addMember(partyId, newMember.id);
+        const invitation = await this.partyRepository.inviteMember(partyId, newMember.id);
         return invitation;
     }
 

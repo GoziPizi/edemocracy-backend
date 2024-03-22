@@ -1,4 +1,5 @@
 import { toPublicUserOutput, toUserOutput } from "@/mappers/UserMapper";
+import OpinionRepository from "@/repositories/OpinionRepository";
 import PartyRepository from "@/repositories/PartyRepository";
 import PersonalityRepository from "@/repositories/PersonalityRepository";
 import UserRepository from "@/repositories/UserRepository";
@@ -10,9 +11,11 @@ class UserService {
     private static userRepository: UserRepository = new UserRepository()
     private static personalityRepository: PersonalityRepository = new PersonalityRepository()
     private static partyRepository: PartyRepository = new PartyRepository()
+    private static opinionRepository: OpinionRepository = new OpinionRepository()
 
     static async createUser(user: any) {
         const createdUser = await UserService.userRepository.create(user);
+        return createdUser;
     }
 
     static async getUserById(id: string): Promise<UserOutputDto> {
@@ -21,6 +24,10 @@ class UserService {
             throw new Error('User not found');
         }
         return toUserOutput(user);
+    }
+
+    static async updateUserById(id: string, user: any) {
+        return UserService.userRepository.update(id, user);
     }
 
     static async getPublicUserById(id: string): Promise<UserPublicOutputDto> {
@@ -42,6 +49,14 @@ class UserService {
 
     static async getUserPartyById(id: string) {
         return await UserService.partyRepository.findPartyByUserId(id);
+    }
+
+    static async getUserOpinions(id: string) {
+        return await UserService.opinionRepository.findOpinionsWithTitleByUserId(id);
+    }
+
+    static async postOpinion(userId: string, topicId: string, opinion: string) {
+        return await UserService.opinionRepository.createOpinion(userId, topicId, opinion);
     }
 }
 

@@ -43,11 +43,11 @@ model User {
   notifications     Notifications[]
   Personality       Personality?
   Argument          Argument[]
-  SurveyAnswer      SurveyAnswer[]
   Vote              Vote[]
   DebateVote        DebateVote[]
   PartyMembership   PartyMembership[]
   MembershipInvites MembershipInvite[]
+  Opinion           Opinion[]
 }
 
 model Notifications {
@@ -117,15 +117,16 @@ model Personality {
 }
 
 model Topic {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   title         String
   parentTopicId String?
   childrenId    String[]
   description   String
   medias        String[]
   debates       String[]
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  Opinion       Opinion[]
 }
 
 model Debate {
@@ -186,27 +187,13 @@ model Vote {
   updatedAt  DateTime @updatedAt
 }
 
-model Survey {
-  id          String   @id @default(uuid())
-  title       String
-  description String
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-}
-
-enum SurveyAnswerType {
-  PASDUTOUT
-  PEU
-  NEUTRE
-  DACCORD
-  BEAUCOUP
-}
-
-model SurveyAnswer {
-  id        String           @id @default(uuid())
-  user      User             @relation(fields: [userId], references: [id])
-  userId    String
-  answer    SurveyAnswerType
-  createdAt DateTime         @default(now())
-  updatedAt DateTime         @updatedAt
+model Opinion {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String //Maybe entityId pour que les opinions soient aussi sur les parties. A voir 
+  topic     Topic    @relation(fields: [topicId], references: [id])
+  topicId   String
+  opinion   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

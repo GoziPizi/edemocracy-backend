@@ -53,4 +53,34 @@ PartyInvitationRouter.get('/:id', async (req: Request, res: Response, next: Next
     }
 });
 
+PartyInvitationRouter.post('/:id/answer', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['PartyInvitation']
+        #swagger.description = 'Endpoint to answer a party invitation, only accessible by the user who received the invitation.'
+        #swagger.parameters['id'] = { description: 'Party invitation id', required: true }
+        #swagger.parameters['answer'] = { description: 'Answer to the invitation', required: true }
+        #swagger.responses[200] = {
+            description: 'Party invitation answered',
+        }
+        #swagger.responses[404] = {
+            description: 'Party invitation not found',
+        }
+        #swagger.responses[400] = {
+            description: 'Bad request',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        await PartyInvitationService.answerPartyInvitation(req.params.id, userId, req.body.answer);
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 export default PartyInvitationRouter;

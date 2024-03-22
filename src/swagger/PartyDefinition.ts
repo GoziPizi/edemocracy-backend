@@ -1,10 +1,12 @@
 import { PartyCreateInput } from "@/types/dtos/PartyDto";
+import { Affiliation } from "@prisma/client";
 
 export const PartyCreateInputDefinition: PartyCreateInput = {
     name: 'string',
     description: 'optional',
     reason: 'optional',
-    founder: { connect: { id: 'founderId' } },
+    founderId: 'string',
+    politicSide: Affiliation.LEFT,
     createdAt: new Date(),
     updatedAt: new Date()
 }

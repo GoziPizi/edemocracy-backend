@@ -10,7 +10,7 @@ export const UserCreateInputDefinition: UserCreateInputDto = {
     telephone: 'string',
     firstName: 'string',
     language: 'string',
-    affiliation: Affiliation.DROITE    
+    politicSide: Affiliation.RIGHT
 }
 
 export const UserOutputDefinition: UserOutputDto = {
@@ -19,10 +19,11 @@ export const UserOutputDefinition: UserOutputDto = {
     name: 'string',
     address: 'string',
     profession: 'string',
+    description: 'string',
     telephone: 'string',
     firstName: 'string',
     language: 'string',
-    affiliation: Affiliation.DROITE,
+    politicSide: Affiliation.RIGHT,
     follows: ['1'],
     role: 'USER',
     createdAt: new Date(),
@@ -34,6 +35,7 @@ export const UserPublicOutputDefinition: UserPublicOutputDto = {
     name: 'string',
     firstName: 'string',
     language: 'string',
+    politicSide: Affiliation.RIGHT,
     createdAt: new Date(),
     updatedAt: new Date()
 }
@@ -46,5 +48,5 @@ export const UserUpdateInputDefinition: UserUpdateInputDto = {
     telephone: 'string',
     firstName: 'string',
     language: 'string',
-    affiliation: Affiliation.DROITE
+    politicSide: Affiliation.RIGHT
 }

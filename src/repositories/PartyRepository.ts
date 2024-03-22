@@ -1,3 +1,4 @@
+import { PartyRole } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 
 class PartyRepository extends PrismaRepository {
@@ -56,7 +57,7 @@ class PartyRepository extends PrismaRepository {
         return party
     }
 
-    addMember = async (partyId: string, userId: string) => {
+    inviteMember = async (partyId: string, userId: string) => {
         const invitation = await this.prismaClient.membershipInvite.create({
             data: {
                 partyId,
@@ -64,6 +65,17 @@ class PartyRepository extends PrismaRepository {
             }
         })
         return invitation
+    }
+
+    addMember = async (partyId: string, userId: string) => {
+        const membership = await this.prismaClient.partyMembership.create({
+            data: {
+                partyId,
+                userId,
+                role: PartyRole.MEMBER
+            }
+        })
+        return membership
     }
 
     getMembersId = async (partyId: string) => {

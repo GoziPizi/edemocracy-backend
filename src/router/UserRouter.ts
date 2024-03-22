@@ -27,6 +27,33 @@ UserRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
+UserRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Update the logged user'
+        #swagger.parameters['body'] = {
+            description: 'User information',
+            required: true,
+            schema: { $ref: "#/definitions/UserUpdateInputDefinition" }
+        }
+        #swagger.responses[200] = {
+            description: 'User updated',
+            schema: { $ref: "#/definitions/UserOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const user = await UserService.updateUserById(userId, req.body);
+        res.status(200).send(user);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 UserRouter.get('/personality', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']
@@ -71,23 +98,54 @@ UserRouter.get('/party', async (req: Request, res: Response, next: NextFunction)
     }
 });
 
-UserRouter.get('/:id/public', async (req, res) => {
+UserRouter.post('/opinion', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']
-        #swagger.description = 'Get public user by id'
-        #swagger.parameters['id'] = { description: 'User id', required: true }
+        #swagger.description = 'Pour poster son opinion par rapport à un topic
+        #swagger.parameters['body'] = {
+            description: 'Opinion information',
+            required: true,
+        }
         #swagger.responses[200] = {
-            description: 'User found',
-            schema: { $ref: "#/definitions/UserPublicOutputDefinition" }
+            description: 'Opinion posted',
         }
      */
     try {
-        //TODO
-        res.status(200)
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const { topicId, opinion } = req.body;
+        await UserService.postOpinion(userId, topicId, opinion);
+        res.status(200).send(opinion);
     } catch (error) {
         console.log(error);
     }
 });
+
+UserRouter.get('/opinions', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Get the opinions of the logged user'
+        #swagger.responses[200] = {
+            description: 'User found
+        }
+    */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const opinions = await UserService.getUserOpinions(userId);
+        res.status(200).send(opinions);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+
 
 UserRouter.put('/:id', async (req, res) => {
     /**

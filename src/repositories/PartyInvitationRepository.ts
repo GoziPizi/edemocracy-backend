@@ -19,6 +19,15 @@ class PartyInvitationRepository extends PrismaRepository {
         })
         return partyInvitations
     }
+
+    deletePartyInvitation = async (id: string) => {
+        const partyInvitation = await this.prismaClient.membershipInvite.delete({
+            where: {
+                id
+            }
+        })
+        return partyInvitation
+    }
 }
 
 export default PartyInvitationRepository;

@@ -16,6 +16,18 @@ class UserRepository extends PrismaRepository {
         return createdUser
     }
 
+    update = async (id: string, user: any) => {
+        const updatedUser = await this.prismaClient.user.update({
+            where: {
+                id
+            },
+            data: {
+                ...user
+            }
+        })
+        return updatedUser
+    }
+
     findById = async (id: string) => {
         const user = await this.prismaClient.user.findUnique({
             where: {
