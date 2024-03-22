@@ -14,10 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const client_1 = require("@prisma/client");
 const user_seed_1 = __importDefault(require("./user.seed"));
+const topic_seed_1 = __importDefault(require("./topic.seed"));
+const personality_seed_1 = __importDefault(require("./personality.seed"));
 const prisma = new client_1.PrismaClient();
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         yield (0, user_seed_1.default)(prisma);
+        yield (0, topic_seed_1.default)(prisma);
+        yield (0, personality_seed_1.default)(prisma);
     });
 }
 main()

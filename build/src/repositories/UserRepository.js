@@ -25,10 +25,27 @@ class UserRepository extends PrismaRepository_1.default {
             });
             return createdUser;
         });
+        this.update = (id, user) => __awaiter(this, void 0, void 0, function* () {
+            const updatedUser = yield this.prismaClient.user.update({
+                where: {
+                    id
+                },
+                data: Object.assign({}, user)
+            });
+            return updatedUser;
+        });
         this.findById = (id) => __awaiter(this, void 0, void 0, function* () {
             const user = yield this.prismaClient.user.findUnique({
                 where: {
                     id
+                }
+            });
+            return user;
+        });
+        this.getUserByEmail = (email) => __awaiter(this, void 0, void 0, function* () {
+            const user = yield this.prismaClient.user.findFirst({
+                where: {
+                    email
                 }
             });
             return user;
