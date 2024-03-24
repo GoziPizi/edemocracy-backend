@@ -52,7 +52,9 @@ PartyRouter.post('/search', async (req: Request, res: Response, next: NextFuncti
             throw new JwtNotInHeaderException();
         }
         await AuthentificationService.checkToken(token);
+        console.log(req.body);
         const result = await PartyService.searchParty(req.body);
+        console.log(result);
         res.status(201).send(result);
     } catch (error) {
         console.log(error);
