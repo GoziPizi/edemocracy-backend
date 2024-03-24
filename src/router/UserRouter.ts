@@ -76,7 +76,7 @@ UserRouter.get('/personality', async (req: Request, res: Response, next: NextFun
     }
 });
 
-UserRouter.get('/party', async (req: Request, res: Response, next: NextFunction) => {
+UserRouter.get('/partis', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']
         #swagger.description = 'Get the party of the logged user if he has one'
@@ -91,7 +91,7 @@ UserRouter.get('/party', async (req: Request, res: Response, next: NextFunction)
             throw new JwtNotInHeaderException();
         }
         const userId = AuthentificationService.getUserId(token);
-        const user = await UserService.getUserPartyById(userId);
+        const user = await UserService.getUserPartisById(userId);
         res.status(200).send(user);
     } catch (error) {
         console.log(error);

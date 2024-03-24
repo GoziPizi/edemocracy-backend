@@ -47,8 +47,8 @@ class UserService {
         return await UserService.personalityRepository.findPersonalityByUserId(id);
     }
 
-    static async getUserPartyById(id: string) {
-        return await UserService.partyRepository.findPartyByUserId(id);
+    static async getUserPartisById(id: string) {
+        return await UserService.partyRepository.findPartisByUserId(id);
     }
 
     static async getUserOpinions(id: string) {

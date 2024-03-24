@@ -167,6 +167,93 @@ PartyRouter.get('/:id/check-admin', async (req, res) => {
     }
 });
 
+PartyRouter.get('/:id/history', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to get the history of a party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.responses[200] = {
+            description: 'History of the party',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const history = await PartyService.getAllPartyHistoryEventsFromPartyId(req.params.id);
+        res.status(200).send(history);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PartyRouter.post('/:id/history', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to add a history event to a party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.parameters['body'] = {
+            description: 'History event to add',
+            required: true,
+            schema: {
+                title: 'Titre',
+                content: 'Contenu',
+                dateStart: '2021-01-01T00:00:00.000Z',
+                dateEnd: '2021-01-01T00:00:00.000Z',
+            }
+        }
+        #swagger.responses[201] = {
+            description: 'History event added',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const hasAdminRights = await PartyService.checkAdminRights(req.params.id, userId);
+        if(!hasAdminRights) {
+            throw new Error('You are not allowed to do this');
+        }
+        const history = await PartyService.createPartyHistoryEvent(req.params.id, req.body);
+        res.status(201).send(history);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PartyRouter.delete('/:id/history/:historyId', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to delete a party history event'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.parameters['historyId'] = { description: 'History event id', required: true }
+        #swagger.responses[200] = {
+            description: 'History event deleted',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const hasAdminRights = await PartyService.checkAdminRights(req.params.id, userId);
+        if(!hasAdminRights) {
+            throw new Error('You are not allowed to do this');
+        }
+        await PartyService.deletePartyHistoryEvent(req.params.historyId);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
 PartyRouter.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']

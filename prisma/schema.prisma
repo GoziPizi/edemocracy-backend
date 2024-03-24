@@ -76,6 +76,19 @@ model Party {
   Personality       Personality[]
   PartyMembership   PartyMembership[]
   MembershipInvites MembershipInvite[]
+  PartyHistoryEvent PartyHistoryEvent[]
+}
+
+model PartyHistoryEvent {
+  id        String   @id @default(uuid())
+  party     Party    @relation(fields: [partyId], references: [id])
+  partyId   String
+  title     String
+  content   String
+  dateStart DateTime
+  dateEnd   DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 enum PartyRole {
@@ -194,6 +207,13 @@ model Opinion {
   topic     Topic    @relation(fields: [topicId], references: [id])
   topicId   String
   opinion   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model BanWord {
+  id        String   @id @default(uuid())
+  word      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

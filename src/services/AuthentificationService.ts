@@ -45,6 +45,12 @@ class AuthentificationService {
     static getUserId(token: string): string {
         return Jwt.decode(token).payload.id
     }
+
+    static async getUserRole(token: string): Promise<Role> {
+        const userId = this.getUserId(token)
+        const user = await UserService.getUserById(userId)
+        return user.role
+    }
 }
 
 export default AuthentificationService;

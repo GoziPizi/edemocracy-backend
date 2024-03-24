@@ -7,6 +7,13 @@ class PartyRepository extends PrismaRepository {
         const party = await this.prismaClient.party.create({
             data
         })
+        await this.prismaClient.partyMembership.create({
+            data: {
+                partyId: party.id,
+                userId: party.founderId,
+                role: PartyRole.ADMIN
+            }
+        })
         return party
     }
 
@@ -42,19 +49,21 @@ class PartyRepository extends PrismaRepository {
         return parties
     }
 
-    findPartyByUserId = async (userId: string) => {
-        const partymembership = await this.prismaClient.partyMembership.findFirst({
+    findPartisByUserId = async (userId: string) => {
+        const partyMemberships = await this.prismaClient.partyMembership.findMany({
             where: {
                 userId
             }
         })
-        if(!partymembership) return null
-        const party = await this.prismaClient.party.findUnique({
+        const partyIds = partyMemberships.map(p => p.partyId)
+        const parties = await this.prismaClient.party.findMany({
             where: {
-                id: partymembership.partyId
+                id: {
+                    in: partyIds
+                }
             }
         })
-        return party
+        return parties
     }
 
     inviteMember = async (partyId: string, userId: string) => {

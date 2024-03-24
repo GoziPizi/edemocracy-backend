@@ -68,6 +68,18 @@ class UserRepository extends PrismaRepository {
         })
         return true
     }
+
+    findRoleById = async (id: string) => {
+        const user = await this.prismaClient.user.findUnique({
+            where: {
+                id
+            },
+            select: {
+                role: true
+            }
+        })
+        return user!.role
+    }
 }
 
 export default UserRepository;

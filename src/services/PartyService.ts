@@ -1,4 +1,5 @@
 import { toPublicUserOutput } from "@/mappers/UserMapper";
+import PartyHistoryEventRepository from "@/repositories/PartyHistoryEventRepository";
 import PartyRepository from "@/repositories/PartyRepository";
 import UserRepository from "@/repositories/UserRepository";
 import { PartyCreateInput } from "@/types/dtos/PartyDto";
@@ -7,6 +8,7 @@ class PartyService {
 
     private static partyRepository: PartyRepository = new PartyRepository();
     private static userRepository: UserRepository = new UserRepository();
+    private static partyHistoryEventRepository: PartyHistoryEventRepository = new PartyHistoryEventRepository();
 
     static async createParty(party: PartyCreateInput, userId: string) {
         let createdParty = await this.partyRepository.createParty({
@@ -94,6 +96,27 @@ class PartyService {
         const users = await this.partyRepository.getMembersUser(id);
         const returnUsers = users.map(toPublicUserOutput);
         return returnUsers;
+    }
+
+    //history events related methods
+
+    static async createPartyHistoryEvent(id: string,  data: any) {
+        const partyHistoryEvent = await this.partyHistoryEventRepository.createPartyHistoryEvent({
+            ...data,
+            partyId: id
+        
+        });
+        return partyHistoryEvent;
+    }
+
+    static async deletePartyHistoryEvent(id: string) {
+        const partyHistoryEvent = await this.partyHistoryEventRepository.deletePartyHistoryEvent(id);
+        return partyHistoryEvent;
+    }
+
+    static async getAllPartyHistoryEventsFromPartyId(partyId: string) {
+        const partyHistoryEvents = await this.partyHistoryEventRepository.getAllPartyHistoryEventsFromPartyId(partyId);
+        return partyHistoryEvents;
     }
 
 }
