@@ -88,6 +88,7 @@ class PartyService {
                 against: criterias.against
             }
         }
+        console.log(finalCriterias);
         let result = await PartyService.partyRepository.searchParty(finalCriterias);
         return result;
     }

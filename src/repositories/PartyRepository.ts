@@ -46,6 +46,7 @@ class PartyRepository extends PrismaRepository {
         const parties = await this.prismaClient.party.findMany({
             where
         })
+        console.log(parties);
         return parties
     }
 
