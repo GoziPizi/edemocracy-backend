@@ -1,6 +1,7 @@
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import BanWordService from '@/services/BanWordService';
+import { Role } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express'
 
 const AdminRouter = express.Router();
@@ -85,5 +86,85 @@ AdminRouter.post('/banwords', async (req: Request, res: Response, next: NextFunc
         console.log(error);
     }
 });
+
+AdminRouter.get('/admins', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Utils']
+        #swagger.description = 'Get the list of admins'
+        #swagger.responses[200] = {
+            description: 'Admins found',
+            schema: { $ref: "#/definitions/AdminOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Error('You are not allowed to see this');
+        }
+        console.log('aaaa')
+        const admins = await AuthentificationService.getAdmins();
+        res.status(200).send(admins);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+AdminRouter.post('/admins', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Utils']
+        #swagger.description = 'Create an admin'
+        #swagger.responses[200] = {
+            description: 'Admin created',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Error('You are not allowed to see this');
+        }
+        const userEmailToPromote = req.body.email;
+        await AuthentificationService.setRoleToUserByEmail(userEmailToPromote, Role.ADMIN);
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+    }
+})
+
+AdminRouter.delete('/admins/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Utils']
+        #swagger.description = 'Delete an admin'
+        #swagger.parameters['id'] = {
+            description: 'Admin id',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'Admin deleted',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Error('You are not allowed to see this');
+        }
+        const userIdToPromote = req.params.id;
+        await AuthentificationService.setRoleToUser(userIdToPromote, Role.USER);
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+    }
+})
 
 export default AdminRouter;

@@ -1,3 +1,4 @@
+import { Role } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 import RawQueryRepository from "./RawQueryRepository";
 
@@ -79,6 +80,40 @@ class UserRepository extends PrismaRepository {
             }
         })
         return user!.role
+    }
+
+    getAdmins = async () => {
+        const admins = await this.prismaClient.user.findMany({
+            where: {
+                role: Role.ADMIN
+            }
+        })
+        return admins
+    }
+
+    setRole = async (id: string, role: Role) => {
+        const updatedUser = await this.prismaClient.user.update({
+            where: {
+                id
+            },
+            data: {
+                role
+            }
+        })
+        return updatedUser
+    }
+
+    setRoleByEmail = async (email: string, role: Role) => {
+        console.log(email, role)
+        const updatedUser = await this.prismaClient.user.update({
+            where: {
+                email
+            },
+            data: {
+                role
+            }
+        })
+        return updatedUser
     }
 }
 

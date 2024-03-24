@@ -51,6 +51,20 @@ class AuthentificationService {
         const user = await UserService.getUserById(userId)
         return user.role
     }
+
+    static async getAdmins() {
+        return this.userRepository.getAdmins()
+    }
+
+    static async setRoleToUserByEmail(email: string, role: Role) {
+        await this.userRepository.setRoleByEmail(email, role)
+        return
+    }
+
+    static async setRoleToUser(userId: string, role: Role) {
+        await this.userRepository.setRole(userId, role)
+        return
+    }
 }
 
 export default AuthentificationService;
