@@ -166,6 +166,25 @@ class PartyRepository extends PrismaRepository {
             }
         })
     }
+
+    textSearch(query: string) {
+        return this.prismaClient.party.findMany({
+            where: {
+                OR: [
+                    {
+                        name: {
+                            contains: query, mode: 'insensitive'
+                        }
+                    },
+                    {
+                        description: {
+                            contains: query, mode: 'insensitive'
+                        }
+                    }
+                ]
+            }
+        })
+    }
 }
 
 export default PartyRepository;

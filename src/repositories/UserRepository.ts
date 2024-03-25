@@ -17,6 +17,15 @@ class UserRepository extends PrismaRepository {
         return createdUser
     }
 
+    delete = async (id: string) => {
+        await this.prismaClient.user.delete({
+            where: {
+                id
+            }
+        })
+        return
+    }
+
     update = async (id: string, user: any) => {
         const updatedUser = await this.prismaClient.user.update({
             where: {
@@ -114,6 +123,54 @@ class UserRepository extends PrismaRepository {
             }
         })
         return updatedUser
+    }
+
+    //Verification methods
+
+    getVerificationList = async () => {
+        const users = await this.prismaClient.verifyUser.findMany()
+        return users
+    }
+
+    getVerificationRequest = async (id: string) => {
+        const user = await this.prismaClient.verifyUser.findUnique({
+            where: {
+                id
+            }
+        })
+        return user
+    }
+
+    createVerificationRequest = async (userId: string, recto: string, verso: string) => {
+        const verification = await this.prismaClient.verifyUser.create({
+            data: {
+                userId,
+                recto,
+                verso
+            }
+        })
+        return verification
+    }
+
+    deleteVerificationRequest = async (id: string) => {
+        await this.prismaClient.verifyUser.delete({
+            where: {
+                id
+            }
+        })
+        return
+    }
+
+    setUserVerified = async (userId: string) => {
+        await this.prismaClient.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                isVerified: true
+            }
+        })
+        return
     }
 }
 

@@ -53,6 +53,21 @@ class PersonalityRepository extends PrismaRepository {
         })
         return personalities
     }
+
+    textSearch = async (query: string) => {
+        const personalities = await this.prismaClient.personality.findMany({
+            where: {
+            OR: [
+                { user: { name: { contains: query, mode: 'insensitive' } } },
+                { user: { description: { contains: query, mode: 'insensitive' } } }
+            ]
+            },
+            include: {
+            user: true
+            }
+        })
+        return personalities
+    }
 }
 
 export default PersonalityRepository;

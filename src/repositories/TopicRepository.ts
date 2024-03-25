@@ -84,6 +84,26 @@ class TopicRepository extends PrismaRepository {
         return updatedTopic
     }
 
+    textSearch = async (search: string) => {
+        const topics = await this.prismaClient.topic.findMany({
+            where: {
+                OR: [
+                    {
+                        title: {
+                            contains: search, mode: 'insensitive'
+                        }
+                    },
+                    {
+                        description: {
+                            contains: search, mode: 'insensitive'
+                        }
+                    }
+                ]
+            }
+        })
+        return topics
+    }
+
 }
 
 export default TopicRepository;

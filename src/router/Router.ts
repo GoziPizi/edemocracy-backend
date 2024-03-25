@@ -11,6 +11,7 @@ import ArgumentRouter from './ArgumentRouter';
 import PartyRouter from './PartyRouter';
 import PartyInvitationRouter from './PartyInvitationRouter';
 import AdminRouter from './AdminRouter';
+import SearchRouter from './SearchRouter';
 
 const router = express.Router();
 
@@ -23,6 +24,7 @@ router.use('/api/personality', PersonalityRouter);
 router.use('/api/parties', PartyRouter);
 router.use('/api/invitations', PartyInvitationRouter);
 router.use('/api/admin', AdminRouter);
+router.use('/api/search', SearchRouter);
 
 router.all('*', (req: Request, res: Response) => {
     throw new EndpointNotFoundException(req.path, req.method)

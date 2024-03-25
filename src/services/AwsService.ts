@@ -27,11 +27,23 @@ class AwsService {
         }
     }
 
-    static async deleteFile(key: string): Promise<void> {
-        await this.aws3.deleteObject({
-            Bucket: this.bucketName,
-            Key: key,
-        });
+    static deleteFile = async (key: string) => {
+        const pattern = /^https:\/\/edemocracy-dev.s3.eu-west-3.amazonaws.com/;
+        if (pattern.test(key)) {
+          key = key.replace('https://edemocracy-dev.s3.eu-west-3.amazonaws.com/', '');
+        }
+        try {
+          await this.aws3.deleteObject({ Bucket: this.bucketName, Key: key })
+        } catch (e) {
+          console.log(e)
+          throw new Error('Error deleting file')
+        }
+      }
+
+    static async uploadIdentityPicture(file: Express.Multer.File): Promise<string> {
+        const pictureKey = `identity-picture/${Date.now()}_${uuidv4()}`;
+        await this.uploadFile(pictureKey, file);
+        return `${this.baseUrl}${pictureKey}`;
     }
 
     static async uploadProfilePicture(file: Express.Multer.File, prefix: string): Promise<string> {

@@ -3,6 +3,7 @@ import PartyHistoryEventRepository from "@/repositories/PartyHistoryEventReposit
 import PartyRepository from "@/repositories/PartyRepository";
 import UserRepository from "@/repositories/UserRepository";
 import { PartyCreateInput } from "@/types/dtos/PartyDto";
+import BanWordService from "./BanWordService";
 
 class PartyService {
 
@@ -124,6 +125,7 @@ class PartyService {
     //Comments methods
 
     static async addComment(partyId: string, userId: string, comment: string) {
+        await BanWordService.checkStringForBanWords(comment);
         const party = await this.partyRepository.getPartyById(partyId);
         if(!party) {
             throw new Error('Party not found');

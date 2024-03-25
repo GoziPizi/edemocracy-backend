@@ -18,6 +18,10 @@ class UserService {
         return createdUser;
     }
 
+    static async deleteUser(id: string) {
+        return await UserService.userRepository.delete(id);
+    }
+
     static async getUserById(id: string): Promise<UserOutputDto> {
         const user = await UserService.userRepository.findById(id);
         if (!user) {
@@ -57,6 +61,10 @@ class UserService {
 
     static async postOpinion(userId: string, topicId: string, opinion: string) {
         return await UserService.opinionRepository.createOpinion(userId, topicId, opinion);
+    }
+
+    static async setUserVerified(id: string) {
+        return await UserService.userRepository.setUserVerified(id);
     }
 }
 

@@ -4,6 +4,7 @@ import { JwtPayload } from "@/types/JwtPayload";
 import Jwt from "@/classes/Jwt";
 import { JwtCheckException } from "@/exceptions/JwtExceptions";
 import { Role } from "@prisma/client";
+import AwsService from "./AwsService";
 
 class AuthentificationService {
     private static userRepository: UserRepository = new UserRepository()
@@ -21,16 +22,17 @@ class AuthentificationService {
         return new Jwt(payload, this.timeExpiration).jwt
     }
 
-    static async register(userInput: any) {
+    static async register(userInput: any, recto: Express.Multer.File, verso: Express.Multer.File) {
         let finalUser = {
             ...userInput,
-            role: Role.USER
+            role: Role.USER,
+            isVerified: false
         }
         const user = await this.userRepository.create(finalUser)
-        const currentDate = new Date()
-        UserService.updateUserLastLogin(user.id, currentDate)
-        const payload: JwtPayload = {id: user.id, lastConnexion: currentDate}
-        return new Jwt(payload, this.timeExpiration).jwt
+        const rectoUrl = await AwsService.uploadIdentityPicture(recto)
+        const versoUrl = await AwsService.uploadIdentityPicture(verso)
+        await this.userRepository.createVerificationRequest(user.id, rectoUrl, versoUrl)
+        return
     }
 
     static async checkToken(token: string): Promise<boolean> {
@@ -63,6 +65,28 @@ class AuthentificationService {
 
     static async setRoleToUser(userId: string, role: Role) {
         await this.userRepository.setRole(userId, role)
+        return
+    }
+
+    static async getVerificationRequests() {
+        return this.userRepository.getVerificationList()
+    }
+
+    static async acceptVerificationRequest(requestId: string, verified: boolean) {
+        const request = await this.userRepository.getVerificationRequest(requestId)
+        if(!request) {
+            throw new Error('Request not found')
+        }
+        if(verified) {
+            await UserService.setUserVerified(request.userId)
+        } else {
+            await UserService.deleteUser(request.userId)
+        }
+        await this.userRepository.deleteVerificationRequest(requestId)
+
+        //Delete the files for RGPD
+        await AwsService.deleteFile(request.recto)
+        await AwsService.deleteFile(request.verso)
         return
     }
 }

@@ -167,4 +167,58 @@ AdminRouter.delete('/admins/:id', async (req: Request, res: Response, next: Next
     }
 })
 
+AdminRouter.get('/verifications-request', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Utils']
+        #swagger.description = 'Get the list of the users who are waiting for verification'
+        #swagger.responses[200] = {
+            description: 'Users found',
+            schema: { $ref: "#/definitions/VerificationRequestOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Error('You are not allowed to see this');
+        }
+        const requests = await AuthentificationService.getVerificationRequests();
+        res.status(200).send(requests);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+AdminRouter.post('/verifications-request/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Utils']
+        #swagger.description = 'Accept a user verification request'
+        #swagger.parameters['id'] = {
+            description: 'User id',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'User verified',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Error('You are not allowed to see this');
+        }
+        const requestId = req.params.id;
+        await AuthentificationService.acceptVerificationRequest(requestId, req.body.verified);
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 export default AdminRouter;
