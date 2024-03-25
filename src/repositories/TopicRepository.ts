@@ -6,8 +6,27 @@ class TopicRepository extends PrismaRepository {
         const newTopic = await this.prismaClient.topic.create({
             data: topic
         })
+        if(topic.parentTopicId) {
+            await this.updateChildrenIds(topic.parentTopicId, newTopic.id)
+        }
         return newTopic
     }   
+
+    updateChildrenIds = async (topicId: string, childrenId: string) => {
+        const topic = await this.prismaClient.topic.findFirst({where: {id: topicId}})
+        if (!topic) {
+            throw new Error('Topic not found')
+        }
+        const updatedTopic = await this.prismaClient.topic.update({
+            where: {
+                id: topicId
+            },
+            data: {
+                childrenId: topic.childrenId ? [...topic.childrenId, childrenId] : [childrenId]
+            }
+        })
+        return updatedTopic
+    }
 
     findTopicById = async (id: string) => {
         const topic = await this.prismaClient.topic.findUnique({

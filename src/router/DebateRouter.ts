@@ -1,5 +1,6 @@
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
+import BanWordService from '@/services/BanWordService';
 import DebateService from '@/services/DebateService';
 import { DebateVoteType } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express';
@@ -54,7 +55,9 @@ DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
         if(!token) {
             throw new JwtNotInHeaderException();
         }
-        const debate = req.body as string;
+        const debate = req.body;
+        await BanWordService.checkStringForBanWords(debate.title)
+        await BanWordService.checkStringForBanWords(debate.description)
         const createdDebate = await DebateService.createDebate(debate);
         res.status(200).send(createdDebate);
     } catch (error) {

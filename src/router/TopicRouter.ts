@@ -1,11 +1,19 @@
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
+import BanWordService from '@/services/BanWordService';
 import TopicService from '@/services/TopicService';
 import express, { NextFunction, Request, Response } from 'express';
+import multer from 'multer'
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const TopicRouter = express.Router();
 
-TopicRouter.post('/', async (req, res) => {
+TopicRouter.post(
+    '/',
+    upload.fields([{ name: 'image', maxCount: 1}]),
+    async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Topic']
         #swagger.summary = 'Endpoint to create a new topic.'
@@ -22,16 +30,24 @@ TopicRouter.post('/', async (req, res) => {
         }
      */
     try {
+
+        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+        const image = files['image'] ? files['image'][0] : undefined;
+
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
         }
         await AuthentificationService.checkToken(token);
+
         const topic = req.body;
-        const newTopic = await TopicService.createTopic(topic);
+        await BanWordService.checkStringForBanWords(topic.title)
+        await BanWordService.checkStringForBanWords(topic.description)
+
+        const newTopic = await TopicService.createTopic(topic, image);
         res.status(201).send(newTopic);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

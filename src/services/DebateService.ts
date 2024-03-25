@@ -14,7 +14,7 @@ class DebateService {
     private static debateVoteRepository: DebateVoteRepository = new DebateVoteRepository()
     private static topicRepository: TopicRepository = new TopicRepository()
 
-    static async createDebate(debate: string) {
+    static async createDebate(debate: any) {
         const newDebate = await this.debateRepository.createDebate(debate);
         if(!newDebate) {
             throw new Error('Debate not created');

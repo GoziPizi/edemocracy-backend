@@ -1,11 +1,26 @@
 import TopicRepository from "@/repositories/TopicRepository";
 import DebateRepository from "@/repositories/DebateRepository";
+import AwsService from "./AwsService";
+import { ResizeService } from "./ResizeService";
 
 class TopicService {
     private static topicRepository: TopicRepository = new TopicRepository()
     private static debateRepository: DebateRepository = new DebateRepository()
 
-    static async createTopic(topic: any) {
+    static async createTopic(
+        topic: any,
+        image: Express.Multer.File | undefined
+    ) {
+        let imageUrl = undefined;
+
+        if(image) {
+            await ResizeService.checkRatio(image, 16 / 9);
+            image = await ResizeService.resizeTopicImage(image);
+            imageUrl = await AwsService.uploadTopicPicture(image, topic.title);
+            delete topic.image;
+            topic.medias = [imageUrl];
+        }
+
         const createdTopic = await TopicService.topicRepository.createTopic(topic);
         return createdTopic;
     }
