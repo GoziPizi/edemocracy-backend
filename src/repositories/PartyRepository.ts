@@ -113,6 +113,59 @@ class PartyRepository extends PrismaRepository {
         })
         return users
     }
+
+    //Comments methods
+
+    getCommentById = async (commentId: string) => {
+        const comment = await this.prismaClient.partyComment.findUnique({
+            where: {
+                id: commentId
+            }
+        })
+        return comment
+    }
+
+    addComment(partyId: string, userId: string, content: string) {
+        return this.prismaClient.partyComment.create({
+            data: {
+                content,
+                partyId,
+                userId
+            }
+        })
+    }
+
+    deleteComment(commentId: string) {
+        return this.prismaClient.partyComment.delete({
+            where: {
+                id: commentId
+            }
+        })
+    }
+
+    getAllCommentsFromPartyId(partyId: string) {
+        return this.prismaClient.partyComment.findMany({
+            where: {
+                partyId
+            }
+        })
+    }
+
+    getAllCommentsWithNameFromPartyId(partyId: string) {
+        return this.prismaClient.partyComment.findMany({
+            where: {
+            partyId
+            },
+            include: {
+                user: {
+                    select: {
+                        firstName: true,
+                        name: true
+                    }
+                }
+            }
+        })
+    }
 }
 
 export default PartyRepository;

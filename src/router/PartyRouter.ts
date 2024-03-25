@@ -285,4 +285,76 @@ PartyRouter.put('/:id', async (req: Request, res: Response, next: NextFunction) 
     }
 });
 
+//Comments related methods
+
+PartyRouter.post('/:id/comments', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to add a comment to a party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.parameters['body'] = {
+            description: 'Comment to add',
+            required: true,
+            schema: {
+                content: 'Contenu',
+            }
+        }
+        #swagger.responses[201] = {
+            description: 'Comment added',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const comment = await PartyService.addComment(req.params.id, userId, req.body.content);
+        res.status(201).send(comment);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PartyRouter.get('/:id/comments', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to get the comments of a party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.responses[200] = {
+            description: 'List of comments',
+            schema: { $ref: "#/definitions/PartyCommentsOutputDtoDefinition" }
+        }
+     */
+    try {
+        const comments = await PartyService.getAllCommentsWithNameFromPartyId(req.params.id);
+        res.status(200).send(comments);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PartyRouter.delete('/:id/comments/:commentId', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to delete a comment of a party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.parameters['commentId'] = { description: 'Comment id', required: true }
+        #swagger.responses[200] = {
+            description: 'Comment deleted',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        await PartyService.deleteComment(req.params.commentId, userId);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default PartyRouter;

@@ -121,6 +121,39 @@ class PartyService {
         return partyHistoryEvents;
     }
 
+    //Comments methods
+
+    static async addComment(partyId: string, userId: string, comment: string) {
+        const party = await this.partyRepository.getPartyById(partyId);
+        if(!party) {
+            throw new Error('Party not found');
+        }
+        const commentAdded = await this.partyRepository.addComment(partyId, userId, comment);
+        return commentAdded;
+    }
+
+    static async deleteComment(commentId: string, userId: string) {
+        const comment = await this.partyRepository.getCommentById(commentId);
+        if(!comment) {
+            throw new Error('Comment not found');
+        }
+        if(comment.userId !== userId) {
+            throw new Error('You are not allowed to do this');
+        }
+        const commentDeleted = await this.partyRepository.deleteComment(commentId);
+        return commentDeleted;
+    }
+
+    static async getAllCommentsFromPartyId(partyId: string) {
+        const comments = await this.partyRepository.getAllCommentsFromPartyId(partyId);
+        return comments;
+    }
+
+    static async getAllCommentsWithNameFromPartyId(partyId: string) {
+        const comments = await this.partyRepository.getAllCommentsWithNameFromPartyId(partyId);
+        return comments;
+    }
+
 }
 
 export default PartyService;
