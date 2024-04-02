@@ -48,7 +48,8 @@ class AwsService {
 
     static async uploadProfilePicture(file: Express.Multer.File, prefix: string): Promise<string> {
         const pictureUrl = `profile-picture/${prefix}-${Date.now()}_${uuidv4()}`;
-        return this.uploadFile(pictureUrl, file);
+        await this.uploadFile(pictureUrl, file);
+        return `${this.baseUrl}${pictureUrl}`;
     }
 
     static async uploadTopicPicture(file: Express.Multer.File, prefix: string): Promise<string> {

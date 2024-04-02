@@ -16,7 +16,8 @@ export const toUserOutput = (user: User): UserOutputDto => {
         language: user.language,
         role: user.role,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt
+        updatedAt: user.updatedAt,
+        profilePicture: user.profilePicture
     }
 }
 
@@ -28,6 +29,7 @@ export const toPublicUserOutput = (user: User): UserPublicOutputDto => {
         politicSide: user.politicSide,
         language: user.language,
         createdAt: user.createdAt,
-        updatedAt: user.updatedAt
+        updatedAt: user.updatedAt,
+        profilePicture: user.profilePicture
     }
 }

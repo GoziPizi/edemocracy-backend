@@ -18,6 +18,22 @@ class PersonalityService {
         return personality;
     }
 
+    static async createPersonality(userId: string) {
+        return PersonalityService.personalityRepository.createPersonality(userId);
+    }
+
+    static async updatePersonalityFromUserId(userId: string, updates: any) {
+        console.log(updates);
+        console.log(userId);
+        let personality = await PersonalityService.personalityRepository.findPersonalityByUserId(userId);
+        if(!personality) {
+            throw new Error("Personality not found");
+        }
+        personality = await PersonalityService.personalityRepository.updatePersonality(personality.id, updates);
+        return personality;
+    }
+
+
     static async searchPersonality(criterias: any) {
         let finalCriterias = {};
         if(criterias.politicSide) {

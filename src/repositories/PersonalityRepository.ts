@@ -3,6 +3,32 @@ import PrismaRepository from "./PrismaRepository";
 
 class PersonalityRepository extends PrismaRepository {
 
+    createPersonality = async (userId: string) => {
+        const personality = await this.prismaClient.personality.create({
+            data: {
+                user: {
+                    connect: {
+                        id: userId
+                    }
+                },
+                description: "",
+                for: [],
+                against: []
+            }
+        })
+        return personality
+    }
+
+    updatePersonality = async (id: string, updates: any) => {
+        const personality = await this.prismaClient.personality.update({
+            where: {
+                id
+            },
+            data: updates
+        })
+        return personality
+    }
+
     findPersonalityById = async (id: string) => {
         const personality = await this.prismaClient.personality.findUnique({
             where: {

@@ -5,14 +5,53 @@ import express, { NextFunction, Request, Response } from 'express';
 
 const PersonalityRouter = express.Router();
 
-PersonalityRouter.post('/', async (req, res) => {
-    //TODO
+PersonalityRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+     * #swagger.tags = ['Personality']
+     * #swagger.description = 'Endpoint to create a personality'
+     * #swagger.parameters['body'] = {
+     *    in: 'body',
+     *   description: 'Personality informations',
+     *  required: true,
+     * schema: { $ref: "#/definitions/Personality" }
+    */
     try {
-        //TODO
-        //Accessible si connecté
-        res.status(201)
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const result = await PersonalityService.createPersonality(userId);
+        res.status(201).send(result);
     } catch (error) {
         console.log(error);
+    }
+});
+
+PersonalityRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Personality']
+        #swagger.description = 'Endpoint to update a personality'
+        #swagger.parameters['body'] = {
+            description: 'Personality informations',
+            required: true,
+        }
+        #swagger.responses[200] = {
+            description: 'Personality updated',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const result = await PersonalityService.updatePersonalityFromUserId(userId, req.body);
+        res.status(200).send(result);
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -73,7 +112,7 @@ PersonalityRouter.get('/:id/private-infos', async (req, res) => {
     }
 });
 
-PersonalityRouter.put('/:id', async (req, res) => {
+PersonalityRouter.put('/:id/description', async (req, res) => {
     //TODO
     try {
         //TODO

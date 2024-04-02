@@ -2,6 +2,10 @@ import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import UserService from '@/services/UserService';
 import express, { NextFunction, Request, Response } from 'express'
+import multer from 'multer'
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const UserRouter = express.Router();
 
@@ -51,6 +55,41 @@ UserRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
         res.status(200).send(user);
     } catch (error) {
         console.log(error);
+    }
+});
+
+UserRouter.put(
+    '/profile-picture',
+    upload.single('profilePicture'),
+    async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Update the profile picture of the logged user'
+        #swagger.parameters['id'] = { description: 'User id', required: true }
+        #swagger.parameters['body'] = {
+            description: 'User information',
+            required: true,
+            schema: { $ref: "#/definitions/UserUpdateInputDefinition" }
+        }
+        #swagger.responses[200] = {
+            description: 'User updated',
+            schema: { $ref: "#/definitions/UserOutputDefinition" }
+        }
+        */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const file = req.file;
+        if (!file) {
+            throw new Error('No file provided');
+        }
+        const user = await UserService.updateProfilePicture(userId, file);
+        res.status(200).send(user);
+    } catch (error) {
+        next(error);
     }
 });
 
@@ -165,6 +204,27 @@ UserRouter.put('/:id', async (req, res) => {
     try {
         //TODO
         res.status(200)
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+UserRouter.delete('/', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Delete the logged user'
+        #swagger.responses[200] = {
+            description: 'User deleted'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        await UserService.deleteUserById(userId);
+        res.status(200).send('User deleted');
     } catch (error) {
         console.log(error);
     }

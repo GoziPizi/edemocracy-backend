@@ -27,7 +27,7 @@ NotificationRouter.get('/', async (req: Request, res: Response, next: NextFuncti
     }
 });
 
-NotificationRouter.post('/read', async (req: Request, res: Response, next: NextFunction) => {
+NotificationRouter.post('/r ead', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Notification']
         #swagger.description = 'Endpoint to mark a notification as read, only accessible by the user who received the notification.'

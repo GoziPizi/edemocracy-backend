@@ -1,4 +1,4 @@
-import { Role } from "@prisma/client";
+import { Affiliation, Role } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 import RawQueryRepository from "./RawQueryRepository";
 
@@ -15,6 +15,41 @@ class UserRepository extends PrismaRepository {
             }
         })
         return createdUser
+    }
+
+    deleteUserById = async (id: string) => {
+        //Updates all the filds to "deleted"
+        await this.prismaClient.user.update({
+            where: {
+                id
+            },
+            data: {
+                email: "deleted",
+                name: "deleted",
+                firstName: "deleted",
+                telephone: "deleted",
+                profession: "deleted",
+                politicSide: Affiliation.CENTER,
+                password: "deleted",
+                role: Role.USER,
+                profilePicture: "deleted",
+                isVerified: false,
+                address: "deleted",
+                description: "deleted",
+            }
+        })
+    }
+
+    updateProfilePicture = async (id: string, imageUrl: string) => {
+        const updatedUser = await this.prismaClient.user.update({
+            where: {
+                id
+            },
+            data: {
+                profilePicture: imageUrl
+            }
+        })
+        return updatedUser
     }
 
     delete = async (id: string) => {

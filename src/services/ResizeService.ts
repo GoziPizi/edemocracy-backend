@@ -21,4 +21,8 @@ export class ResizeService {
     return this.resizeImage(cover, 900)
   }
 
+  static resizeProfilePicture = async (profilePicture: Express.Multer.File) => {
+    return this.resizeImage(profilePicture, 200)
+  }
+
 }

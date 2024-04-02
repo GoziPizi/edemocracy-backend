@@ -4,6 +4,8 @@ import PartyRepository from "@/repositories/PartyRepository";
 import PersonalityRepository from "@/repositories/PersonalityRepository";
 import UserRepository from "@/repositories/UserRepository";
 import { UserOutputDto, UserPublicOutputDto } from "@/types/dtos/UserDto";
+import AwsService from "./AwsService";
+import { ResizeService } from "./ResizeService";
 
 
 class UserService {
@@ -16,6 +18,17 @@ class UserService {
     static async createUser(user: any) {
         const createdUser = await UserService.userRepository.create(user);
         return createdUser;
+    }
+
+    static async deleteUserById(userId: string) {
+        return UserService.userRepository.delete(userId);
+    }
+
+    static async updateProfilePicture(id: string, profilePicture: Express.Multer.File) {
+        await ResizeService.checkRatio(profilePicture, 1);
+        profilePicture = await ResizeService.resizeProfilePicture(profilePicture);
+        const imageUrl = await AwsService.uploadProfilePicture(profilePicture, id);
+        return await UserService.userRepository.updateProfilePicture(id, imageUrl);
     }
 
     static async deleteUser(id: string) {
