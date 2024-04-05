@@ -22,6 +22,7 @@ export const UserOutputDefinition: UserOutputDto = {
     description: 'string',
     telephone: 'string',
     firstName: 'string',
+    profilePicture: 'string',
     language: 'string',
     politicSide: Affiliation.RIGHT,
     follows: ['1'],
@@ -35,6 +36,7 @@ export const UserPublicOutputDefinition: UserPublicOutputDto = {
     name: 'string',
     firstName: 'string',
     language: 'string',
+    profilePicture: 'string',
     politicSide: Affiliation.RIGHT,
     createdAt: new Date(),
     updatedAt: new Date()
