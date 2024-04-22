@@ -7,6 +7,64 @@ import express, { NextFunction, Request, Response } from 'express';
 
 const DebateRouter = express.Router();
 
+DebateRouter.get('/by-time', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to get debates by time.'
+        #swagger.parameters['query'] = {
+            limit: 10
+        }
+        #swagger.responses[200] = {
+            description: 'Debates found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const limit = Number(req.query.limit) || 10;
+        const debates = await DebateService.getDebatesByTime(limit);
+        res.status(200).send(debates);
+    } catch (error) {
+        next(error);
+    }
+});
+
+DebateRouter.get('/by-popularity', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to get debates by popularity.'
+        #swagger.parameters['query'] = {
+            limit: 10
+        }
+        #swagger.responses[200] = {
+            description: 'Debates found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const limit = Number(req.query.limit) || 10;
+        const debates = await DebateService.getDebatesByPopularity(limit);
+        res.status(200).send(debates);
+    } catch (error) {
+        next(error);
+    }
+});
+
 DebateRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']

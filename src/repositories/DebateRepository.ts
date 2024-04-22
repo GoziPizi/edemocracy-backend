@@ -29,6 +29,25 @@ class DebateRepository extends PrismaRepository {
     return debate;
   }
 
+  getDebatesByTime = async (page_size: number = 10, page: number = 1) => {
+    const debates = await this.prismaClient.debate.findMany({
+      take: page_size,
+      skip: (page - 1) * page_size,
+    });
+    return debates;
+  }
+
+  getDebatesByPopularity = async (page_size: number = 10, page: number = 1) => {
+    const debates = await this.prismaClient.debate.findMany({
+      take: page_size,
+      skip: (page - 1) * page_size,
+      orderBy: {
+        nbVotes: 'desc',
+      },
+    });
+    return debates;
+  }
+
   getByDebatesIds = async (ids: string[]) => {
     const debates = await this.prismaClient.debate.findMany({
       where: {

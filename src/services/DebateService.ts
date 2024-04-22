@@ -31,6 +31,16 @@ class DebateService {
         return debate
     }
 
+    static async getDebatesByTime(page_size: number = 10, page: number = 1) {
+        const debates = await this.debateRepository.getDebatesByTime(page_size, page);
+        return debates;
+    }   
+
+    static async getDebatesByPopularity(page_size: number = 10, page: number = 1) {
+        const debates = await this.debateRepository.getDebatesByPopularity(page_size, page);
+        return debates;
+    }
+
     static async getDebateWithUserVote(id: string, userId: string) {
         const debate = await this.debateRepository.getDebateById(id);
         const userVote = await this.debateRepository.getDebateVote(id, userId);
