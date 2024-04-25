@@ -13,6 +13,11 @@ class TopicService {
     ) {
         let imageUrl = undefined;
 
+        if(topic.medias) {
+            topic.medias = JSON.parse(topic.medias);
+        }
+
+
         if(image) {
             await ResizeService.checkRatio(image, 16 / 9);
             image = await ResizeService.resizeTopicImage(image);
