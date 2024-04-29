@@ -26,4 +26,27 @@ SearchRouter.get('/all/:query', async (req: Request, res: Response, next: NextFu
     }
 });
 
+SearchRouter.get('/topic/:query', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Search']
+        #swagger.description = 'Get all search results'
+        #swagger.parameters['query'] = {
+            description: 'Query to search',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'Search results found',
+            schema: { $ref: "#/definitions/SearchResultDefinition" }
+        }
+     */
+    try {
+
+        const query = req.params.query;
+        const results = await SearchService.textSearchByType(query, 'topic');
+        res.status(200).send(results);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default SearchRouter;

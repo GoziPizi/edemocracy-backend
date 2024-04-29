@@ -45,6 +45,44 @@ LoginRouter.post('/check', async (req: Request, res: Response, next: NextFunctio
     }
 });
 
+LoginRouter.post('/reset-password', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+    #swagger.tags = ['Login']
+    #swagger.summary = 'Endpoint to reset password'
+    #swagger.parameters['body] = {
+        description: 'email',
+        required: true,
+        schema: { $ref: "#/definitions/EmailDefinition" }
+    }
+     */
+    try {
+        const { email } = req.body;
+        await AuthentificationService.resetPassword(email);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
+LoginRouter.post('/change-password', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+    #swagger.tags = ['Login']
+    #swagger.summary = 'Endpoint to change password'
+    #swagger.parameters['body] = {
+        description: 'email, password and token',
+        required: true,
+        schema: { $ref: "#/definitions/ChangePasswordDefinition" }
+    }
+     */
+    try {
+        const { email, password, token } = req.body;
+        await AuthentificationService.changePassword(email, password, token);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
 LoginRouter.post(
     '/register',
     upload.fields([{name: 'recto', maxCount: 1}, {name: 'verso', maxCount: 1}]),

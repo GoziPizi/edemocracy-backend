@@ -5,6 +5,7 @@ import Jwt from "@/classes/Jwt";
 import { JwtCheckException } from "@/exceptions/JwtExceptions";
 import { Role } from "@prisma/client";
 import AwsService from "./AwsService";
+import { sendReinitPasswordMail } from "./MailService";
 
 class AuthentificationService {
     private static userRepository: UserRepository = new UserRepository()
@@ -87,6 +88,26 @@ class AuthentificationService {
         //Delete the files for RGPD
         await AwsService.deleteFile(request.recto)
         await AwsService.deleteFile(request.verso)
+        return
+    }
+
+    static async resetPassword(email: string) {
+        const user = await this.userRepository.getUserByEmail(email)
+        if(!user) {
+            throw new Error('User not found')
+        }
+        const token = new Jwt({id: user.id}, 60 * 60).jwt
+        sendReinitPasswordMail(email, token.toString())
+        return
+    }
+
+    static async changePassword(email: string, password: string, token: string) {
+        const user = await this.userRepository.getUserByEmail(email)
+        if(!user) {
+            throw new Error('User not found')
+        }
+        Jwt.checkToken(token)
+        await UserService.updateUserPassword(user.id, password)
         return
     }
 }

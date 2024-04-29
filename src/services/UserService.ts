@@ -24,6 +24,10 @@ class UserService {
         return UserService.userRepository.delete(userId);
     }
 
+    static async updateUserPassword(id: string, password: string) {
+        return await UserService.userRepository.updatePassword(id, password);
+    }
+
     static async updateProfilePicture(id: string, profilePicture: Express.Multer.File) {
         await ResizeService.checkRatio(profilePicture, 1);
         profilePicture = await ResizeService.resizeProfilePicture(profilePicture);

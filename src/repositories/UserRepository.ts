@@ -18,6 +18,19 @@ class UserRepository extends PrismaRepository {
         return createdUser
     }
 
+    updatePassword = async (id: string, password: string) => {
+        const hashedPassword = await this.RawQueryRepository.getSha256(password)
+        await this.prismaClient.user.update({
+            where: {
+                id
+            },
+            data: {
+                password: hashedPassword
+            }
+        })
+        return
+    }
+
     deleteUserById = async (id: string) => {
         //Updates all the filds to "deleted"
         await this.prismaClient.user.update({
