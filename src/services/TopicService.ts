@@ -30,6 +30,18 @@ class TopicService {
         return createdTopic;
     }
 
+    static async updateTopic(id: string, topic: any, userId: string) {
+        const actualTopic = await TopicService.topicRepository.findTopicById(id);
+        if (!actualTopic) {
+            throw new Error("Topic not found");
+        }
+        if(actualTopic.userId !== userId) {
+            throw new Error("You are not allowed to update this topic");
+        }
+        const updatedTopic = await TopicService.topicRepository.updateTopic(id, topic);
+        return updatedTopic;
+    }
+
     static async getTopicById(id: string) {
         const topic = await TopicService.topicRepository.findTopicById(id);
         return topic

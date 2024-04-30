@@ -12,6 +12,16 @@ class TopicRepository extends PrismaRepository {
         return newTopic
     }   
 
+    updateTopic = async (id: string, topic: any) => {
+        const updatedTopic = await this.prismaClient.topic.update({
+            where: {
+                id
+            },
+            data: topic
+        })
+        return updatedTopic
+    }
+
     updateChildrenIds = async (topicId: string, childrenId: string) => {
         const topic = await this.prismaClient.topic.findFirst({where: {id: topicId}})
         if (!topic) {

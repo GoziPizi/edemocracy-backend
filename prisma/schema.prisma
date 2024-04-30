@@ -51,6 +51,7 @@ model User {
   Opinion           Opinion[]
   PartyComment      PartyComment[]
   VerifyUser        VerifyUser[]
+  Topic             Topic[]
 }
 
 model VerifyUser {
@@ -158,6 +159,8 @@ model Personality {
 
 model Topic {
   id            String    @id @default(uuid())
+  user          User?     @relation(fields: [userId], references: [id])
+  userId        String?
   title         String
   parentTopicId String?
   childrenId    String[]

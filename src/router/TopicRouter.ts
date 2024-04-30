@@ -51,6 +51,45 @@ TopicRouter.post(
     }
 });
 
+TopicRouter.patch('/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Topic']
+        #swagger.summary = 'Endpoint to update a topic by its id.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.parameters['body'] = {
+            title: "Title",
+            description: "Description",
+            parentTopicId: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Topic updated',
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token)
+
+        const id = String(req.params.id);
+        const topic = req.body;
+        await BanWordService.checkStringForBanWords(topic.title)
+        await BanWordService.checkStringForBanWords(topic.description)
+
+        const updatedTopic = await TopicService.updateTopic(id, topic, userId);
+        res.status(200).send(updatedTopic);
+    } catch (error) {
+        next(error);
+    }
+});
+
 TopicRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Topic']
