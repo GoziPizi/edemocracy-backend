@@ -1,6 +1,7 @@
 import ArgumentRepository from "@/repositories/ArgumentRepository";
 import VoteRepository from "@/repositories/VoteRepository";
 import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
+import { ArgumentType } from "@prisma/client";
 
 class ArgumentService {
 
@@ -20,8 +21,8 @@ class ArgumentService {
         }
     }
 
-    static async createArgument(content: string, userId: string, debateId: string): Promise<void>  {
-        const argument = await this.argumentRepository.createArgument(content, userId, debateId);
+    static async createArgument(content: string, argumentType: ArgumentType,userId: string, debateId: string): Promise<void>  {
+        const argument = await this.argumentRepository.createArgument(content, argumentType, userId, debateId);
         if(!argument) {
             throw new Error('Error creating argument');
         }

@@ -1,6 +1,7 @@
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import ArgumentService from '@/services/ArgumentService';
 import AuthentificationService from '@/services/AuthentificationService';
+import { ArgumentType } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express';
 
 const ArgumentRouter = express.Router();
@@ -26,8 +27,8 @@ ArgumentRouter.post('/', async (req: Request, res: Response, next: NextFunction)
         }
         await AuthentificationService.checkToken(token);
         const userId = AuthentificationService.getUserId(token);
-        const { content, debateId } = req.body;
-        await ArgumentService.createArgument(content, userId, debateId);
+        const { content, argumentType, debateId } = req.body;
+        await ArgumentService.createArgument(content, argumentType as ArgumentType, userId, debateId);
         res.status(200).send();
     } catch (error) {
         next(error);

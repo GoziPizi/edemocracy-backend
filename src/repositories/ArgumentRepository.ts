@@ -1,11 +1,13 @@
+import { ArgumentType } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 
 class ArgumentRepository extends PrismaRepository {
 
-    createArgument = async (content: string, userId: string, debateId: string) => {
+    createArgument = async (content: string, argumentType: ArgumentType, userId: string, debateId: string) => {
         const argument = await this.prismaClient.argument.create({
             data: {
                 content,
+                type: argumentType,
                 userId,
                 debateId
             }

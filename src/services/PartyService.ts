@@ -4,6 +4,8 @@ import PartyRepository from "@/repositories/PartyRepository";
 import UserRepository from "@/repositories/UserRepository";
 import { PartyCreateInput } from "@/types/dtos/PartyDto";
 import BanWordService from "./BanWordService";
+import { ResizeService } from "./ResizeService";
+import AwsService from "./AwsService";
 
 class PartyService {
 
@@ -45,7 +47,22 @@ class PartyService {
         }
         let party = await this.partyRepository.updateParty(id, data);
         return party;
+    }
 
+    static async updatePartyLogo(id: string, logo: Express.Multer.File, userId: string) {
+        let hasAdminRights = await this.checkAdminRights(id, userId);
+        if(!hasAdminRights) {
+            throw new Error('You are not allowed to do this');
+        }
+        await ResizeService.checkRatio(logo, 1);
+        logo = await ResizeService.resizeProfilePicture(logo);
+        const logoUrl = await AwsService.uploadPartyLogo(logo, id);
+        const oldParty = await this.partyRepository.getPartyById(id);
+        if(oldParty && oldParty.logo !== 'default-logo.png') {
+            await AwsService.deleteFile(oldParty.logo);
+        }
+        let party = await this.partyRepository.updateParty(id, { logo: logoUrl});
+        return party;
     }
 
     static async inviteMember(partyId: string, userId: string, newMemberEmail: string) {

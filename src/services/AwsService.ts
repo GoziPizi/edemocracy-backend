@@ -57,6 +57,12 @@ class AwsService {
         await this.uploadFile(pictureKey, file);
         return `${this.baseUrl}${pictureKey}`;
     }
+
+    static async uploadPartyLogo(file: Express.Multer.File, prefix: string): Promise<string> {
+        const pictureKey = `party-logo/${prefix}-${Date.now()}_${uuidv4()}`;
+        await this.uploadFile(pictureKey, file);
+        return `${this.baseUrl}${pictureKey}`;
+    }
 }
 
 export default AwsService;

@@ -3,6 +3,10 @@ import AuthentificationService from '@/services/AuthentificationService';
 import PartyService from '@/services/PartyService';
 import { PartyCreateInput } from '@/types/dtos/PartyDto';
 import express, { NextFunction, Request, Response } from 'express';
+import multer from 'multer';
+
+const storage = multer.memoryStorage();
+const upload = multer({ storage: storage });
 
 const PartyRouter = express.Router();
 
@@ -279,6 +283,40 @@ PartyRouter.put('/:id', async (req: Request, res: Response, next: NextFunction) 
         const userId = AuthentificationService.getUserId(token);
         const party: PartyCreateInput = req.body;
         const updatedParty = await PartyService.updateParty(req.params.id, party, userId);
+        res.status(200).send(updatedParty);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PartyRouter.put(
+    '/:id/logo',
+    upload.single('logo'),
+    async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to update the logo of a party'
+        #swagger.parameters['id'] = { description: 'Party id', required: true }
+        #swagger.parameters['body'] = {
+            description: 'Logo to update',
+            required: true,
+        }
+        #swagger.responses[200] = {
+            description: 'Logo updated',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const file = req.file;
+        if (!file) {
+            throw new Error('No file provided');
+        }
+        const updatedParty = await PartyService.updatePartyLogo(req.params.id, file, userId);
         res.status(200).send(updatedParty);
     } catch (error) {
         next(error);

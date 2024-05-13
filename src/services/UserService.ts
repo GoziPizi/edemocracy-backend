@@ -16,6 +16,11 @@ class UserService {
     private static opinionRepository: OpinionRepository = new OpinionRepository()
 
     static async createUser(user: any) {
+        const finalUser = {
+            ...user,
+            verified: false,
+            contribution: false
+        }
         const createdUser = await UserService.userRepository.create(user);
         return createdUser;
     }

@@ -55,6 +55,16 @@ class TopicRepository extends PrismaRepository {
         return topics
     }
 
+    findRecentTopics = async () => {
+        const topics = await this.prismaClient.topic.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            },
+            take: 5
+        })
+        return topics
+    }
+
     getParentsList = async () => {
         const topics = await this.prismaClient.topic.findMany({
             where: {

@@ -167,6 +167,34 @@ TopicRouter.get('/fulllist', async (req: Request, res: Response, next: NextFunct
     }
 });
 
+TopicRouter.get('/recent', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Topic']
+        #swagger.summary = 'Endpoint to get the most recent topics.'
+        #swagger.parameters['query'] = {
+            page: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Topics found',
+            schema: { $ref: "#/definitions/TopicOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const topics = await TopicService.getRecentTopics()
+        res.status(200).send(topics);
+    } catch (error) {
+        next(error);
+    }
+});
+
 TopicRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Topic']

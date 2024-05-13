@@ -70,6 +70,11 @@ class TopicService {
         return debates;
         
     }
+
+    static async getRecentTopics() {
+        const topics = await TopicService.topicRepository.findRecentTopics();
+        return topics;
+    }
 }
 
 export default TopicService;
