@@ -4,6 +4,7 @@ import ArgumentRepository from "@/repositories/ArgumentRepository";
 import DebateRepository from "@/repositories/DebateRepository";
 import DebateVoteRepository from "@/repositories/DebateVoteRepository";
 import TopicRepository from "@/repositories/TopicRepository";
+import UserRepository from "@/repositories/UserRepository";
 import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
 import { Argument, DebateVoteType } from "@prisma/client";
 
@@ -13,6 +14,7 @@ class DebateService {
     private static argumentRepository: ArgumentRepository = new ArgumentRepository()
     private static debateVoteRepository: DebateVoteRepository = new DebateVoteRepository()
     private static topicRepository: TopicRepository = new TopicRepository()
+    private static userRepository: UserRepository = new UserRepository()
 
     static async createDebate(debate: any) {
         const argument = await this.argumentRepository.getArgumentById(debate.argumentId);
@@ -73,16 +75,21 @@ class DebateService {
 
     static async voteForDebate(debateId: string, userId: string, value: DebateVoteType) {
         const actualeVote = await this.debateRepository.getDebateVote(debateId, userId);
+        const user = await this.userRepository.findById(userId);
+        if(!user) {
+            throw new Error('User not found');
+        }
+        const contribution = user.contribution;
         const debate = await this.debateRepository.getDebateById(debateId);
         if(!debate) {
             throw new Error('Debate not found');
         }
         if(actualeVote) {
-            await this.debateVoteRepository.updateVote(actualeVote.id, value);
+            await this.debateVoteRepository.updateVote(actualeVote.id, value, contribution);
             const score = debate.score - toValue(actualeVote.value) + toValue(value);
             await this.debateRepository.update(debateId, { score });
         } else {
-            await this.debateVoteRepository.createVote(userId, debateId, value);
+            await this.debateVoteRepository.createVote(userId, debateId, value, contribution);
             const score = debate.score + toValue(value);
             const nbVotes = debate.nbVotes + 1;
             await this.debateRepository.update(debateId, { score, nbVotes });

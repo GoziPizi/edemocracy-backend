@@ -196,14 +196,15 @@ enum DebateVoteType {
 }
 
 model DebateVote {
-  id        String         @id @default(uuid())
-  value     DebateVoteType
-  user      User           @relation(fields: [userId], references: [id])
-  userId    String
-  debate    Debate         @relation(fields: [debateId], references: [id])
-  debateId  String
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  id                String         @id @default(uuid())
+  value             DebateVoteType
+  user              User           @relation(fields: [userId], references: [id])
+  userId            String
+  isFromContributor Boolean        @default(false)
+  debate            Debate         @relation(fields: [debateId], references: [id])
+  debateId          String
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
 }
 
 enum ArgumentType {

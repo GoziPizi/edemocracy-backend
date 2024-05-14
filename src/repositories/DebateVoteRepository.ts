@@ -3,23 +3,25 @@ import PrismaRepository from "./PrismaRepository";
 
 class DebateVoteRepository extends PrismaRepository {
 
-    createVote = async (userId: string, debateId: string, value: DebateVoteType) => {
+    createVote = async (userId: string, debateId: string, value: DebateVoteType, isFromContributor: boolean) => {
         await this.prismaClient.debateVote.create({
             data: {
                 userId,
                 debateId,
-                value
+                value, 
+                isFromContributor
             }
         });
     }
 
-    updateVote = async (voteId: string, value: DebateVoteType) => {
+    updateVote = async (voteId: string, value: DebateVoteType, isFromContributor: boolean) => {
         await this.prismaClient.debateVote.update({
             where: {
                 id: voteId
             },
             data: {
-                value
+                value,
+                isFromContributor
             }
         });
     }
