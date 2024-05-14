@@ -10,6 +10,12 @@ class DebateRepository extends PrismaRepository {
     return debate;
   }
 
+  createDebateResult() {
+    return this.prismaClient.debateResult.create({
+      data: {},
+    });
+  }
+
   update = async (id: string, data: any) => {
     const debate = await this.prismaClient.debate.update({
       where: {
@@ -40,10 +46,7 @@ class DebateRepository extends PrismaRepository {
   getDebatesByPopularity = async (page_size: number = 10, page: number = 1) => {
     const debates = await this.prismaClient.debate.findMany({
       take: page_size,
-      skip: (page - 1) * page_size,
-      orderBy: {
-        nbVotes: 'desc',
-      },
+      skip: (page - 1) * page_size
     });
     return debates;
   }
@@ -94,6 +97,25 @@ class DebateRepository extends PrismaRepository {
       },
     });
     return debate;
+  }
+
+  getDebateResult = async (id: string) => {
+    const debateResult = await this.prismaClient.debateResult.findFirst({
+      where: {
+        id,
+      },
+    });
+    return debateResult;
+  }
+
+  updateDebateResult = async (debateResultId: string, data: any) => {
+    const debateResult = await this.prismaClient.debateResult.update({
+      where: {
+        id: debateResultId,
+      },
+      data,
+    });
+    return debateResult;
   }
 }
 

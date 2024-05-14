@@ -174,17 +174,23 @@ model Topic {
 }
 
 model Debate {
-  id          String       @id @default(uuid())
-  title       String
-  description String
-  arguments   Argument[]
-  score       Float        @default(0)
-  nbVotes     Int          @default(0)
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  topicId     String?
-  argumentId  String?
-  DebateVote  DebateVote[]
+  id                         String       @id @default(uuid())
+  title                      String
+  description                String
+  arguments                  Argument[]
+  debateResultId             String       @unique
+  debateContributorsResultId String       @unique
+  createdAt                  DateTime     @default(now())
+  updatedAt                  DateTime     @updatedAt
+  topicId                    String?
+  argumentId                 String?
+  DebateVote                 DebateVote[]
+}
+
+model DebateResult {
+  id      String @id @default(uuid())
+  score   Float  @default(0)
+  nbVotes Int    @default(0)
 }
 
 enum DebateVoteType {

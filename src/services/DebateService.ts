@@ -21,7 +21,14 @@ class DebateService {
         if(argument && argument.childDebateId) {
             throw new Error('Argument already has a debate');
         }
-        const newDebate = await this.debateRepository.createDebate(debate);
+        const debateResult = await this.debateRepository.createDebateResult();
+        const debateContributorsResult = await this.debateRepository.createDebateResult();
+        const newDebate = await this.debateRepository.createDebate({
+            ...debate,
+            debateResultId: debateResult.id,
+            debateContributorsResultId: debateContributorsResult.id
+        
+        });
         if(!newDebate) {
             throw new Error('Debate not created');
         }
@@ -32,11 +39,6 @@ class DebateService {
             await this.argumentRepository.addDebateToArgument(newDebate.argumentId, newDebate.id);
         }
         return newDebate;
-    }
-
-    static async getDebateById(id: string) {
-        const debate = await this.debateRepository.getDebateById(id);
-        return debate
     }
 
     static async getDebatesByTime(page_size: number = 10, page: number = 1) {
@@ -51,11 +53,15 @@ class DebateService {
 
     static async getDebateWithUserVote(id: string, userId: string) {
         const debate = await this.debateRepository.getDebateById(id);
+        const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);
+        const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
         const userVote = await this.debateRepository.getDebateVote(id, userId);
         const vote = userVote ? userVote.value : null;
         return {
             ...debate,
-            hasVote: vote
+            hasVote: vote,
+            debateResult,
+            debateContributorsResult
         }
     }
 
@@ -74,42 +80,82 @@ class DebateService {
     }
 
     static async voteForDebate(debateId: string, userId: string, value: DebateVoteType) {
-        const actualeVote = await this.debateRepository.getDebateVote(debateId, userId);
-        const user = await this.userRepository.findById(userId);
-        if(!user) {
-            throw new Error('User not found');
-        }
-        const contribution = user.contribution;
         const debate = await this.debateRepository.getDebateById(debateId);
-        if(!debate) {
-            throw new Error('Debate not found');
-        }
-        if(actualeVote) {
-            await this.debateVoteRepository.updateVote(actualeVote.id, value, contribution);
-            const score = debate.score - toValue(actualeVote.value) + toValue(value);
-            await this.debateRepository.update(debateId, { score });
+        const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);
+        const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
+        const actualVote = await this.debateRepository.getDebateVote(debateId, userId);
+        const user = await this.userRepository.findById(userId);
+        const contribution = user!.contribution;
+
+        //Handling vote
+
+        if(actualVote) {
+            await this.debateVoteRepository.updateVote(actualVote.id, value, contribution);
         } else {
             await this.debateVoteRepository.createVote(userId, debateId, value, contribution);
-            const score = debate.score + toValue(value);
-            const nbVotes = debate.nbVotes + 1;
-            await this.debateRepository.update(debateId, { score, nbVotes });
+
+            //Handling debate nbVotes
+            await this.debateRepository.updateDebateResult(debateResult!.id, { nbVotes: debateResult!.nbVotes + 1 });
+
+            if(contribution) {
+                await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { nbVotes: debateContributorsResult!.nbVotes + 1 });
+            }
         }
-        return;
+
+        //Handling debate score
+
+        let newScore = debateResult!.score + toValue(value)
+        if(actualVote) {
+            newScore -= toValue(actualVote.value);
+        }
+        await this.debateRepository.updateDebateResult(debateResult!.id, { score: newScore });
+
+        if(contribution) {
+            let newContributorsScore = debateContributorsResult!.score + toValue(value)
+            if(actualVote) {
+                newContributorsScore -= toValue(actualVote.value);
+            }
+            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { score: newContributorsScore });
+        }
+
+        return true;
+        
     }
 
     static async deleteVoteForDebate(debateId: string, userId: string) {
-        const actualeVote = await this.debateRepository.getDebateVote(debateId, userId);
         const debate = await this.debateRepository.getDebateById(debateId);
-        if(!debate) {
-            throw new Error('Debate not found');
+        const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);
+        const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
+        const actualVote = await this.debateRepository.getDebateVote(debateId, userId);
+        const user = await this.userRepository.findById(userId);
+        const contribution = user!.contribution;
+
+        if(!actualVote) {
+            throw new Error('Vote not found');
         }
-        if(actualeVote) {
-            await this.debateVoteRepository.deleteVote(actualeVote.id);
-            const score = debate.score - toValue(actualeVote.value);
-            const nbVotes = debate.nbVotes - 1;
-            await this.debateRepository.update(debateId, { score, nbVotes });
+
+        //Handling debate nbVotes
+        await this.debateRepository.updateDebateResult(debateResult!.id, { nbVotes: debateResult!.nbVotes - 1 });
+
+        if(contribution) {
+            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { nbVotes: debateContributorsResult!.nbVotes - 1 });
         }
-        return;
+
+        //Handling debate score
+
+        let newScore = debateResult!.score - toValue(actualVote.value);
+        await this.debateRepository.updateDebateResult(debateResult!.id, { score: newScore });
+
+        if(contribution) {
+            let newContributorsScore = debateContributorsResult!.score - toValue(actualVote.value);
+            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { score: newContributorsScore });
+        }
+
+        //Handling vote
+
+        await this.debateVoteRepository.deleteVote(actualVote.id);
+
+        return true;
     }
 
 }
