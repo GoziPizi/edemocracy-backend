@@ -15,6 +15,16 @@ class ArgumentRepository extends PrismaRepository {
         return argument;
     }
 
+    addDebateToArgument = async (argumentId: string, childDebateId: string) => {
+        const argument = await this.prismaClient.argument.update({
+            where: { id: argumentId },
+            data: {
+                childDebateId
+            }
+        });
+        return argument;
+    }
+
     updateArgument = async (id: string, data: any) => {
         const updatedArgument = await this.prismaClient.argument.update({
             where: { id }, data

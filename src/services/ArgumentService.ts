@@ -1,4 +1,5 @@
 import ArgumentRepository from "@/repositories/ArgumentRepository";
+import DebateRepository from "@/repositories/DebateRepository";
 import VoteRepository from "@/repositories/VoteRepository";
 import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
 import { ArgumentType } from "@prisma/client";
@@ -6,6 +7,7 @@ import { ArgumentType } from "@prisma/client";
 class ArgumentService {
 
     private static argumentRepository: ArgumentRepository = new ArgumentRepository()
+    private static debateRepository: DebateRepository = new DebateRepository()
     private static voteRepository: VoteRepository = new VoteRepository()
 
     static async getArgumentById(id: string, userId: string): Promise<ArgumentWithVoteOutput> {
@@ -15,9 +17,12 @@ class ArgumentService {
         }
         const userVote = await this.argumentRepository.getUserVote(userId, id);
         const vote = userVote ? userVote.value : null;
+        const childDebate = await this.debateRepository.getChildDebateFromArgument(argument.debateId);
+        const childDebateId = childDebate ? childDebate.id : null;
         return {
             ...argument,
-            hasVote: vote
+            hasVote: vote,
+            childDebateId
         }
     }
 

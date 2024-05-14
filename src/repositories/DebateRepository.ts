@@ -86,6 +86,15 @@ class DebateRepository extends PrismaRepository {
     });
     return debateArgs;
   }
+
+  getChildDebateFromArgument = async (argumentId: string) => {
+    const debate = await this.prismaClient.debate.findFirst({
+      where: {
+        argumentId,
+      },
+    });
+    return debate;
+  }
 }
 
 export default DebateRepository;

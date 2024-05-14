@@ -15,14 +15,20 @@ class DebateService {
     private static topicRepository: TopicRepository = new TopicRepository()
 
     static async createDebate(debate: any) {
+        const argument = await this.argumentRepository.getArgumentById(debate.argumentId);
+        if(argument && argument.debateId) {
+            throw new Error('Argument already has a debate');
+        }
         const newDebate = await this.debateRepository.createDebate(debate);
         if(!newDebate) {
             throw new Error('Debate not created');
         }
-        if(!newDebate.topicId) {
-            throw new Error('Topic not found');
+        if(newDebate.topicId) {
+            await this.topicRepository.addDebateToTopic(newDebate.topicId, newDebate.id);
         }
-        await this.topicRepository.addDebateToTopic(newDebate.topicId, newDebate.id);
+        if(newDebate.argumentId) {
+            await this.argumentRepository.addDebateToArgument(newDebate.argumentId, newDebate.id);
+        }
         return newDebate;
     }
 

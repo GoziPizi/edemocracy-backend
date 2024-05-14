@@ -183,6 +183,7 @@ model Debate {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   topicId     String?
+  argumentId  String?
   DebateVote  DebateVote[]
 }
 
