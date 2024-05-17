@@ -84,6 +84,7 @@ class DebateService {
         const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);
         const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
         const actualVote = await this.debateRepository.getDebateVote(debateId, userId);
+        console.log(actualVote)
         const user = await this.userRepository.findById(userId);
         const contribution = user!.contribution;
 
@@ -93,10 +94,8 @@ class DebateService {
             await this.debateVoteRepository.updateVote(actualVote.id, value, contribution);
         } else {
             await this.debateVoteRepository.createVote(userId, debateId, value, contribution);
-
             //Handling debate nbVotes
             await this.debateRepository.updateDebateResult(debateResult!.id, { nbVotes: debateResult!.nbVotes + 1 });
-
             if(contribution) {
                 await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { nbVotes: debateContributorsResult!.nbVotes + 1 });
             }

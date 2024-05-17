@@ -1,9 +1,11 @@
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import ContributionService from '@/services/ContributionService';
+import StripeService from '@/services/StripeService';
 import express, { NextFunction, Request, Response } from 'express';
 
 const ContributionRouter = express.Router();
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 ContributionRouter.get('/checkout-session', async (req: Request, res: Response, next: NextFunction) => {
     /**
@@ -43,10 +45,24 @@ ContributionRouter.post('/webhook', async (req: Request, res: Response, next: Ne
         }
      */
     try {
+        const sig = req.headers['stripe-signature'] as string;
+        if(!sig) {
+            throw new Error('Stripe signature missing');
+        }
+        let event;
+        try {
+            event = StripeService.verifyStripeEvent(req.body, sig, endpointSecret || '');
+        } catch (error: any) {
+            res.status(400).send(`Webhook Error: ${error.message}`);
+        }
         const stripeEvent = req.body;
+        console.log('------------------------------------')
+        console.log(stripeEvent);
         await ContributionService.handleStripeEvent(stripeEvent);
         res.status(200).send();
     } catch (error) {
         next(error);
     }
 });
+
+export default ContributionRouter;

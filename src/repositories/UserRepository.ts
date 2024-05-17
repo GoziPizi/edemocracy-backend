@@ -31,6 +31,19 @@ class UserRepository extends PrismaRepository {
         return
     }
 
+    //Updates the contribution field to true, based on the email to clarify on Stripe.
+    updateContribution = async (email: string) => {
+        await this.prismaClient.user.update({
+            where: {
+                email
+            },
+            data: {
+                contribution: true
+            }
+        })
+        return
+    }
+
     deleteUserById = async (id: string) => {
         //Updates all the filds to "deleted"
         await this.prismaClient.user.update({
