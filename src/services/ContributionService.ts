@@ -20,18 +20,19 @@ class ContributionService {
     static async handleStripeEvent(stripeEvent: any) {
         
         switch(stripeEvent.type) {
-            case 'payment_intent.succeeded':
-                ContributionService.handleSucceededPayment(stripeEvent);
+            case 'checkout.session.completed':
+                ContributionService.handleSucceededSession(stripeEvent.data.object);
                 break;
             default:
                 throw new Error('Unhandled event');
         }
     }
 
-    static handleSucceededPayment(stripeEvent: any) {
-        const paymentIntent = stripeEvent.data.object;
-        const email = paymentIntent.metadata.email;
-        this.userRepository.updateContribution(email);
+    static async handleSucceededSession(stripeEvent: any) {
+        const email = stripeEvent.customer_email;
+        console.log('HANDELING SUCCESSFUL SESSION')
+        console.log(email);
+        await this.userRepository.updateContribution(email);
     }
 
 }
