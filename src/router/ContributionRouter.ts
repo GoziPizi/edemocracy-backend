@@ -56,8 +56,6 @@ ContributionRouter.post('/webhook', async (req: Request, res: Response, next: Ne
             res.status(400).send(`Webhook Error: ${error.message}`);
         }
         const stripeEvent = req.body;
-        console.log('------------------------------------')
-        console.log(stripeEvent);
         await ContributionService.handleStripeEvent(stripeEvent);
         res.status(200).send();
     } catch (error) {

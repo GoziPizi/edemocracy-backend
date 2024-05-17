@@ -18,7 +18,7 @@ class StripeService {
                     price_data: {
                         currency: 'eur',
                         product: this.contribution_product_id,
-                        unit_amount: 5000,
+                        unit_amount: 500,
                     },
                     quantity: 1,
                 },
