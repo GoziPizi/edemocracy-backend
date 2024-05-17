@@ -9,8 +9,9 @@ class StripeService {
         const session = await this.stripe.checkout.sessions.create({
             mode: 'payment', 
             payment_method_types: ['card'],
+            customer_email: email,
             metadata: {
-                email,
+                userId,
             },
             line_items: [
                 {
