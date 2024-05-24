@@ -5,6 +5,7 @@ type JwtWithoutPayload = Omit<Jwt, 'payload'>
 export type JwtPayload = {
   id: string
   lastConnexion: Date
+  isVerified: boolean
 }
 
 export type CustomJwt = {

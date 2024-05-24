@@ -24,6 +24,10 @@ ContributionRouter.get('/checkout-session', async (req: Request, res: Response, 
         if(!token) {
             throw new JwtNotInHeaderException();
         }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
         await AuthentificationService.checkToken(token);
         const userId = AuthentificationService.getUserId(token);
         const session = await ContributionService.getCheckoutSession(userId);

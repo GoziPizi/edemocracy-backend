@@ -15,6 +15,24 @@ class OpinionRepository extends PrismaClient{
         return createdOpinion
     }
 
+    findById = async (id: string) => {
+        const opinion = await this.opinion.findUnique({
+            where: {
+                id
+            }
+        })
+        return opinion
+    }
+
+    delete = async (id: string) => {
+        const deletedOpinion = await this.opinion.delete({
+            where: {
+                id
+            }
+        })
+        return deletedOpinion
+    }
+
     findOpinionsWithTitleByUserId = async (userId: string) => {
         let opinions = await this.opinion.findMany({
             where: {

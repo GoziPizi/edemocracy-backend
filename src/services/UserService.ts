@@ -85,6 +85,17 @@ class UserService {
         return await UserService.opinionRepository.createOpinion(userId, topicId, opinion);
     }
 
+    static async deleteOpinion(userId: string, id: string) {
+        const opinion = await UserService.opinionRepository.findById(id);
+        if (!opinion) {
+            throw new Error('Opinion not found');
+        }
+        if (opinion.userId !== userId) {
+            throw new Error('Unauthorized');
+        }
+        return await UserService.opinionRepository.delete(id);
+    }
+
     static async setUserVerified(id: string) {
         return await UserService.userRepository.setUserVerified(id);
     }

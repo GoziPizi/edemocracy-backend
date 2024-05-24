@@ -26,6 +26,10 @@ ArgumentRouter.post('/', async (req: Request, res: Response, next: NextFunction)
             throw new JwtNotInHeaderException();
         }
         await AuthentificationService.checkToken(token);
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
         const userId = AuthentificationService.getUserId(token);
         const { content, argumentType, debateId } = req.body;
         await ArgumentService.createArgument(content, argumentType as ArgumentType, userId, debateId);
@@ -88,6 +92,10 @@ ArgumentRouter.post('/:id/vote', async (req: Request, res: Response, next: NextF
             throw new JwtNotInHeaderException();
         }
         await AuthentificationService.checkToken(token);
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
         const userId = AuthentificationService.getUserId(token);
         const id = String(req.params.id);
         const value = Boolean(req.body.value);

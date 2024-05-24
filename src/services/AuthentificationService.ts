@@ -19,7 +19,7 @@ class AuthentificationService {
         }
         const currentDate = new Date()
         UserService.updateUserLastLogin(user.id, currentDate)
-        const payload: JwtPayload = {id: user.id, lastConnexion: currentDate}
+        const payload: JwtPayload = {id: user.id, lastConnexion: currentDate, isVerified: user.isVerified}
         return new Jwt(payload, this.timeExpiration).jwt
     }
 
@@ -43,6 +43,11 @@ class AuthentificationService {
         } catch (error) {
             throw JwtCheckException
         }
+    }
+
+    static checkVerified(token: string): boolean {
+        const isVerified = Jwt.decode(token).payload.isVerified
+        return isVerified
     }
 
     static getUserId(token: string): string {

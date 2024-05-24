@@ -113,6 +113,10 @@ DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
         if(!token) {
             throw new JwtNotInHeaderException();
         }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
         const debate = req.body;
         await BanWordService.checkStringForBanWords(debate.title)
         await BanWordService.checkStringForBanWords(debate.description)
@@ -173,6 +177,10 @@ DebateRouter.post('/:id/vote', async (req: Request, res: Response, next: NextFun
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
+        }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
         }
         const id = String(req.params.id);
         const value = req.body.value as DebateVoteType;

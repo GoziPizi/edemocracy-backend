@@ -38,6 +38,10 @@ TopicRouter.post(
         if(!token) {
             throw new JwtNotInHeaderException();
         }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
         await AuthentificationService.checkToken(token);
 
         const topic = req.body;

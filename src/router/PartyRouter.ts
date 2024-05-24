@@ -28,6 +28,10 @@ PartyRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
         if(!token) {
             throw new JwtNotInHeaderException();
         }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
         await AuthentificationService.checkToken(token);
         const userId = AuthentificationService.getUserId(token);
         const party: PartyCreateInput = req.body;

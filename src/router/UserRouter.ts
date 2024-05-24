@@ -137,7 +137,7 @@ UserRouter.get('/partis', async (req: Request, res: Response, next: NextFunction
     }
 });
 
-UserRouter.post('/opinion', async (req: Request, res: Response, next: NextFunction) => {
+UserRouter.post('/opinions', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']
         #swagger.description = 'Pour poster son opinion par rapport à un topic
@@ -157,7 +157,7 @@ UserRouter.post('/opinion', async (req: Request, res: Response, next: NextFuncti
         const userId = AuthentificationService.getUserId(token);
         const { topicId, opinion } = req.body;
         await UserService.postOpinion(userId, topicId, opinion);
-        res.status(200).send(opinion);
+        res.status(200).send();
     } catch (error) {
         console.log(error);
     }
@@ -184,7 +184,28 @@ UserRouter.get('/opinions', async (req: Request, res: Response, next: NextFuncti
     }
 });
 
-
+UserRouter.delete('/opinions/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Delete an opinion of the logged user'
+        #swagger.parameters['id'] = { description: 'Opinion id', required: true }
+        #swagger.responses[200] = {
+            description: 'Opinion deleted'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const opinionId = req.params.id;
+        await UserService.deleteOpinion(userId, opinionId);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
 
 UserRouter.put('/:id', async (req, res) => {
     /**

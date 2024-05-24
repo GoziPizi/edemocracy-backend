@@ -20,6 +20,10 @@ PersonalityRouter.post('/', async (req: Request, res: Response, next: NextFuncti
         if(!token) {
             throw new JwtNotInHeaderException();
         }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
         await AuthentificationService.checkToken(token);
         const userId = AuthentificationService.getUserId(token);
         const result = await PersonalityService.createPersonality(userId);
@@ -95,6 +99,23 @@ PersonalityRouter.get('/:id', async (req: Request, res: Response, next: NextFunc
             throw new JwtNotInHeaderException();
         }
         const result = await PersonalityService.getPersonality(req.params.id);
+        res.status(200).send(result);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PersonalityRouter.get('/:id/opinions', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Personality']
+        #swagger.description = 'Endpoint to get the opinions of a personality'
+        #swagger.parameters['id'] = { description: 'Personality id' }
+        #swagger.responses[200] = {
+            description: 'Opinions found',
+        }
+     */
+    try {
+        const result = await PersonalityService.getOpinions(req.params.id);
         res.status(200).send(result);
     } catch (error) {
         next(error);

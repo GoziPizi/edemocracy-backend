@@ -1,9 +1,11 @@
 import { toPublicUserOutput } from "@/mappers/UserMapper";
+import OpinionRepository from "@/repositories/OpinionRepository";
 import PersonalityRepository from "@/repositories/PersonalityRepository";
 import { PersonalityOutput } from "@/types/dtos/PersonalityDtos";
 
 class PersonalityService {
     private static personalityRepository: PersonalityRepository = new PersonalityRepository()
+    private static opinionRepository: OpinionRepository = new OpinionRepository()
 
     static async getPersonality(id: string): Promise<PersonalityOutput> {
         let result = await PersonalityService.personalityRepository.getPersonalityWithUser(id);
@@ -20,6 +22,15 @@ class PersonalityService {
 
     static async createPersonality(userId: string) {
         return PersonalityService.personalityRepository.createPersonality(userId);
+    }
+
+    static async getOpinions(id: string) {
+        const personality = await PersonalityService.personalityRepository.findPersonalityById(id);
+        if(!personality) {
+            throw new Error("Personality not found");
+        }
+        const opinions = await PersonalityService.opinionRepository.findOpinionsWithTitleByUserId(personality.userId);
+        return opinions;
     }
 
     static async updatePersonalityFromUserId(userId: string, updates: any) {
