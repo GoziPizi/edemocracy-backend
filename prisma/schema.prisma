@@ -13,6 +13,7 @@ enum Affiliation {
   FAR_RIGHT
   FAR_LEFT
   CENTER
+  NONE
 }
 
 enum Role {
@@ -188,9 +189,12 @@ model Debate {
 }
 
 model DebateResult {
-  id      String @id @default(uuid())
-  score   Float  @default(0)
-  nbVotes Int    @default(0)
+  id              String @id @default(uuid())
+  nbReallyFor     Int    @default(0)
+  nbFor           Int    @default(0)
+  nbNeutral       Int    @default(0)
+  nbAgainst       Int    @default(0)
+  nbReallyAgainst Int    @default(0)
 }
 
 enum DebateVoteType {

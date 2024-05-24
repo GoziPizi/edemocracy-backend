@@ -84,7 +84,6 @@ class DebateService {
         const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);
         const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
         const actualVote = await this.debateRepository.getDebateVote(debateId, userId);
-        console.log(actualVote)
         const user = await this.userRepository.findById(userId);
         const contribution = user!.contribution;
 
@@ -94,30 +93,15 @@ class DebateService {
             await this.debateVoteRepository.updateVote(actualVote.id, value, contribution);
         } else {
             await this.debateVoteRepository.createVote(userId, debateId, value, contribution);
-            //Handling debate nbVotes
-            await this.debateRepository.updateDebateResult(debateResult!.id, { nbVotes: debateResult!.nbVotes + 1 });
-            if(contribution) {
-                await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { nbVotes: debateContributorsResult!.nbVotes + 1 });
-            }
         }
+       
+        //Handling debate result
 
-        //Handling debate score
-
-        let newScore = debateResult!.score + toValue(value)
-        if(actualVote) {
-            newScore -= toValue(actualVote.value);
-        }
-        await this.debateRepository.updateDebateResult(debateResult!.id, { score: newScore });
+        await this.debateRepository.updateDebateResult(debateResult!.id, this.createNewDebateResult(debateResult, value, actualVote?.value));
 
         if(contribution) {
-            let newContributorsScore = debateContributorsResult!.score + toValue(value)
-            if(actualVote) {
-                newContributorsScore -= toValue(actualVote.value);
-            }
-            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { score: newContributorsScore });
+            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, this.createNewDebateResult(debateContributorsResult, value, actualVote?.value));
         }
-
-        return true;
         
     }
 
@@ -129,32 +113,104 @@ class DebateService {
         const user = await this.userRepository.findById(userId);
         const contribution = user!.contribution;
 
+        if(!debate) {
+            throw new Error('Debate not found');
+        }
+
         if(!actualVote) {
             throw new Error('Vote not found');
-        }
-
-        //Handling debate nbVotes
-        await this.debateRepository.updateDebateResult(debateResult!.id, { nbVotes: debateResult!.nbVotes - 1 });
-
-        if(contribution) {
-            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { nbVotes: debateContributorsResult!.nbVotes - 1 });
-        }
-
-        //Handling debate score
-
-        let newScore = debateResult!.score - toValue(actualVote.value);
-        await this.debateRepository.updateDebateResult(debateResult!.id, { score: newScore });
-
-        if(contribution) {
-            let newContributorsScore = debateContributorsResult!.score - toValue(actualVote.value);
-            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, { score: newContributorsScore });
         }
 
         //Handling vote
 
         await this.debateVoteRepository.deleteVote(actualVote.id);
 
-        return true;
+        //Handling debate result
+
+        let newResult = { ...debateResult! };
+
+        switch(actualVote.value) {
+            case DebateVoteType.REALLY_AGAINST:
+                newResult.nbReallyAgainst--;
+                break;
+            case DebateVoteType.AGAINST:
+                newResult.nbAgainst--;
+                break;
+            case DebateVoteType.NEUTRAL:
+                newResult.nbNeutral--;
+                break;
+            case DebateVoteType.FOR:
+                newResult.nbFor--;
+                break;
+            case DebateVoteType.REALLY_FOR:
+                newResult.nbReallyFor--;
+                break;
+        }
+
+        await this.debateRepository.updateDebateResult(debateResult!.id, newResult);
+
+        if(contribution) {
+            let newContributorsResult = { ...debateContributorsResult! };
+
+            switch(actualVote.value) {
+                case DebateVoteType.REALLY_AGAINST:
+                    newContributorsResult.nbReallyAgainst--;
+                    break;
+                case DebateVoteType.AGAINST:
+                    newContributorsResult.nbAgainst--;
+                    break;
+                case DebateVoteType.NEUTRAL:
+                    newContributorsResult.nbNeutral--;
+                    break;
+                case DebateVoteType.FOR:
+                    newContributorsResult.nbFor--;
+                    break;
+                case DebateVoteType.REALLY_FOR:
+                    newContributorsResult.nbReallyFor--;
+                    break;
+            }
+
+            await this.debateRepository.updateDebateResult(debateContributorsResult!.id, newContributorsResult);
+        }
+    }
+
+    static createNewDebateResult(debateResult: any, newValue: DebateVoteType, oldValue?: DebateVoteType) {
+        let newResult = { ...debateResult };
+        switch(oldValue) {
+            case DebateVoteType.REALLY_AGAINST:
+                newResult.nbReallyAgainst--;
+                break;
+            case DebateVoteType.AGAINST:
+                newResult.nbAgainst--;
+                break;
+            case DebateVoteType.NEUTRAL:
+                newResult.nbNeutral--;
+                break;
+            case DebateVoteType.FOR:
+                newResult.nbFor--;
+                break;
+            case DebateVoteType.REALLY_FOR:
+                newResult.nbReallyFor--;
+                break;
+        }
+        switch(newValue) {
+            case DebateVoteType.REALLY_AGAINST:
+                newResult.nbReallyAgainst++;
+                break;
+            case DebateVoteType.AGAINST:
+                newResult.nbAgainst++;
+                break;
+            case DebateVoteType.NEUTRAL:
+                newResult.nbNeutral++;
+                break;
+            case DebateVoteType.FOR:
+                newResult.nbFor++;
+                break;
+            case DebateVoteType.REALLY_FOR:
+                newResult.nbReallyFor++;
+                break;
+        }
+        return newResult;
     }
 
 }
