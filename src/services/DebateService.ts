@@ -16,11 +16,12 @@ class DebateService {
     private static topicRepository: TopicRepository = new TopicRepository()
     private static userRepository: UserRepository = new UserRepository()
 
-    static async createDebate(debate: any) {
+    static async createDebate(debate: any, userId: string) {
         const argument = await this.argumentRepository.getArgumentById(debate.argumentId);
         if(argument && argument.childDebateId) {
             throw new Error('Argument already has a debate');
         }
+        //Initialisation of debate results
         const debateResult = await this.debateRepository.createDebateResult();
         const debateContributorsResult = await this.debateRepository.createDebateResult();
         const newDebate = await this.debateRepository.createDebate({
@@ -32,12 +33,15 @@ class DebateService {
         if(!newDebate) {
             throw new Error('Debate not created');
         }
+        //Adding debate to argument and topic
         if(newDebate.topicId) {
             await this.topicRepository.addDebateToTopic(newDebate.topicId, newDebate.id);
         }
         if(newDebate.argumentId) {
             await this.argumentRepository.addDebateToArgument(newDebate.argumentId, newDebate.id);
         }
+        //Creating the first reformulation (the description itself)
+        await this.createDebateReformulation(newDebate.id, debate.description, userId);
         return newDebate;
     }
 
@@ -61,8 +65,13 @@ class DebateService {
             ...debate,
             hasVote: vote,
             debateResult,
-            debateContributorsResult
+            debateContributorsResult,
         }
+    }
+
+    static async getDebateReformulations(id: string) {
+        const reformulations = await this.debateRepository.getDebateReformulations(id);
+        return reformulations;
     }
 
     static async getDebateArguments(id: string, token: string) {
@@ -212,6 +221,64 @@ class DebateService {
         }
         return newResult;
     }
+
+    //Reformulation related Debate
+
+    static async createDebateReformulation(debateId: string, reformulationContent: string, userId: string) {
+        const debate = await this.debateRepository.getDebateById(debateId);
+        if(!debate) {
+            throw new Error('Debate not found');
+        }
+        const reformulation = await this.debateRepository.createDebateReformulation(debateId, reformulationContent, userId);
+        return reformulation;
+    }
+
+    static async voteForReformulation(reformulationId: string, userId: string, value: boolean | null) {
+        const actualReformulationVote = await this.debateRepository.getDebateReformulationVote(reformulationId, userId);
+        const reformulation = await this.debateRepository.getDebateReformulation(reformulationId);
+        if(!reformulation) {
+            throw new Error('Reformulation not found');
+        }
+        if(actualReformulationVote && actualReformulationVote.value === value) {
+            return;
+        }
+
+        //New vote handeling
+
+        let newScore = reformulation.score;
+        if(value) {
+            newScore++;
+        }
+        if(value === false && value !== null) {
+            newScore--;
+        }
+
+        //old vote handeling
+
+        if(actualReformulationVote) {
+            if(actualReformulationVote.value) {
+                newScore--;
+            }
+            if(actualReformulationVote.value === false) {
+                newScore++;
+            }
+            if(value === null) {
+                await this.debateRepository.deleteReformulationVote(actualReformulationVote.id);
+            } else {
+                await this.debateRepository.updateReformulationVote(actualReformulationVote.id, value);
+            }
+        } else {
+            if(value !== null) {
+                await this.debateRepository.createReformulationVote(userId, reformulationId, value);
+            }
+        }
+
+        await this.debateRepository.updateReformulationScore(reformulationId, newScore);
+    }
+
+    static async getReformulationVote(reformulationId: string, userId: string) {
+        return await this.debateRepository.getDebateReformulationVote(reformulationId, userId);
+    }   
 
 }
 

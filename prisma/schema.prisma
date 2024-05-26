@@ -43,17 +43,19 @@ model User {
   politicSide Affiliation
   role        Role
 
-  notifications     Notifications[]
-  Personality       Personality?
-  Argument          Argument[]
-  Vote              Vote[]
-  DebateVote        DebateVote[]
-  PartyMembership   PartyMembership[]
-  MembershipInvites MembershipInvite[]
-  Opinion           Opinion[]
-  PartyComment      PartyComment[]
-  VerifyUser        VerifyUser[]
-  Topic             Topic[]
+  notifications                  Notifications[]
+  Personality                    Personality?
+  Argument                       Argument[]
+  Vote                           Vote[]
+  DebateVote                     DebateVote[]
+  PartyMembership                PartyMembership[]
+  MembershipInvites              MembershipInvite[]
+  Opinion                        Opinion[]
+  PartyComment                   PartyComment[]
+  VerifyUser                     VerifyUser[]
+  Topic                          Topic[]
+  VoteForReformulation           VoteForReformulation[]
+  DebateDescriptionReformulation DebateDescriptionReformulation[]
 }
 
 model VerifyUser {
@@ -175,17 +177,42 @@ model Topic {
 }
 
 model Debate {
-  id                         String       @id @default(uuid())
+  id                         String                           @id @default(uuid())
   title                      String
   description                String
+  descriptionReformulations  DebateDescriptionReformulation[]
   arguments                  Argument[]
-  debateResultId             String       @unique
-  debateContributorsResultId String       @unique
-  createdAt                  DateTime     @default(now())
-  updatedAt                  DateTime     @updatedAt
+  debateResultId             String                           @unique
+  debateContributorsResultId String                           @unique
+  createdAt                  DateTime                         @default(now())
+  updatedAt                  DateTime                         @updatedAt
   topicId                    String?
   argumentId                 String?
   DebateVote                 DebateVote[]
+}
+
+model DebateDescriptionReformulation {
+  id                   String                 @id @default(uuid())
+  user                 User                   @relation(fields: [userId], references: [id])
+  userId               String
+  debateId             String
+  content              String
+  score                Int                    @default(0)
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+  Debate               Debate                 @relation(fields: [debateId], references: [id])
+  VoteForReformulation VoteForReformulation[]
+}
+
+model VoteForReformulation {
+  id                             String                         @id @default(uuid())
+  user                           User                           @relation(fields: [userId], references: [id])
+  userId                         String
+  debateDescriptionReformulation DebateDescriptionReformulation @relation(fields: [debateReformulationId], references: [id])
+  debateReformulationId          String
+  value                          Boolean
+  createdAt                      DateTime                       @default(now())
+  updatedAt                      DateTime                       @updatedAt
 }
 
 model DebateResult {

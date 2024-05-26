@@ -3,12 +3,14 @@ import DebateRepository from "@/repositories/DebateRepository";
 import VoteRepository from "@/repositories/VoteRepository";
 import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
 import { ArgumentType } from "@prisma/client";
+import DebateService from "./DebateService";
 
 class ArgumentService {
 
     private static argumentRepository: ArgumentRepository = new ArgumentRepository()
     private static debateRepository: DebateRepository = new DebateRepository()
     private static voteRepository: VoteRepository = new VoteRepository()
+    private static DebateService: DebateService = new DebateService()
 
     static async getArgumentById(id: string, userId: string): Promise<ArgumentWithVoteOutput> {
         const argument = await this.argumentRepository.getArgumentById(id);
@@ -31,6 +33,12 @@ class ArgumentService {
         if(!argument) {
             throw new Error('Error creating argument');
         }
+        const debateToCreate = {
+            title: 'Débat d\'argument',
+            description: 'Débat sur la formulation de l\'argument',
+            argumentId: argument.id
+        }
+        await DebateService.createDebate(debateToCreate, userId);
         return ;
     }
 

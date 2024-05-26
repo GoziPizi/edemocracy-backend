@@ -117,6 +117,89 @@ class DebateRepository extends PrismaRepository {
     });
     return debateResult;
   }
+
+  createDebateReformulation = async (debateId: string, reformulation: string, userId: string) => {
+    console.log('createDebateReformulation')
+    console.log(debateId, reformulation, userId);
+    const reformulationData = await this.prismaClient.debateDescriptionReformulation.create({
+      data: {
+        debateId,
+        content: reformulation,
+        userId,
+      },
+    });
+    return reformulationData;
+  }
+
+  getDebateReformulation = async (id: string) => {
+    const reformulation = await this.prismaClient.debateDescriptionReformulation.findUnique({
+      where: {
+        id,
+      },
+    });
+    return reformulation;
+  }
+
+  createReformulationVote = async (userId: string, reformulationId: string, value: boolean) => {
+    const vote = await this.prismaClient.voteForReformulation.create({
+      data: {
+        debateReformulationId: reformulationId,
+        userId,
+        value,
+      },
+    });
+    return vote;
+  }
+
+  getDebateReformulationVote = async (reformulationId: string, userId: string) => {
+    const vote = await this.prismaClient.voteForReformulation.findFirst({
+      where: {
+        debateReformulationId: reformulationId,
+        userId,
+      },
+    });
+    return vote;
+  }
+
+  getDebateReformulations = async (debateId: string) => {
+    const reformulations = await this.prismaClient.debateDescriptionReformulation.findMany({
+      where: {
+        debateId,
+      },
+    });
+    return reformulations;
+  }
+
+  updateReformulationScore(reformulationId: string, score: number) {
+    return this.prismaClient.debateDescriptionReformulation.update({
+      where: {
+        id: reformulationId,
+      },
+      data: {
+        score,
+      },
+    });
+  }
+
+  updateReformulationVote = async (id: string, value: boolean) => {
+    const vote = await this.prismaClient.voteForReformulation.update({
+      where: {
+        id,
+      },
+      data: {
+        value,
+      },
+    });
+    return vote;
+  }
+
+  deleteReformulationVote = async (id: string) => {
+    await this.prismaClient.voteForReformulation.delete({
+      where: {
+        id,
+      },
+    });
+  }
 }
 
 export default DebateRepository;

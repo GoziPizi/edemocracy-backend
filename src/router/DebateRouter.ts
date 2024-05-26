@@ -114,13 +114,14 @@ DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
             throw new JwtNotInHeaderException();
         }
         const isVerified = AuthentificationService.checkVerified(token);
+        const userId = AuthentificationService.getUserId(token);
         if(!isVerified) {
             throw new Error('User not verified');
         }
         const debate = req.body;
         await BanWordService.checkStringForBanWords(debate.title)
         await BanWordService.checkStringForBanWords(debate.description)
-        const createdDebate = await DebateService.createDebate(debate);
+        const createdDebate = await DebateService.createDebate(debate, userId);
         res.status(200).send(createdDebate);
     } catch (error) {
         next(error);
@@ -214,6 +215,144 @@ DebateRouter.delete('/:id/vote', async (req: Request, res: Response, next: NextF
         const id = String(req.params.id);
         const userId = AuthentificationService.getUserId(token);
         await DebateService.deleteVoteForDebate(id, userId);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
+DebateRouter.post('/:id/reformulations', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to reformulate a debate.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.parameters['formData'] = {
+            title: 'Nouveau titre',
+            description: 'Nouvelle description'
+        }
+        #swagger.responses[200] = {
+            description: 'Debate reformulated'
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const id = String(req.params.id);
+        const reformulation = req.body.content;
+        await BanWordService.checkStringForBanWords(reformulation)
+        console.log('ICI')
+        console.log(id, reformulation, userId);
+        await DebateService.createDebateReformulation(id, reformulation, userId);
+        res.status(200).send();
+    } catch (error) {
+        next(error);
+    }
+});
+
+DebateRouter.get('/:id/reformulations', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to get a debate reformulation by its id.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Reformulation found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const id = String(req.params.id);
+        const reformulation = await DebateService.getDebateReformulations(id);
+        res.status(200).send(reformulation);
+    } catch (error) {
+        next(error);
+    }
+});
+
+DebateRouter.get('/reformulations/:reformulationId/vote', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to get the vote of the user for a debate reformulation.'
+        #swagger.parameters['path'] = {
+            id: 1,
+            reformulationId: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Vote found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const reformulationId = String(req.params.reformulationId);
+        const userId = AuthentificationService.getUserId(token);
+        const vote = await DebateService.getReformulationVote(reformulationId, userId);
+        res.status(200).send(vote);
+    } catch (error) {
+        next(error);
+    }
+});
+
+
+DebateRouter.post('/reformulations/:reformulationId/vote', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to vote for a debate reformulation.'
+        #swagger.parameters['path'] = {
+            id: 1,
+            reformulationId: 1
+        }
+        #swagger.parameters['formData'] = {
+            value: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Vote registered'
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const isVerified = AuthentificationService.checkVerified(token);
+        if(!isVerified) {
+            throw new Error('User not verified');
+        }
+        const reformulationId = String(req.params.reformulationId);
+        const value = req.body.value as boolean | null;
+        const userId = AuthentificationService.getUserId(token);
+        await DebateService.voteForReformulation(reformulationId, userId, value);
         res.status(200).send();
     } catch (error) {
         next(error);
