@@ -53,8 +53,11 @@ const credentials = {
 
 const app = express();
 const httpsServer = https.createServer(credentials, app);
-
 app.use(cors(corsOptions));
+
+//show the cors configuration of app
+console.log('isProdEnvironment:', isProdEnvironment());
+console.log('PORT:', PORT);
 
 app.use(express.json({ limit: '50mb' }))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerOutput));

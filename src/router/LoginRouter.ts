@@ -18,7 +18,6 @@ LoginRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
     }
      */
     try {
-        console.log('login');
         const { email, password } = req.body;
         const jwt = await AuthentificationService.login(email, password);
         res.status(200).send(jwt);
