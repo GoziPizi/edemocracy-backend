@@ -15,9 +15,27 @@ const PORT = process.env.PORT || 8080;
 
 const sslFileDirectory = process.env.SSL_FILE_DIRECTORY || '/etc/letsencrypt/live/digital-democracy.eu/';
 
-const corsOptions = {
-  origin: JSON.parse(process.env.CORS_ORIGIN || '[]')
+let corsOrigins;
+try {
+  corsOrigins = JSON.parse(process.env.CORS_ORIGIN || '[]');
+  console.log('Allowed CORS Origins:', corsOrigins);
+} catch (error) {
+  console.error('Error parsing CORS_ORIGIN:', error);
+  corsOrigins = [];
 }
+
+const corsOptions = {
+  origin: (origin: any, callback: any) => {
+    if (corsOrigins.indexOf(origin) !== -1 || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Add methods you need
+  credentials: true, // Include credentials if needed
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+};
 
 let privateKey = '';
 let certificate = '';
