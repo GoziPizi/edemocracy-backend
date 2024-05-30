@@ -6,6 +6,7 @@ import swaggerUi from 'swagger-ui-express';
 import swaggerOutput from './swagger-output.json';
 import cors from 'cors';
 import fs from 'fs';
+import path from 'path';
 
 function isProdEnvironment(): boolean {
     console.log(process.env.NODE_ENV);
@@ -14,11 +15,22 @@ function isProdEnvironment(): boolean {
 
 const PORT = process.env.PORT || (isProdEnvironment() ? 443 : 8080)
 
-const sslFileDirectory = process.env.SSL_FILE_DIRECTORY
+const sslFileDirectory = process.env.SSL_FILE_DIRECTORY || '/etc/letsencrypt/live/digital-democracy.eu/';
 
-const privateKey = isProdEnvironment() ? fs.readFileSync(`${sslFileDirectory}/privkey.pem`, 'utf8') : ''
-const certificate = isProdEnvironment() ? fs.readFileSync(`${sslFileDirectory}/fullchain.pem`, 'utf8') : ''
-const ca = isProdEnvironment() ? fs.readFileSync(`${sslFileDirectory}/chain.pem`, 'utf8') : ''
+let privateKey = '';
+let certificate = '';
+let ca = '';
+
+if (isProdEnvironment()) {
+  try {
+      privateKey = fs.readFileSync(path.join(sslFileDirectory, 'privkey.pem'), 'utf8');
+      certificate = fs.readFileSync(path.join(sslFileDirectory, 'fullchain.pem'), 'utf8');
+      ca = fs.readFileSync(path.join(sslFileDirectory, 'chain.pem'), 'utf8');
+  } catch (error) {
+      console.error('Error reading SSL certificate files:', error);
+      process.exit(1); // Exit the application if SSL files cannot be read
+  }
+}
 
 const credentials = {
     key: privateKey,
