@@ -11,7 +11,7 @@ function isProdEnvironment(): boolean {
     return process.env.NODE_ENV === 'prod';
 }
 
-const PORT = process.env.PORT || (isProdEnvironment() ? 443 : 8080)
+const PORT = process.env.PORT || 8080;
 
 const sslFileDirectory = process.env.SSL_FILE_DIRECTORY || '/etc/letsencrypt/live/digital-democracy.eu/';
 
