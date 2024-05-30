@@ -25,16 +25,9 @@ try {
 }
 
 const corsOptions = {
-  origin: (origin: any, callback: any) => {
-    if (corsOrigins.indexOf(origin) !== -1 || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Add methods you need
-  credentials: true, // Include credentials if needed
-  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  origin: corsOrigins,
+  optionsSuccessStatus: 200
 };
 
 let privateKey = '';
