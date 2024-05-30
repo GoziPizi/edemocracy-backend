@@ -15,6 +15,10 @@ const PORT = process.env.PORT || 8080;
 
 const sslFileDirectory = process.env.SSL_FILE_DIRECTORY || '/etc/letsencrypt/live/digital-democracy.eu/';
 
+const corsOptions = {
+  origin: JSON.parse(process.env.CORS_ORIGIN || '[]')
+}
+
 let privateKey = '';
 let certificate = '';
 let ca = '';
@@ -39,7 +43,7 @@ const credentials = {
 const app = express();
 const httpsServer = https.createServer(credentials, app);
 
-app.use(cors());
+app.use(cors(corsOptions));
 
 app.use(express.json({ limit: '50mb' }))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
