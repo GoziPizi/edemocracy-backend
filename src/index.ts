@@ -25,6 +25,7 @@ const credentials = {
     cert: certificate,
     ca: ca
 };
+console.log(credentials);
 
 const app = express();
 const httpsServer = https.createServer(credentials, app);
