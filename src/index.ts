@@ -1,4 +1,3 @@
-import http from 'http';
 import https from 'https';
 import express from 'express';
 import router from './router/Router';
@@ -9,7 +8,6 @@ import fs from 'fs';
 import path from 'path';
 
 function isProdEnvironment(): boolean {
-    console.log(process.env.NODE_ENV);
     return process.env.NODE_ENV === 'prod';
 }
 
@@ -37,7 +35,6 @@ const credentials = {
     cert: certificate,
     ca: ca
 };
-console.log(credentials);
 
 const app = express();
 const httpsServer = https.createServer(credentials, app);
