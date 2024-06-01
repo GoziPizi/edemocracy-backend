@@ -57,7 +57,7 @@ ArgumentRouter.get('/:id', async (req: Request, res: Response, next: NextFunctio
     try {
         const token = req.headers.authorization;
         let userId = null;
-        if(token) {
+        if(token && token !== null && token !== 'null' && token !== 'undefined' && token !== undefined) {
             await AuthentificationService.checkToken(token);
             userId = AuthentificationService.getUserId(token);
         }

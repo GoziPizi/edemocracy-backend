@@ -49,6 +49,7 @@ class PartyRepository extends PrismaRepository {
     }
 
     findPartisByUserId = async (userId: string) => {
+        console.log('userId', userId)
         const partyMemberships = await this.prismaClient.partyMembership.findMany({
             where: {
                 userId

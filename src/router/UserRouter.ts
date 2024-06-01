@@ -31,24 +31,6 @@ UserRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
-UserRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
-    /**
-        #swagger.tags = ['User']
-        #swagger.description = 'Get user by id'
-        #swagger.parameters['id'] = { description: 'User id', required: true }
-        #swagger.responses[200] = {
-            description: 'User found',
-            schema: { $ref: "#/definitions/UserOutputDefinition" }
-        }
-     */
-    try {
-        const user = await UserService.getPublicUserById(req.params.id);
-        res.status(200).send(user);
-    } catch (error) {
-        console.log(error);
-    }
-});
-
 UserRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']
@@ -126,7 +108,9 @@ UserRouter.get('/personality', async (req: Request, res: Response, next: NextFun
             throw new JwtNotInHeaderException();
         }
         const userId = AuthentificationService.getUserId(token);
+        console.log('personality', userId)
         const user = await UserService.getUserPersonalityById(userId);
+        console.log('personality', user)
         res.status(200).send(user);
     } catch (error) {
         console.log(error);
@@ -144,12 +128,15 @@ UserRouter.get('/partis', async (req: Request, res: Response, next: NextFunction
      */
     try {
         const token = req.headers.authorization;
+        console.log('token', token)
         if(!token) {
             throw new JwtNotInHeaderException();
         }
         const userId = AuthentificationService.getUserId(token);
-        const user = await UserService.getUserPartisById(userId);
-        res.status(200).send(user);
+        console.log('partis', userId)
+        const userPerties = await UserService.getUserPartisById(userId);
+        console.log('partis', userPerties)
+        res.status(200).send(userPerties);
     } catch (error) {
         console.log(error);
     }
@@ -268,5 +255,24 @@ UserRouter.delete('/', async (req: Request, res: Response, next: NextFunction) =
         console.log(error);
     }
 });
+
+UserRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Get user by id'
+        #swagger.parameters['id'] = { description: 'User id', required: true }
+        #swagger.responses[200] = {
+            description: 'User found',
+            schema: { $ref: "#/definitions/UserOutputDefinition" }
+        }
+     */
+    try {
+        const user = await UserService.getPublicUserById(req.params.id);
+        res.status(200).send(user);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 
 export default UserRouter;
