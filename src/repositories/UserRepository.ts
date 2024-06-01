@@ -8,7 +8,6 @@ class UserRepository extends PrismaRepository {
 
     create = async (user: any) => {
         const hashedPassword = await this.RawQueryRepository.getSha256(user.password)
-        console.log(user);
         const createdUser = await this.prismaClient.user.create({
             data: {
                 ...user,
@@ -175,7 +174,6 @@ class UserRepository extends PrismaRepository {
     }
 
     setRoleByEmail = async (email: string, role: Role) => {
-        console.log(email, role)
         const updatedUser = await this.prismaClient.user.update({
             where: {
                 email

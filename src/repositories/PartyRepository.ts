@@ -42,11 +42,9 @@ class PartyRepository extends PrismaRepository {
         if(criterias.politicSide) where.politicSide = { equals: criterias.politicSide };
         if(criterias.for) where.for = { hasEvery: criterias.for };
         if(criterias.against) where.against = { hasEvery: criterias.against };
-        console.log(where);
         const parties = await this.prismaClient.party.findMany({
             where
         })
-        console.log(parties);
         return parties
     }
 

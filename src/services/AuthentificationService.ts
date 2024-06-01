@@ -51,7 +51,9 @@ class AuthentificationService {
     }
 
     static getUserId(token: string): string {
-        return Jwt.decode(token).payload.id
+        const payload = Jwt.decode(token).payload
+        const id = payload.id
+        return id
     }
 
     static async getUserRole(token: string): Promise<Role> {

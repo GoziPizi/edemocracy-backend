@@ -56,13 +56,18 @@ ArgumentRouter.get('/:id', async (req: Request, res: Response, next: NextFunctio
      */
     try {
         const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
+        let userId = null;
+        if(token) {
+            await AuthentificationService.checkToken(token);
+            userId = AuthentificationService.getUserId(token);
         }
-        await AuthentificationService.checkToken(token);
-        const userId = AuthentificationService.getUserId(token);
         const id = String(req.params.id);
-        const argument = await ArgumentService.getArgumentById(id, userId);
+        let argument;
+        if(userId) {
+            argument = await ArgumentService.getArgumentWithVoteById(id, userId);
+        } else {
+            argument = await ArgumentService.getArgumentById(id);
+        }
         res.status(200).send(argument);
     } catch (error) {
         next(error);

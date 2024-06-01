@@ -31,6 +31,24 @@ UserRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
     }
 });
 
+UserRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Get user by id'
+        #swagger.parameters['id'] = { description: 'User id', required: true }
+        #swagger.responses[200] = {
+            description: 'User found',
+            schema: { $ref: "#/definitions/UserOutputDefinition" }
+        }
+     */
+    try {
+        const user = await UserService.getPublicUserById(req.params.id);
+        res.status(200).send(user);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 UserRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']

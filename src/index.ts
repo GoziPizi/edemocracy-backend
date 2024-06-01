@@ -18,9 +18,7 @@ const sslFileDirectory = process.env.SSL_FILE_DIRECTORY || '/etc/letsencrypt/liv
 let corsOrigins;
 try {
   corsOrigins = '*';
-  console.log('Allowed CORS Origins:', corsOrigins);
 } catch (error) {
-  console.error('Error parsing CORS_ORIGIN:', error);
   corsOrigins = [];
 }
 

@@ -60,7 +60,6 @@ class PersonalityRepository extends PrismaRepository {
     }
 
     searchPersonality = async (criterias: any) => {
-        console.log(criterias);
         const where: Prisma.PersonalityWhereInput = {};
         if(criterias.for && criterias.for.length > 0) where.for = { hasEvery: criterias.for };
         if(criterias.against && criterias.against.length > 0) where.against = { hasEvery: criterias.against };

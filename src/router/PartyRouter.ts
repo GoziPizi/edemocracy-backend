@@ -55,14 +55,7 @@ PartyRouter.post('/search', async (req: Request, res: Response, next: NextFuncti
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
-        console.log(req.body);
         const result = await PartyService.searchParty(req.body);
-        console.log(result);
         res.status(201).send(result);
     } catch (error) {
         console.log(error);
@@ -80,11 +73,6 @@ PartyRouter.get('/:id', async (req, res) => {
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const party = await PartyService.getPartyById(req.params.id);
         res.status(200).send(party);
     } catch (error) {
@@ -115,11 +103,6 @@ PartyRouter.get('/:id/members', async (req, res) => {
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const members = await PartyService.getMembers(req.params.id);
         res.status(200).send(members);
     } catch (error) {
@@ -187,11 +170,6 @@ PartyRouter.get('/:id/history', async (req: Request, res: Response, next: NextFu
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const history = await PartyService.getAllPartyHistoryEventsFromPartyId(req.params.id);
         res.status(200).send(history);
     } catch (error) {

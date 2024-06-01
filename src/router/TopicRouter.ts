@@ -110,11 +110,6 @@ TopicRouter.get('/', async (req: Request, res: Response, next: NextFunction) => 
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const page = Number(req.query.page) || 1;
         const topics = await TopicService.getTopics(page)
         res.status(200).send(topics);
@@ -135,11 +130,6 @@ TopicRouter.get('/parentlist', async (req: Request, res: Response, next: NextFun
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const topics = await TopicService.getParentsList();
         res.status(200).send(topics);
     } catch (error) {
@@ -159,11 +149,6 @@ TopicRouter.get('/fulllist', async (req: Request, res: Response, next: NextFunct
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const topics = await TopicService.getFullList();
         res.status(200).send(topics);
     } catch (error) {
@@ -187,11 +172,6 @@ TopicRouter.get('/recent', async (req: Request, res: Response, next: NextFunctio
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const topics = await TopicService.getRecentTopics()
         res.status(200).send(topics);
     } catch (error) {
@@ -215,11 +195,6 @@ TopicRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) 
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const id = String(req.params.id);
         const topic = await TopicService.getTopicById(id);
         res.status(200).send(topic);
@@ -244,11 +219,6 @@ TopicRouter.get('/:id/debates', async (req: Request, res: Response, next: NextFu
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const id = String(req.params.id);
         const debates = await TopicService.getDebatesByTopicId(id);
         res.status(200).send(debates);

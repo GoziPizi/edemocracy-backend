@@ -119,8 +119,6 @@ class DebateRepository extends PrismaRepository {
   }
 
   createDebateReformulation = async (debateId: string, reformulation: string, userId: string) => {
-    console.log('createDebateReformulation')
-    console.log(debateId, reformulation, userId);
     const reformulationData = await this.prismaClient.debateDescriptionReformulation.create({
       data: {
         debateId,

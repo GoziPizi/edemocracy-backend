@@ -12,7 +12,7 @@ class ArgumentService {
     private static voteRepository: VoteRepository = new VoteRepository()
     private static DebateService: DebateService = new DebateService()
 
-    static async getArgumentById(id: string, userId: string): Promise<ArgumentWithVoteOutput> {
+    static async getArgumentWithVoteById(id: string, userId: string): Promise<ArgumentWithVoteOutput> {
         const argument = await this.argumentRepository.getArgumentById(id);
         if(!argument) {
             throw new Error('Argument not found');
@@ -28,6 +28,19 @@ class ArgumentService {
         }
     }
 
+    static async getArgumentById(id: string) {
+        const argument = await this.argumentRepository.getArgumentById(id);
+        if(!argument) {
+            throw new Error('Argument not found');
+        }
+        const childDebate = await this.debateRepository.getChildDebateFromArgument(argument.debateId);
+        const childDebateId = childDebate ? childDebate.id : null;
+        return {
+            ...argument,
+            childDebateId
+        }
+    }
+    
     static async createArgument(content: string, argumentType: ArgumentType,userId: string, debateId: string): Promise<void>  {
         const argument = await this.argumentRepository.createArgument(content, argumentType, userId, debateId);
         if(!argument) {

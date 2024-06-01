@@ -72,11 +72,6 @@ PersonalityRouter.post('/search', async (req: Request, res: Response, next: Next
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const result = await PersonalityService.searchPersonality(req.body);
         res.status(201).send(result);
     } catch (error) {
@@ -94,10 +89,6 @@ PersonalityRouter.get('/:id', async (req: Request, res: Response, next: NextFunc
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
         const result = await PersonalityService.getPersonality(req.params.id);
         res.status(200).send(result);
     } catch (error) {

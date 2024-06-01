@@ -23,11 +23,6 @@ DebateRouter.get('/by-time', async (req: Request, res: Response, next: NextFunct
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const limit = Number(req.query.limit) || 10;
         const debates = await DebateService.getDebatesByTime(limit);
         res.status(200).send(debates);
@@ -52,11 +47,6 @@ DebateRouter.get('/by-popularity', async (req: Request, res: Response, next: Nex
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const limit = Number(req.query.limit) || 10;
         const debates = await DebateService.getDebatesByPopularity(limit);
         res.status(200).send(debates);
@@ -82,13 +72,18 @@ DebateRouter.get('/:id', async (req: Request, res: Response, next: NextFunction)
      */
     try {
         const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
+        let userId = null;
+        if(token && token !== null && token !== 'null' && token !== 'undefined' && token !== undefined) {
+            await AuthentificationService.checkToken(token);
+            userId = AuthentificationService.getUserId(token);
         }
-        await AuthentificationService.checkToken(token);
-        const userId = AuthentificationService.getUserId(token);
         const id = String(req.params.id);
-        const debate = await DebateService.getDebateWithUserVote(id, userId);
+        let debate;
+        if(userId) {
+            debate = await DebateService.getDebateWithUserVote(id, userId);
+        } else {
+            debate = await DebateService.getDebateById(id);
+        }
         res.status(200).send(debate);
     } catch (error) {
         next(error);
@@ -145,12 +140,18 @@ DebateRouter.get('/:id/arguments', async (req: Request, res: Response, next: Nex
      */
     try {
         const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
+        let userId = null;
+        if(token && token !== null && token !== 'null' && token !== 'undefined' && token !== undefined) {
+            await AuthentificationService.checkToken(token);
+            userId = AuthentificationService.getUserId(token);
         }
-        await AuthentificationService.checkToken(token);
         const id = String(req.params.id);
-        const debateArguments = await DebateService.getDebateArguments(id, token);
+        let debateArguments;
+        if(userId) {
+            debateArguments = await DebateService.getDebateArgumentsWithVote(id, userId);
+        } else {
+            debateArguments = await DebateService.getDebateArguments(id);
+        }
         res.status(200).send(debateArguments);
     } catch (error) {
         next(error);
@@ -252,8 +253,6 @@ DebateRouter.post('/:id/reformulations', async (req: Request, res: Response, nex
         const id = String(req.params.id);
         const reformulation = req.body.content;
         await BanWordService.checkStringForBanWords(reformulation)
-        console.log('ICI')
-        console.log(id, reformulation, userId);
         await DebateService.createDebateReformulation(id, reformulation, userId);
         res.status(200).send();
     } catch (error) {
@@ -277,11 +276,6 @@ DebateRouter.get('/:id/reformulations', async (req: Request, res: Response, next
         }
      */
     try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        await AuthentificationService.checkToken(token);
         const id = String(req.params.id);
         const reformulation = await DebateService.getDebateReformulations(id);
         res.status(200).send(reformulation);
@@ -321,6 +315,30 @@ DebateRouter.get('/reformulations/:reformulationId/vote', async (req: Request, r
     }
 });
 
+DebateRouter.get('/reformulations/:reformulationId', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to get a debate reformulation by its id.'
+        #swagger.parameters['path'] = {
+            id: 1,
+            reformulationId: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Reformulation found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const reformulationId = String(req.params.reformulationId);
+        const reformulation = await DebateService.getReformulationById(reformulationId);
+        res.status(200).send(reformulation);
+    } catch (error) {
+        next(error);
+    }
+});
 
 DebateRouter.post('/reformulations/:reformulationId/vote', async (req: Request, res: Response, next: NextFunction) => {
     /**

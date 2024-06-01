@@ -105,7 +105,6 @@ AdminRouter.get('/admins', async (req: Request, res: Response, next: NextFunctio
         if(role !== 'ADMIN') {
             throw new Error('You are not allowed to see this');
         }
-        console.log('aaaa')
         const admins = await AuthentificationService.getAdmins();
         res.status(200).send(admins);
     } catch (error) {

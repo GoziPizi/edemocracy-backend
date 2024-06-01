@@ -30,8 +30,6 @@ class ContributionService {
 
     static async handleSucceededSession(stripeEvent: any) {
         const email = stripeEvent.customer_email;
-        console.log('HANDELING SUCCESSFUL SESSION')
-        console.log(email);
         await this.userRepository.updateContribution(email);
     }
 

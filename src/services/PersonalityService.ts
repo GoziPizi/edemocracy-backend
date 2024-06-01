@@ -34,8 +34,6 @@ class PersonalityService {
     }
 
     static async updatePersonalityFromUserId(userId: string, updates: any) {
-        console.log(updates);
-        console.log(userId);
         let personality = await PersonalityService.personalityRepository.findPersonalityByUserId(userId);
         if(!personality) {
             throw new Error("Personality not found");

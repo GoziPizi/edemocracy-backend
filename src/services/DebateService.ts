@@ -69,13 +69,28 @@ class DebateService {
         }
     }
 
+    static async getDebateById(id: string) {
+        const debate = await this.debateRepository.getDebateById(id);
+        const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);
+        const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
+        return {
+            ...debate,
+            debateResult,
+            debateContributorsResult,
+        }
+    }
+
     static async getDebateReformulations(id: string) {
         const reformulations = await this.debateRepository.getDebateReformulations(id);
         return reformulations;
     }
 
-    static async getDebateArguments(id: string, token: string) {
-        const userId = Jwt.decode(token).payload.id;
+    static async getDebateArguments(id: string) {
+        const debateArguments = await this.debateRepository.getDebateArguments(id);
+        return debateArguments;
+    }
+
+    static async getDebateArgumentsWithVote(id: string, userId: string) {
         const debateArguments = await this.debateRepository.getDebateArguments(id);
         const debateArgumentsWithUserVote: ArgumentWithVoteOutput[] = await Promise.all(debateArguments.map(async (argument: Argument) => {
             const userVote = await this.argumentRepository.getUserVote(userId, argument.id);
@@ -279,6 +294,10 @@ class DebateService {
     static async getReformulationVote(reformulationId: string, userId: string) {
         return await this.debateRepository.getDebateReformulationVote(reformulationId, userId);
     }   
+
+    static async getReformulationById(reformulationId: string) {
+        return await this.debateRepository.getDebateReformulation(reformulationId);
+    }
 
 }
 

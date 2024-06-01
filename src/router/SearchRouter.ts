@@ -17,7 +17,6 @@ SearchRouter.get('/all/:query', async (req: Request, res: Response, next: NextFu
         }
      */
     try {
-
         const query = req.params.query;
         const results = await SearchService.textSearch(query);
         res.status(200).send(results);
@@ -40,7 +39,6 @@ SearchRouter.get('/topic/:query', async (req: Request, res: Response, next: Next
         }
      */
     try {
-
         const query = req.params.query;
         const results = await SearchService.textSearchByType(query, 'topic');
         res.status(200).send(results);
