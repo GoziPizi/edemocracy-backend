@@ -14,6 +14,7 @@ import AdminRouter from './AdminRouter';
 import SearchRouter from './SearchRouter';
 import NotificationRouter from './NotificationRouter';
 import ContributionRouter from './ContributionRouter';
+import ModerationRouter from './ModerationRouter';
 
 const router = express.Router();
 
@@ -29,6 +30,7 @@ router.use('/api/admin', AdminRouter);
 router.use('/api/search', SearchRouter);
 router.use('/api/notification', NotificationRouter);
 router.use('/api/contribution', ContributionRouter);
+router.use('/api/moderation', ModerationRouter);
 
 router.all('*', (req: Request, res: Response) => {
     throw new EndpointNotFoundException(req.path, req.method)

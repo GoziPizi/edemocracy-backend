@@ -295,3 +295,19 @@ model BanWord {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+enum ReportingType {
+  TOPIC
+  DEBATE
+  ARGUMENT
+  REFORMULATION
+  COMMENT
+}
+
+model Reporting {
+  id         String        @id @default(uuid())
+  entityId   String
+  entityType ReportingType
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+}
