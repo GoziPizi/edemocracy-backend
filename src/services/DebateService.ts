@@ -130,6 +130,10 @@ class DebateService {
         
     }
 
+    static async getDebateVote(debateId: string, userId: string) {
+        return await this.debateRepository.getDebateVote(debateId, userId);
+    }
+
     static async deleteVoteForDebate(debateId: string, userId: string) {
         const debate = await this.debateRepository.getDebateById(debateId);
         const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);

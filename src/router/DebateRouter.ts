@@ -194,6 +194,36 @@ DebateRouter.post('/:id/vote', async (req: Request, res: Response, next: NextFun
     }
 });
 
+DebateRouter.get('/:id/vote', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to get the vote of the user for a debate.'
+        #swagger.parameters['path'] = {
+            id: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Vote found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const id = String(req.params.id);
+        const userId = AuthentificationService.getUserId(token);
+        const vote = await DebateService.getDebateVote(id, userId);
+        res.status(200).send(vote);
+    } catch (error) {
+        next(error);
+    }
+});
+
 DebateRouter.delete('/:id/vote', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']
