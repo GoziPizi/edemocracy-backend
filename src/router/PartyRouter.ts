@@ -336,6 +336,24 @@ PartyRouter.post('/:id/comments', async (req: Request, res: Response, next: Next
     }
 });
 
+PartyRouter.get('/comments/:commentId', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Party']
+        #swagger.description = 'Endpoint to get a comment by its id'
+        #swagger.parameters['commentId'] = { description: 'Comment id', required: true }
+        #swagger.responses[200] = {
+            description: 'Comment found',
+            schema: { $ref: "#/definitions/PartyCommentOutputDtoDefinition" }
+        }
+     */
+    try {
+        const comment = await PartyService.getCommentById(req.params.commentId);
+        res.status(200).send(comment);
+    } catch (error) {
+        next(error);
+    }
+});
+
 PartyRouter.get('/:id/comments', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']

@@ -10,7 +10,6 @@ class ArgumentService {
     private static argumentRepository: ArgumentRepository = new ArgumentRepository()
     private static debateRepository: DebateRepository = new DebateRepository()
     private static voteRepository: VoteRepository = new VoteRepository()
-    private static DebateService: DebateService = new DebateService()
 
     static async getArgumentWithVoteById(id: string, userId: string): Promise<ArgumentWithVoteOutput> {
         const argument = await this.argumentRepository.getArgumentById(id);
@@ -112,6 +111,26 @@ class ArgumentService {
         }
         await this.argumentRepository.updateArgument(id, data);
         await this.voteRepository.deleteVote(userVote.id);
+    }
+
+    static async deleteArgument(id: string): Promise<void> {
+        const argument = await this.argumentRepository.getArgumentById(id);
+        if(!argument) {
+            throw new Error('Argument not found');
+        }
+
+        //delete related debate
+        if(argument.childDebateId) {
+            await DebateService.deleteDebate(argument.childDebateId);
+        }
+
+        //delete related votes
+
+        await this.argumentRepository.deleteAllVotesFromArgument(id);
+
+        //delete argument
+
+        await this.argumentRepository.deleteArgument(id);
     }
 
 }

@@ -1,5 +1,8 @@
 import ReportRepository from "@/repositories/ReportRepository";
 import { ReportingType } from "@prisma/client";
+import ArgumentService from "./ArgumentService";
+import PartyService from "./PartyService";
+import DebateService from "./DebateService";
 
 class ModerationService {
 
@@ -13,28 +16,38 @@ class ModerationService {
         return this.reportRepository.getReports();
     }
 
-    static async deleteReport(id: string){
+    static async ignoreReport(id: string){
         this.reportRepository.deleteReport(id);
     }
 
-    static async deleteTopic(id: string){
-        
-    }
-
-    static async deleteComment(id: string){
-
-    }
-
-    static async deleteArgument(id: string){
-
-    }
-
-    static async deleteDebate(id: string){
-
-    }
-
-    static async deleteReformulation(id: string){
-
+    static async deleteEntity(id: string){
+        const report = await this.reportRepository.getReport(id);
+        if(!report) {
+            throw new Error('Report not found');
+        }
+        try {
+            switch(report.entityType) {
+                case ReportingType.ARGUMENT:
+                    ArgumentService.deleteArgument(report.entityId);
+                    break;
+                case ReportingType.COMMENT:
+                    PartyService.forceDeleteComment(report.entityId);
+                    break;
+                case ReportingType.DEBATE:
+                    DebateService.deleteDebate(report.entityId);
+                    break;
+                case ReportingType.TOPIC:
+                    //TODO
+                    //delete topic
+                    break;
+                case ReportingType.REFORMULATION:
+                    DebateService.deleteReformulation(report.entityId);
+                    break;
+            }
+        } catch (error) {
+            console.log(error);
+        }
+        this.reportRepository.deleteReport(id);
     }
 
     static async banUser(id: string){ }

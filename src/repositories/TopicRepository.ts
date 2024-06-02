@@ -124,6 +124,47 @@ class TopicRepository extends PrismaRepository {
         return topics
     }
 
-}
+    deleteChildrenLinks = async (topicId: string) => {
+        const children = await this.prismaClient.topic.findMany({where: {parentTopicId: topicId}})
+        if (!children) {
+            return
+        }
+        children.forEach(async (child) => {
+            await this.prismaClient.topic.update({
+                where: {
+                    id: child.id
+                },
+                data: {
+                    parentTopicId: null
+                }
+            })
+        })
+    }
 
-export default TopicRepository;
+        async deleteChildrenPresence(parentId: string, childId: string) {
+            let parent = await this.prismaClient.topic.findFirst({where: {id: parentId}})
+            if (!parent) {
+                throw new Error('Parent topic not found')
+            }
+            return this.prismaClient.topic.update({
+                where: {
+                    id: parentId
+                },
+                data: {
+                    childrenId: {
+                        set: parent.childrenId.filter((id: string) => id !== childId)
+                    }
+                }
+            })
+        }
+
+        deleteAllOpinions = async (topicId: string) => {
+            const opinions = await this.prismaClient.opinion.findMany({where: {topicId}})
+            if (!opinions) {
+                return
+            }
+            await this.prismaClient.opinion.deleteMany({where: {topicId}})
+        }
+    }
+
+    export default TopicRepository;

@@ -51,6 +51,24 @@ class ArgumentRepository extends PrismaRepository {
         return argument;
     }
 
+    deleteAllVotesFromArgument = async (argumentId: string) => {
+        const votes = await this.prismaClient.vote.deleteMany({
+            where: {
+                argumentId
+            }
+        });
+        return votes;
+    }
+
+    deleteArgument = async (id: string) => {
+        const argument = await this.prismaClient.argument.delete({
+            where: {
+                id
+            }
+        });
+        return argument;
+    }
+
 }
 
 export default ArgumentRepository;

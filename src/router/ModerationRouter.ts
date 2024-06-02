@@ -63,18 +63,17 @@ ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextF
     }
 });
 
-//supprimer topic 
-
-ModerationRouter.delete('/topic/:id', async (req: Request, res: Response, next: NextFunction) => {
+//ignore report
+ModerationRouter.delete('/reports/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Moderation']
-        #swagger.description = 'Delete a topic'
+        #swagger.description = 'Ignore a report'
         #swagger.parameters['id'] = {
-            description: 'Topic id',
+            description: 'Report id',
             required: true
         }
         #swagger.responses[200] = {
-            description: 'Topic deleted',
+            description: 'Report ignored',
         }
      */
     try {
@@ -86,25 +85,24 @@ ModerationRouter.delete('/topic/:id', async (req: Request, res: Response, next: 
         if(role !== 'ADMIN' && role !== 'MODERATOR') {
             throw new Error('You are not allowed to see this');
         }
-        await ModerationService.deleteTopic(req.params.id);
+        await ModerationService.ignoreReport(req.params.id);
         res.status(200).send();
     } catch (error) {
         console.log(error);
     }
 });
 
-//supprimer commentaire
-
-ModerationRouter.delete('/comment/:id', async (req: Request, res: Response, next: NextFunction) => {
+//delete reports entity
+ModerationRouter.delete('/reports/:id/delete-entity', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Moderation']
-        #swagger.description = 'Delete a comment'
+        #swagger.description = 'Delete the entity linked to a report'
         #swagger.parameters['id'] = {
-            description: 'Comment id',
+            description: 'Report id',
             required: true
         }
         #swagger.responses[200] = {
-            description: 'Comment deleted',
+            description: 'Entity deleted',
         }
      */
     try {
@@ -116,104 +114,12 @@ ModerationRouter.delete('/comment/:id', async (req: Request, res: Response, next
         if(role !== 'ADMIN' && role !== 'MODERATOR') {
             throw new Error('You are not allowed to see this');
         }
-        await ModerationService.deleteComment(req.params.id);
+        await ModerationService.deleteEntity(req.params.id);
         res.status(200).send();
     } catch (error) {
         console.log(error);
     }
 });
-
-//supprimer argument
-
-ModerationRouter.delete('/argument/:id', async (req: Request, res: Response, next: NextFunction) => {
-    /**
-        #swagger.tags = ['Moderation']
-        #swagger.description = 'Delete an argument'
-        #swagger.parameters['id'] = {
-            description: 'Argument id',
-            required: true
-        }
-        #swagger.responses[200] = {
-            description: 'Argument deleted',
-        }
-     */
-    try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        const role = await AuthentificationService.getUserRole(token);
-        if(role !== 'ADMIN' && role !== 'MODERATOR') {
-            throw new Error('You are not allowed to see this');
-        }
-        await ModerationService.deleteArgument(req.params.id);
-        res.status(200).send();
-    } catch (error) {
-        console.log(error);
-    }
-});
-
-//supprimer debat
-
-ModerationRouter.delete('/debate/:id', async (req: Request, res: Response, next: NextFunction) => {
-    /**
-        #swagger.tags = ['Moderation']
-        #swagger.description = 'Delete a debate'
-        #swagger.parameters['id'] = {
-            description: 'Debate id',
-            required: true
-        }
-        #swagger.responses[200] = {
-            description: 'Debate deleted',
-        }
-     */
-    try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        const role = await AuthentificationService.getUserRole(token);
-        if(role !== 'ADMIN' && role !== 'MODERATOR') {
-            throw new Error('You are not allowed to see this');
-        }
-        await ModerationService.deleteDebate(req.params.id);
-        res.status(200).send();
-    } catch (error) {
-        console.log(error);
-    }
-});
-
-//reformulation
-
-ModerationRouter.delete('/reformulation/:id', async (req: Request, res: Response, next: NextFunction) => {
-    /**
-        #swagger.tags = ['Moderation']
-        #swagger.description = 'Delete a reformulation'
-        #swagger.parameters['id'] = {
-            description: 'Reformulation id',
-            required: true
-        }
-        #swagger.responses[200] = {
-            description: 'Reformulation deleted',
-        }
-     */
-    try {
-        const token = req.headers.authorization;
-        if(!token) {
-            throw new JwtNotInHeaderException();
-        }
-        const role = await AuthentificationService.getUserRole(token);
-        if(role !== 'ADMIN' && role !== 'MODERATOR') {
-            throw new Error('You are not allowed to see this');
-        }
-        await ModerationService.deleteReformulation(req.params.id);
-        res.status(200).send();
-    } catch (error) {
-        console.log(error);
-    }
-});
-
-//ban user
 
 ModerationRouter.delete('/user/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**

@@ -2,6 +2,7 @@ import TopicRepository from "@/repositories/TopicRepository";
 import DebateRepository from "@/repositories/DebateRepository";
 import AwsService from "./AwsService";
 import { ResizeService } from "./ResizeService";
+import DebateService from "./DebateService";
 
 class TopicService {
     private static topicRepository: TopicRepository = new TopicRepository()
@@ -74,6 +75,26 @@ class TopicService {
     static async getRecentTopics() {
         const topics = await TopicService.topicRepository.findRecentTopics();
         return topics;
+    }
+
+    static async deleteTopic(id: string) {
+        const topic = await TopicService.topicRepository.findTopicById(id);
+        if (!topic) {
+            throw new Error("Topic not found");
+        }
+        //delete related debates
+        const debates = await TopicService.debateRepository.getByDebatesIds(topic.debates);
+        await Promise.all(debates.map(async (debate) => {
+            await DebateService.deleteDebate(debate.id);
+        }));
+        //delete link from children
+        await this.topicRepository.deleteChildrenLinks(id);
+        //delete link from parents
+        if(topic.parentTopicId) {
+            await this.topicRepository.deleteChildrenPresence(topic.parentTopicId, id);
+        }
+        //delete all opinions
+        await this.topicRepository.deleteAllOpinions(id);
     }
 }
 

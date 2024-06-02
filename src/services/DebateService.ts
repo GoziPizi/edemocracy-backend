@@ -7,6 +7,7 @@ import TopicRepository from "@/repositories/TopicRepository";
 import UserRepository from "@/repositories/UserRepository";
 import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
 import { Argument, DebateVoteType } from "@prisma/client";
+import ArgumentService from "./ArgumentService";
 
 class DebateService {
 
@@ -297,6 +298,51 @@ class DebateService {
 
     static async getReformulationById(reformulationId: string) {
         return await this.debateRepository.getDebateReformulation(reformulationId);
+    }
+
+    static async deleteDebate(debateId: string) {
+        try {
+            const debate = await this.debateRepository.getDebateById(debateId);
+            if(!debate) {
+                throw new Error('Debate not found');
+            }
+            //delete all reformulations
+            const reformulationsIds = await this.debateRepository.getDebateReformulationsIds(debateId);
+            await Promise.all(reformulationsIds.map(async (reformulationId: string) => {
+                await this.deleteReformulation(reformulationId);
+            }));
+            //delete all arguments
+            const argumentsIds = await this.debateRepository.getDebateArgumentsIds(debateId);
+            await Promise.all(argumentsIds.map(async (argumentId: string) => {
+                await ArgumentService.deleteArgument(argumentId);
+            }));
+            //delete Debate results
+            await this.debateRepository.deleteDebateResult(debate.debateResultId);
+            await this.debateRepository.deleteDebateResult(debate.debateContributorsResultId);
+            //delete debate votes
+            const votes = await this.debateRepository.getDebateVoteIds(debateId);
+            await Promise.all(votes.map(async (voteId: string) => {
+                await this.debateRepository.deleteDebateVote(voteId);
+            }));
+            //delete debate
+            await this.debateRepository.deleteDebate(debateId);
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    static async deleteReformulation(reformulationId: string) {
+        //delete all votes
+        try {
+            const allVotesIds = await this.debateRepository.getDebateReformulationVotesIds(reformulationId);
+            await Promise.all(allVotesIds.map(async (voteId: string) => {
+                await this.debateRepository.deleteReformulationVote(voteId);
+            }));
+            //delete reformulation
+            await this.debateRepository.deleteReformulation(reformulationId);
+        } catch (error) {
+            console.log(error);
+        }
     }
 
 }

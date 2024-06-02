@@ -26,6 +26,15 @@ class ReportRepository extends PrismaRepository {
         const reports = await this.prismaClient.reporting.findMany();
         return reports;
     }
+
+    getReport = async (id: string) => {
+        const report = await this.prismaClient.reporting.findUnique({
+            where: {
+                id
+            }
+        });
+        return report;
+    }
 }
 
 export default ReportRepository;

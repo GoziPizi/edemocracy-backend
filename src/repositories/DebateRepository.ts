@@ -191,8 +191,76 @@ class DebateRepository extends PrismaRepository {
     return vote;
   }
 
+  deleteReformulation = async (id: string) => {
+    await this.prismaClient.debateDescriptionReformulation.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  getDebateReformulationVotesIds = async (reformulationId: string) => {
+    const votes = await this.prismaClient.voteForReformulation.findMany({
+      where: {
+        debateReformulationId: reformulationId,
+      },
+    });
+    return votes.map((vote) => vote.id);
+  }
+
   deleteReformulationVote = async (id: string) => {
     await this.prismaClient.voteForReformulation.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  getDebateReformulationsIds = async (debateId: string) => {
+    const reformulations = await this.prismaClient.debateDescriptionReformulation.findMany({
+      where: {
+        debateId,
+      },
+    });
+    return reformulations.map((reformulation) => reformulation.id);
+  }
+
+  getDebateArgumentsIds = async (debateId: string) => {
+    const argumentss = await this.prismaClient.argument.findMany({
+      where: {
+        debateId,
+      },
+    });
+    return argumentss.map((argument) => argument.id);
+  }
+
+  deleteDebateResult = async (id: string) => {
+    await this.prismaClient.debateResult.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  deleteDebate = async (id: string) => {
+    await this.prismaClient.debate.delete({
+      where: {
+        id,
+      },
+    });
+  }
+
+  getDebateVoteIds = async (debateId: string) => {
+    const votes = await this.prismaClient.debateVote.findMany({
+      where: {
+        debateId,
+      },
+    });
+    return votes.map((vote) => vote.id);
+  }
+
+  deleteDebateVote = async (id: string) => {
+    await this.prismaClient.debateVote.delete({
       where: {
         id,
       },

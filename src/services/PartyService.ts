@@ -163,6 +163,15 @@ class PartyService {
         return commentDeleted;
     }
 
+    static async forceDeleteComment(commentId: string) {
+        const comment = await this.partyRepository.getCommentById(commentId);
+        if(!comment) {
+            throw new Error('Comment not found');
+        }
+        const commentDeleted = await this.partyRepository.deleteComment(commentId);
+        return commentDeleted;
+    }
+
     static async getAllCommentsFromPartyId(partyId: string) {
         const comments = await this.partyRepository.getAllCommentsFromPartyId(partyId);
         return comments;
@@ -171,6 +180,11 @@ class PartyService {
     static async getAllCommentsWithNameFromPartyId(partyId: string) {
         const comments = await this.partyRepository.getAllCommentsWithNameFromPartyId(partyId);
         return comments;
+    }
+
+    static async getCommentById(commentId: string) {
+        const comment = await this.partyRepository.getCommentById(commentId);
+        return comment;
     }
 
 }
