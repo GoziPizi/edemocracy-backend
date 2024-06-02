@@ -12,6 +12,14 @@ class TopicRepository extends PrismaRepository {
         return newTopic
     }   
 
+    deleteTopic = async (id: string) => {
+        await this.prismaClient.topic.delete({
+            where: {
+                id
+            }
+        })
+    }
+
     updateTopic = async (id: string, topic: any) => {
         const updatedTopic = await this.prismaClient.topic.update({
             where: {

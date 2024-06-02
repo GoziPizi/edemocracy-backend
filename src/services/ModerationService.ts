@@ -3,6 +3,7 @@ import { ReportingType } from "@prisma/client";
 import ArgumentService from "./ArgumentService";
 import PartyService from "./PartyService";
 import DebateService from "./DebateService";
+import TopicService from "./TopicService";
 
 class ModerationService {
 
@@ -37,8 +38,7 @@ class ModerationService {
                     DebateService.deleteDebate(report.entityId);
                     break;
                 case ReportingType.TOPIC:
-                    //TODO
-                    //delete topic
+                    TopicService.deleteTopic(report.entityId);
                     break;
                 case ReportingType.REFORMULATION:
                     DebateService.deleteReformulation(report.entityId);

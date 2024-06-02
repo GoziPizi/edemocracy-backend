@@ -108,9 +108,7 @@ UserRouter.get('/personality', async (req: Request, res: Response, next: NextFun
             throw new JwtNotInHeaderException();
         }
         const userId = AuthentificationService.getUserId(token);
-        console.log('personality', userId)
         const user = await UserService.getUserPersonalityById(userId);
-        console.log('personality', user)
         res.status(200).send(user);
     } catch (error) {
         console.log(error);
@@ -128,14 +126,11 @@ UserRouter.get('/partis', async (req: Request, res: Response, next: NextFunction
      */
     try {
         const token = req.headers.authorization;
-        console.log('token', token)
         if(!token) {
             throw new JwtNotInHeaderException();
         }
         const userId = AuthentificationService.getUserId(token);
-        console.log('partis', userId)
         const userPerties = await UserService.getUserPartisById(userId);
-        console.log('partis', userPerties)
         res.status(200).send(userPerties);
     } catch (error) {
         console.log(error);

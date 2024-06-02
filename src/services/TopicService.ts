@@ -78,23 +78,29 @@ class TopicService {
     }
 
     static async deleteTopic(id: string) {
-        const topic = await TopicService.topicRepository.findTopicById(id);
-        if (!topic) {
-            throw new Error("Topic not found");
+        try {
+            const topic = await TopicService.topicRepository.findTopicById(id);
+            if (!topic) {
+                throw new Error("Topic not found");
+            }
+            //delete related debates
+            const debates = await TopicService.debateRepository.getByDebatesIds(topic.debates);
+            await Promise.all(debates.map(async (debate) => {
+                await DebateService.deleteDebate(debate.id);
+            }));
+            //delete link from children
+            await this.topicRepository.deleteChildrenLinks(id);
+            //delete link from parents
+            if(topic.parentTopicId) {
+                await this.topicRepository.deleteChildrenPresence(topic.parentTopicId, id);
+            }
+            //delete all opinions
+            await this.topicRepository.deleteAllOpinions(id);
+            //delete topic
+            await this.topicRepository.deleteTopic(id);
+        } catch (error) {
+            console.log(error);
         }
-        //delete related debates
-        const debates = await TopicService.debateRepository.getByDebatesIds(topic.debates);
-        await Promise.all(debates.map(async (debate) => {
-            await DebateService.deleteDebate(debate.id);
-        }));
-        //delete link from children
-        await this.topicRepository.deleteChildrenLinks(id);
-        //delete link from parents
-        if(topic.parentTopicId) {
-            await this.topicRepository.deleteChildrenPresence(topic.parentTopicId, id);
-        }
-        //delete all opinions
-        await this.topicRepository.deleteAllOpinions(id);
     }
 }
 
