@@ -26,7 +26,7 @@ class BanWordService {
         const banWords = await this.getBanWords();
         for (const banWord of banWords) {
             for (const key in object) {
-                if (object[key].toLowerCase().includes(banWord.word.toLowerCase())) {
+                if (object[key].toLowerCase().includes(' ' + banWord.word.toLowerCase() + ' ')) {
                     throw new BannedContentException();
                 }
             }
