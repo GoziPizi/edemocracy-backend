@@ -26,7 +26,6 @@ export const UserOutputDefinition: UserOutputDto = {
     contribution: false,
     language: 'string',
     politicSide: Affiliation.RIGHT,
-    follows: ['1'],
     role: 'USER',
     createdAt: new Date(),
     updatedAt: new Date()
