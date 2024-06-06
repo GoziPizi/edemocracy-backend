@@ -36,7 +36,7 @@ class BanWordService {
     static async checkStringForBanWords(string: string) {
         const banWords = await this.getBanWords();
         for (const banWord of banWords) {
-            if (string.toLowerCase().includes(banWord.word.toLowerCase())) {
+            if (string.toLowerCase().includes(' ' + banWord.word.toLowerCase() + ' ')) {
                 throw new BannedContentException();
             }
         }
