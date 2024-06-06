@@ -12,7 +12,6 @@ export const toUserOutput = (user: User): UserOutputDto => {
         profession: user.profession,
         description: user.description,
         politicSide: user.politicSide,
-        follows: user.follows,
         language: user.language,
         contribution: user.contribution,
         role: user.role,

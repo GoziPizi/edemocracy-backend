@@ -47,7 +47,7 @@ class ArgumentService {
         }
         const debateToCreate = {
             title: 'Débat d\'argument',
-            description: 'Débat sur la formulation de l\'argument',
+            description: argument.content,
             argumentId: argument.id
         }
         await DebateService.createDebate(debateToCreate, userId);

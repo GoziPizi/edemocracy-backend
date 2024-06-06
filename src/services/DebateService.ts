@@ -294,6 +294,40 @@ class DebateService {
         }
 
         await this.debateRepository.updateReformulationScore(reformulationId, newScore);
+
+        //Update the reformulation winner if needed
+        await this.updateWinnerDebateReformulation(reformulation.debateId);
+    }
+
+    static async checkForWinnerReformulation(debateId: string): Promise<string> {
+        const reformulations = await this.debateRepository.getDebateReformulations(debateId);
+        const winner = reformulations.reduce((prev, current) => {
+            return (prev.score > current.score) ? prev : current
+        });
+        return winner.id;
+    }
+
+    static async updateWinnerDebateReformulation(debateId: string) {
+        const winnerId = await this.checkForWinnerReformulation(debateId);
+        const debate = await this.debateRepository.getDebateById(debateId);
+        if(!debate) {
+            throw new Error('Debate not found');
+        }
+        const reformulation = await this.debateRepository.getDebateReformulation(winnerId);
+        if(!reformulation) {
+            throw new Error('Reformulation not found');
+        }
+        //Set debate description to the winner reformulation
+        await this.debateRepository.update(debateId, { description: reformulation.content });
+
+        //If the debate is linked to an argument, update the argument content
+        if(debate.argumentId) {
+            const argument = await this.argumentRepository.getArgumentById(debate.argumentId);
+            if(!argument) {
+                throw new Error('Argument not found');
+            }
+            await this.argumentRepository.updateArgument(argument.id, { content: reformulation.content });
+        }
     }
 
     static async getReformulationVote(reformulationId: string, userId: string) {

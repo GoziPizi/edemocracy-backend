@@ -81,6 +81,26 @@ class UserService {
         return await UserService.opinionRepository.findOpinionsWithTitleByUserId(id);
     }
 
+    static async follow(id: string, entityId: string, entityType: string) {
+        const actualFollow = await UserService.userRepository.findSingleFollowByUserId(id, entityId);
+        if (actualFollow) {
+            return await UserService.userRepository.deleteFollow(id, entityId);
+        }
+        return await UserService.userRepository.follow(id, entityType, entityId);
+    }
+
+    static async getUserFollows(id: string) {
+        return await UserService.userRepository.findFollowsByUserId(id);
+    }
+
+    static async isUserFollowing(id: string, entityId: string) {
+        const follow = await UserService.userRepository.findSingleFollowByUserId(id, entityId);
+        if (follow) {
+            return true;
+        }
+        return false;
+    }
+
     static async postOpinion(userId: string, topicId: string, opinion: string) {
         return await UserService.opinionRepository.createOpinion(userId, topicId, opinion);
     }

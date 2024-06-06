@@ -137,6 +137,75 @@ UserRouter.get('/partis', async (req: Request, res: Response, next: NextFunction
     }
 });
 
+UserRouter.get('/follows', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Get the follows of the logged user'
+        #swagger.responses[200] = {
+            description: 'User found
+        }
+    */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const follows = await UserService.getUserFollows(userId);
+        res.status(200).send(follows);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+UserRouter.get('/follows/:entityId', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Get the follows of the logged user'
+        #swagger.responses[200] = {
+            description: 'User found
+        }
+    */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const entityId = req.params.entityId;
+        const follows = await UserService.isUserFollowing(userId, entityId);
+        res.status(200).send(follows);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+UserRouter.post('/follows', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['User']
+        #swagger.description = 'Follow a user'
+        #swagger.parameters['body'] = {
+            description: 'User information',
+            required: true,
+        }
+        #swagger.responses[200] = {
+            description: 'User followed',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const { entityId, entityType } = req.body;
+        await UserService.follow(userId, entityId, entityType);
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 UserRouter.post('/opinions', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']

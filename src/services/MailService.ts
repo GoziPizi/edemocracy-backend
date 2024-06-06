@@ -1,7 +1,7 @@
 import nodemailer from 'nodemailer'
 
 const emailAdress = process.env.EMAIL_ADRESS
-const emailPassword = process.env.EMAIL_PASSWORD
+const emailPassCode = process.env.EMAIL_PASS_CODE
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com', //TODO
@@ -9,7 +9,7 @@ const transporter = nodemailer.createTransport({
   secure: true,
   auth: {
     user: emailAdress,
-    pass: emailPassword
+    pass: emailPassCode
   }
 })
 

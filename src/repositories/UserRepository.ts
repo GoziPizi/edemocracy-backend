@@ -152,6 +152,47 @@ class UserRepository extends PrismaRepository {
         return user!.role
     }
 
+    follow = async (userId: string, entityType: string, entityId: string) => {
+        await this.prismaClient.follow.create({
+            data: {
+                userId,
+                entityType,
+                entityId
+            }
+        })
+        return  
+    }
+
+    deleteFollow = async (userId: string, entityId: string) =>
+    {
+        await this.prismaClient.follow.deleteMany({
+            where: {
+                userId,
+                entityId
+            }
+        })
+        return
+    }
+
+    findFollowsByUserId = async (id: string) => {
+        const follows = await this.prismaClient.follow.findMany({
+            where: {
+                userId: id
+            }
+        })
+        return follows
+    }
+
+    findSingleFollowByUserId = async (id: string, entityId: string) => {
+        const follows = await this.prismaClient.follow.findFirst({
+            where: {
+                userId: id,
+                entityId
+            }
+        })
+        return follows
+    }
+
     getAdmins = async () => {
         const admins = await this.prismaClient.user.findMany({
             where: {
