@@ -40,8 +40,8 @@ class ArgumentService {
         }
     }
     
-    static async createArgument(content: string, argumentType: ArgumentType,userId: string, debateId: string): Promise<void>  {
-        const argument = await this.argumentRepository.createArgument(content, argumentType, userId, debateId);
+    static async createArgument(content: string, argumentType: ArgumentType,userId: string, debateId: string, anonymous: boolean): Promise<void>  {
+        const argument = await this.argumentRepository.createArgument(content, argumentType, userId, debateId, anonymous);
         if(!argument) {
             throw new Error('Error creating argument');
         }

@@ -31,8 +31,8 @@ ArgumentRouter.post('/', async (req: Request, res: Response, next: NextFunction)
             throw new Error('User not verified');
         }
         const userId = AuthentificationService.getUserId(token);
-        const { content, argumentType, debateId } = req.body;
-        await ArgumentService.createArgument(content, argumentType as ArgumentType, userId, debateId);
+        const { content, argumentType, debateId, anonymous } = req.body;
+        await ArgumentService.createArgument(content, argumentType as ArgumentType, userId, debateId, anonymous);
         res.status(200).send();
     } catch (error) {
         next(error);
