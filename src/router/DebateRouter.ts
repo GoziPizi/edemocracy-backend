@@ -283,15 +283,10 @@ DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Respons
         const userId = AuthentificationService.getUserId(token);
         const debateId = String(req.params.debateId);
         const reformulation = req.body;
-        console.log('INFOS')
-        console.log(debateId)
-        console.log(reformulation)
         await BanWordService.checkObjectForBanWords(reformulation)
-        console.log('BANWORDS')
         await DebateService.createDebateReformulation({debateId, ...reformulation, userId});
         res.status(200).send();
     } catch (error) {
-        console.log(error)
         next(error);
     }
 });
