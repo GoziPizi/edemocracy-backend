@@ -115,7 +115,7 @@ DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
         }
         const debate = req.body;
         await BanWordService.checkStringForBanWords(debate.title)
-        await BanWordService.checkStringForBanWords(debate.description)
+        await BanWordService.checkStringForBanWords(debate.content)
         const createdDebate = await DebateService.createDebate(debate, userId);
         res.status(200).send(createdDebate);
     } catch (error) {
@@ -252,7 +252,7 @@ DebateRouter.delete('/:id/vote', async (req: Request, res: Response, next: NextF
     }
 });
 
-DebateRouter.post('/:id/reformulations', async (req: Request, res: Response, next: NextFunction) => {
+DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']
         #swagger.summary = 'Endpoint to reformulate a debate.'
@@ -280,10 +280,10 @@ DebateRouter.post('/:id/reformulations', async (req: Request, res: Response, nex
             throw new Error('User not verified');
         }
         const userId = AuthentificationService.getUserId(token);
-        const id = String(req.params.id);
-        const reformulation = req.body.content;
+        const debateId = String(req.params.debateId);
+        const reformulation = req.body;
         await BanWordService.checkStringForBanWords(reformulation)
-        await DebateService.createDebateReformulation(id, reformulation, userId);
+        await DebateService.createDebateReformulation({debateId, ...reformulation, userId});
         res.status(200).send();
     } catch (error) {
         next(error);

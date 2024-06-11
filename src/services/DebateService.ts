@@ -5,9 +5,10 @@ import DebateRepository from "@/repositories/DebateRepository";
 import DebateVoteRepository from "@/repositories/DebateVoteRepository";
 import TopicRepository from "@/repositories/TopicRepository";
 import UserRepository from "@/repositories/UserRepository";
-import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
+import { ArgumentWithVoteOutputDto } from "@/types/dtos/ArgumentOutputDtos";
 import { Argument, DebateVoteType } from "@prisma/client";
 import ArgumentService from "./ArgumentService";
+import { title } from "process";
 
 class DebateService {
 
@@ -42,7 +43,13 @@ class DebateService {
             await this.argumentRepository.addDebateToArgument(newDebate.argumentId, newDebate.id);
         }
         //Creating the first reformulation (the description itself)
-        await this.createDebateReformulation(newDebate.id, debate.description, userId);
+        const data = {
+            debateId: newDebate.id,
+            title: debate.title,
+            content: debate.content,
+            userId
+        }
+        await this.createDebateReformulation(data);
         return newDebate;
     }
 
@@ -83,7 +90,40 @@ class DebateService {
 
     static async getDebateReformulations(id: string) {
         const reformulations = await this.debateRepository.getDebateReformulations(id);
-        return reformulations;
+        const reformulationsWithUserInfos = await Promise.all(reformulations.map(async (reformulation: any) => {
+            const user = await this.userRepository.findById(reformulation.userId);
+            let data = {};
+            if(reformulation.isNameDisplayed){
+                data = { userName: user!.firstName }
+            }
+            if(reformulation.isPoliticSideDisplayed){
+                data = { ...data, userPoliticSide: user!.politicSide }
+            }
+            if(reformulation.isWorkDisplayed){
+                data = { ...data, userWork: user!.profession }
+            }
+            return {
+                ...reformulation,
+                ...data
+            }
+        }));
+        return reformulationsWithUserInfos;
+    }
+
+    static async getDebateReformulationUserInfos(id: string) {
+        const reformulation = await this.debateRepository.getDebateReformulation(id);
+        if(!reformulation) {
+            throw new Error('Reformulation not found');
+        }
+        const user = await this.userRepository.findById(reformulation.userId);
+        if(!user) {
+            throw new Error('User not found');
+        }
+        return {
+            userName: user!.firstName,
+            userPoliticSide: user!.politicSide,
+            userWork: user!.profession
+        }
     }
 
     static async getDebateArguments(id: string) {
@@ -91,14 +131,16 @@ class DebateService {
         return debateArguments;
     }
 
-    static async getDebateArgumentsWithVote(id: string, userId: string) {
+    static async getDebateArgumentsWithVote(id: string, userId: string): Promise<ArgumentWithVoteOutputDto[]> {
         const debateArguments = await this.debateRepository.getDebateArguments(id);
-        const debateArgumentsWithUserVote: ArgumentWithVoteOutput[] = await Promise.all(debateArguments.map(async (argument: Argument) => {
+        const debateArgumentsWithUserVote: ArgumentWithVoteOutputDto[] = await Promise.all(debateArguments.map(async (argument: Argument) => {
             const userVote = await this.argumentRepository.getUserVote(userId, argument.id);
             const vote = userVote ? userVote.value : null;
+            const userInformations = await ArgumentService.getUsernformationsOfArgument(argument.id);
             return {
                 ...argument,
-                hasVote: vote
+                hasVote: vote,
+                ...userInformations
             }
         }));
         return debateArgumentsWithUserVote;
@@ -244,12 +286,14 @@ class DebateService {
 
     //Reformulation related Debate
 
-    static async createDebateReformulation(debateId: string, reformulationContent: string, userId: string) {
+    static async createDebateReformulation(data: any) {
+        console.log(data)
+        const debateId = data.debateId;
         const debate = await this.debateRepository.getDebateById(debateId);
         if(!debate) {
             throw new Error('Debate not found');
         }
-        const reformulation = await this.debateRepository.createDebateReformulation(debateId, reformulationContent, userId);
+        const reformulation = await this.debateRepository.createDebateReformulation(data);
         return reformulation;
     }
 
@@ -318,7 +362,7 @@ class DebateService {
             throw new Error('Reformulation not found');
         }
         //Set debate description to the winner reformulation
-        await this.debateRepository.update(debateId, { description: reformulation.content });
+        await this.debateRepository.update(debateId, { title: reformulation.title, content: reformulation.content });
 
         //If the debate is linked to an argument, update the argument content
         if(debate.argumentId) {
@@ -326,7 +370,7 @@ class DebateService {
             if(!argument) {
                 throw new Error('Argument not found');
             }
-            await this.argumentRepository.updateArgument(argument.id, { content: reformulation.content });
+            await this.argumentRepository.updateArgument(argument.id, { title: reformulation.title, content: reformulation.content });
         }
     }
 

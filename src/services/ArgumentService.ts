@@ -1,17 +1,18 @@
 import ArgumentRepository from "@/repositories/ArgumentRepository";
 import DebateRepository from "@/repositories/DebateRepository";
 import VoteRepository from "@/repositories/VoteRepository";
-import { ArgumentWithVoteOutput } from "@/types/dtos/ArgumentOutputDtos";
-import { ArgumentType } from "@prisma/client";
+import { ArgumentWithVoteOutputDto } from "@/types/dtos/ArgumentOutputDtos";
 import DebateService from "./DebateService";
+import UserRepository from "@/repositories/UserRepository";
 
 class ArgumentService {
 
     private static argumentRepository: ArgumentRepository = new ArgumentRepository()
     private static debateRepository: DebateRepository = new DebateRepository()
     private static voteRepository: VoteRepository = new VoteRepository()
+    private static userRepository: UserRepository = new UserRepository()
 
-    static async getArgumentWithVoteById(id: string, userId: string): Promise<ArgumentWithVoteOutput> {
+    static async getArgumentWithVoteById(id: string, userId: string): Promise<ArgumentWithVoteOutputDto> {
         const argument = await this.argumentRepository.getArgumentById(id);
         if(!argument) {
             throw new Error('Argument not found');
@@ -40,13 +41,36 @@ class ArgumentService {
         }
     }
     
-    static async createArgument(content: string, argumentType: ArgumentType,userId: string, debateId: string, anonymous: boolean): Promise<void>  {
-        const argument = await this.argumentRepository.createArgument(content, argumentType, userId, debateId, anonymous);
+    static async getUsernformationsOfArgument(id: string) {
+        const argument = await this.argumentRepository.getArgumentById(id);
+        if(!argument) {
+            throw new Error('Argument not found');
+        }
+        let data = {};
+        const user = await this.userRepository.findById(argument.userId);
+        if(!user) {
+            throw new Error('User not found');
+        }
+        if(argument.isNameDisplayed) {
+            data = { ...data, userName: user.firstName}
+        }
+        if(argument.isPoliticSideDisplayed) {
+            data = { ...data, userPoliticSide: user.politicSide}
+        }
+        if(argument.isWorkDisplayed) {
+            data = { ...data, userWork: user.profession}
+        }
+        return data;
+    }
+
+    static async createArgument(data: any): Promise<void>  {
+        const userId = data.userId;
+        const argument = await this.argumentRepository.createArgument(data);
         if(!argument) {
             throw new Error('Error creating argument');
         }
         const debateToCreate = {
-            title: 'Débat d\'argument',
+            title: argument.title,
             description: argument.content,
             argumentId: argument.id
         }
