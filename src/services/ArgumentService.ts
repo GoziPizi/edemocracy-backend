@@ -71,7 +71,7 @@ class ArgumentService {
         }
         const debateToCreate = {
             title: argument.title,
-            description: argument.content,
+            content: argument.content,
             argumentId: argument.id
         }
         await DebateService.createDebate(debateToCreate, userId);
