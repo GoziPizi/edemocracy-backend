@@ -287,13 +287,16 @@ class DebateService {
     //Reformulation related Debate
 
     static async createDebateReformulation(data: any) {
-        console.log(data)
+        console.log("CRERATE DEBATE REFORMULATION")
         const debateId = data.debateId;
         const debate = await this.debateRepository.getDebateById(debateId);
+        console.log("DEBATE FOUND")
         if(!debate) {
             throw new Error('Debate not found');
         }
         const reformulation = await this.debateRepository.createDebateReformulation(data);
+        console.log("REFORMULATION CREATED")
+        console.log(reformulation)
         return reformulation;
     }
 
