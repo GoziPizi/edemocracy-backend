@@ -286,7 +286,7 @@ DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Respons
         console.log('INFOS')
         console.log(debateId)
         console.log(reformulation)
-        //await BanWordService.checkStringForBanWords(reformulation)
+        await BanWordService.checkObjectForBanWords(reformulation)
         console.log('BANWORDS')
         await DebateService.createDebateReformulation({debateId, ...reformulation, userId});
         res.status(200).send();
