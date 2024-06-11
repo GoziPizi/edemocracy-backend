@@ -271,6 +271,7 @@ DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Respons
         }
      */
     try {
+        console.log('DEBATE REFORMULATION')
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
@@ -282,6 +283,9 @@ DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Respons
         const userId = AuthentificationService.getUserId(token);
         const debateId = String(req.params.debateId);
         const reformulation = req.body;
+        console.log('INFOS')
+        console.log(debateId)
+        console.log(reformulation)
         await BanWordService.checkStringForBanWords(reformulation)
         await DebateService.createDebateReformulation({debateId, ...reformulation, userId});
         res.status(200).send();
