@@ -52,7 +52,7 @@ class ArgumentService {
             throw new Error('User not found');
         }
         if(argument.isNameDisplayed) {
-            data = { ...data, userName: user.firstName}
+            data = { ...data, userName: user.name}
         }
         if(argument.isPoliticSideDisplayed) {
             data = { ...data, userPoliticSide: user.politicSide}

@@ -120,7 +120,7 @@ class DebateService {
             throw new Error('User not found');
         }
         return {
-            userName: user!.firstName,
+            userName: user!.name,
             userPoliticSide: user!.politicSide,
             userWork: user!.profession
         }
