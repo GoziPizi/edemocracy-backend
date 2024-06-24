@@ -17,7 +17,6 @@ class PartyService {
         let createdParty = await this.partyRepository.createParty({
             ...party,
             founderId: userId,
-            logo: 'default-logo.png',
             for: party.for || [],
             against: party.against || []
         });

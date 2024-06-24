@@ -94,7 +94,7 @@ model Party {
   id          String      @id @default(uuid())
   founderId   String
   name        String
-  logo        String
+  logo        String      @default("")
   politicSide Affiliation
   description String      @default("")
   reason      String      @default("")
