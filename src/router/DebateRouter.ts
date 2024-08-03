@@ -108,11 +108,7 @@ DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
         if(!token) {
             throw new JwtNotInHeaderException();
         }
-        const isVerified = AuthentificationService.checkVerified(token);
         const userId = AuthentificationService.getUserId(token);
-        if(!isVerified) {
-            throw new Error('User not verified');
-        }
         const debate = req.body;
         await BanWordService.checkStringForBanWords(debate.title)
         await BanWordService.checkStringForBanWords(debate.content)
@@ -179,10 +175,6 @@ DebateRouter.post('/:id/vote', async (req: Request, res: Response, next: NextFun
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
-        }
-        const isVerified = AuthentificationService.checkVerified(token);
-        if(!isVerified) {
-            throw new Error('User not verified');
         }
         const id = String(req.params.id);
         const value = req.body.value as DebateVoteType;
@@ -274,10 +266,6 @@ DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Respons
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
-        }
-        const isVerified = AuthentificationService.checkVerified(token);
-        if(!isVerified) {
-            throw new Error('User not verified');
         }
         const userId = AuthentificationService.getUserId(token);
         const debateId = String(req.params.debateId);
@@ -393,10 +381,6 @@ DebateRouter.post('/reformulations/:reformulationId/vote', async (req: Request, 
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
-        }
-        const isVerified = AuthentificationService.checkVerified(token);
-        if(!isVerified) {
-            throw new Error('User not verified');
         }
         const reformulationId = String(req.params.reformulationId);
         const value = req.body.value as boolean | null;

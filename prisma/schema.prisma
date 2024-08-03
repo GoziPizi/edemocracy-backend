@@ -23,21 +23,29 @@ enum Role {
 }
 
 model User {
-  id             String   @id @default(uuid())
-  email          String   @unique
-  name           String
-  firstName      String
-  password       String
-  telephone      String
-  address        String
-  profession     String
-  profilePicture String?
-  description    String   @default("")
-  isVerified     Boolean  @default(false)
-  contribution   Boolean  @default(false)
-  language       String
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id        String @id @default(uuid())
+  email     String @unique
+  name      String
+  firstName String
+  password  String
+  telephone String
+  address   String
+
+  //optional fields
+  profession        String?
+  profilePicture    String?
+  formationName     String?
+  formationDuration String?
+  birthSex          String?
+  actualSex         String?
+  sexualOrientation String?
+  religion          String?
+  description       String   @default("")
+  isVerified        Boolean  @default(false)
+  contribution      Boolean  @default(false)
+  language          String   @default("fr")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   politicSide Affiliation
   role        Role

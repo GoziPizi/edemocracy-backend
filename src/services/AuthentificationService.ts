@@ -6,6 +6,7 @@ import { JwtCheckException } from "@/exceptions/JwtExceptions";
 import { Role } from "@prisma/client";
 import AwsService from "./AwsService";
 import { sendReinitPasswordMail } from "./MailService";
+import { FreeUserCreateInputDto, StandardUserCreateInputDto } from "@/types/dtos/UserDto";
 
 class AuthentificationService {
     private static userRepository: UserRepository = new UserRepository()
@@ -36,6 +37,34 @@ class AuthentificationService {
         return
     }
 
+    static async registerFree(userInput: FreeUserCreateInputDto) {
+        let finalUser = {
+            ...userInput,
+            role: Role.USER,
+        }
+        await this.userRepository.create(finalUser)
+    }
+
+    static async registerStandard(
+        userInput: StandardUserCreateInputDto,
+        recto1: Express.Multer.File,
+        verso1: Express.Multer.File,
+        recto2: Express.Multer.File | undefined,
+        verso2: Express.Multer.File | undefined)
+    {
+        //TODO
+    }
+
+    static async registerPremium(
+        userInput: any,
+        recto1: Express.Multer.File,
+        verso1: Express.Multer.File,
+        recto2: Express.Multer.File | undefined,
+        verso2: Express.Multer.File | undefined)
+    {
+        //TODO
+    }
+
     static async checkToken(token: string): Promise<boolean> {
         try {
             Jwt.checkToken(token)
@@ -48,6 +77,14 @@ class AuthentificationService {
     static checkVerified(token: string): boolean {
         const isVerified = Jwt.decode(token).payload.isVerified
         return isVerified
+    }
+
+    static async isEmailTaken(email: string): Promise<boolean> {
+        const user = await this.userRepository.getUserByEmail(email)
+        if(user) {
+            return true
+        }
+        return false
     }
 
     static getUserId(token: string): string {
