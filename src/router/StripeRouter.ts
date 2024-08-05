@@ -24,11 +24,13 @@ StripeRouter.post('/webhook', async (req: Request, res: Response, next: NextFunc
         let event;
         try {
             event = StripeService.verifyStripeEvent(req.body, sig, endpointSecret || '');
+            console.log('event', event);
         } catch (error: any) {
             res.status(400).send(`Webhook Error: ${error.message}`);
         }
         const stripeEvent = req.body;
-        await StripeService.handleStripeEvent(stripeEvent);
+        console.log('stripeEvent', stripeEvent);
+        await StripeService.handleStripeEvent(event);
         res.status(200).send();
     } catch (error) {
         next(error);
