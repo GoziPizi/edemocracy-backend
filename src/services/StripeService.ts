@@ -53,12 +53,10 @@ class StripeService {
         return session;
     }
 
-    //throw an error if the signature is not valid
-    static verifyStripeEvent(payload: string, sig: string, endpointSecret: string) {
-        return this.stripe.webhooks.constructEvent(payload, sig, endpointSecret);
-    }
-
     static constructStripeEvent(payload: any, sig: string | string[], endpointSecret: string) {
+        console.log(payload)
+        console.log(sig)
+        console.log(endpointSecret)
         return this.stripe.webhooks.constructEvent(payload, sig, endpointSecret);
     }
 
