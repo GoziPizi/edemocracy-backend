@@ -81,12 +81,17 @@ class StripeService {
 
         const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.data.object.id);
 
-        if(!checkoutSession.line_items?.data[0].price?.product) {
+        if(!checkoutSession) {
             return;
         }
 
-        console.log(checkoutSession.line_items?.data[0].price.product);
-        const premium = checkoutSession.line_items?.data[0].price.product === this.premium_product_id;
+        const productId = checkoutSession.line_items?.data[0].price?.product as string;
+
+        if(productId !== this.standard_product_id && productId !== this.premium_product_id) {
+            return;
+        }
+
+        const premium = productId === this.premium_product_id;
 
         if(paiementStatus !== 'paid') {
             await this.preRegistrationRepository.deletePreRegistration(email);
