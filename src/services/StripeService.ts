@@ -75,7 +75,7 @@ class StripeService {
 
     static async handleCompletedSession(stripeEvent: any) {
 
-        console.log('handleCompletedSession');
+        console.log('handleCompletedSession', stripeEvent);
         const email = stripeEvent.data.object.customer_email;
         const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
         const paiementStatus = stripeEvent.data.object.payment_status;

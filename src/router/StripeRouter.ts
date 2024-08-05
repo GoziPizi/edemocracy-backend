@@ -16,6 +16,7 @@ StripeRouter.post('/webhook', async (req: Request, res: Response, next: NextFunc
         }
      */
     try {
+        console.log('HAHA')
         const sig = req.headers['stripe-signature'] as string;
         if(!sig) {
             throw new Error('Stripe signature missing');
