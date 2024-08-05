@@ -52,6 +52,10 @@ class UserService {
         return toUserOutput(user);
     }
 
+    static async getUserByEmail(email: string) {
+        return await UserService.userRepository.getUserByEmail(email);
+    }
+
     static async updateUserById(id: string, user: any) {
         return UserService.userRepository.update(id, user);
     }
@@ -116,8 +120,8 @@ class UserService {
         return await UserService.opinionRepository.delete(id);
     }
 
-    static async setUserVerified(id: string) {
-        return await UserService.userRepository.setUserVerified(id);
+    static async setUserVerified(email: string) {
+        return await UserService.userRepository.setUserVerified(email);
     }
 }
 
