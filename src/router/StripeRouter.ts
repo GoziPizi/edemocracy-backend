@@ -29,7 +29,7 @@ StripeRouter.post(
         let event: Stripe.Event
 
         try {
-            event = StripeService.constructStripeEvent(JSON.parse(req.body), sig);
+            event = StripeService.constructStripeEvent(req.body, sig);
             console.log('event', event);
         } catch (error: any) {
             res.status(400).send(`Webhook Error: ${error.message}`);
