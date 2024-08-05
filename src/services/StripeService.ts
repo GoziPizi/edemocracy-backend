@@ -77,7 +77,7 @@ class StripeService {
 
         const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.id);
         console.log('CHECKOUT SESSION', checkoutSession);
-        
+
         if(!checkoutSession) {
             throw new Error('Checkout session not found');
         }
