@@ -6,10 +6,8 @@ import { MembershipStatus } from '@prisma/client';
 
 class StripeService {
     private static stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
-    private static contribution_product_id: string = process.env.CONTRIBUTION_PRODUCT_ID!;
     private static standard_product_id: string = process.env.STANDARD_PRODUCT_ID!;
     private static premium_product_id: string = process.env.PREMIUM_PRODUCT_ID!;
-    private static success_url: string = process.env.STRIPE_SUCCESS_URL!;
     private static userRepository: UserRepository = new UserRepository();
     private static preRegistrationRepository: PreRegistrationRepository = new PreRegistrationRepository();
 
@@ -53,11 +51,9 @@ class StripeService {
         return session;
     }
 
-    static constructStripeEvent(payload: any, sig: string | string[], endpointSecret: string) {
-        console.log(payload)
-        console.log(sig)
-        console.log(endpointSecret)
-        return this.stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+    static constructStripeEvent(payload: any, sig: string | string[]) {
+        console.log(process.env.STRIPE_ENDPOINT_SECRET);
+        return this.stripe.webhooks.constructEvent(payload, sig, process.env.STRIPE_ENDPOINT_SECRET!);
     }
 
     static async handleStripeEvent(stripeEvent: any) {

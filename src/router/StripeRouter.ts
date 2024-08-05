@@ -3,7 +3,6 @@ import StripeService from '@/services/StripeService';
 import Stripe from 'stripe';
 
 const StripeRouter = express.Router();
-const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 StripeRouter.post(
     '/webhook',
@@ -30,7 +29,7 @@ StripeRouter.post(
         let event: Stripe.Event
 
         try {
-            event = StripeService.constructStripeEvent(req.body, sig, endpointSecret!);
+            event = StripeService.constructStripeEvent(req.body, sig);
             console.log('event', event);
         } catch (error: any) {
             res.status(400).send(`Webhook Error: ${error.message}`);
