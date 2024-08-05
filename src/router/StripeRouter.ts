@@ -1,10 +1,14 @@
 import express, { NextFunction, Request, Response } from 'express';
 import StripeService from '@/services/StripeService';
+import Stripe from 'stripe';
 
 const StripeRouter = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
-StripeRouter.post('/webhook', async (req: Request, res: Response, next: NextFunction) => {
+StripeRouter.post(
+    '/webhook',
+    express.raw({type: 'application/json'}),
+    async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Contribution']
         #swagger.summary = 'Endpoint to handle stripe webhook.'
@@ -16,12 +20,15 @@ StripeRouter.post('/webhook', async (req: Request, res: Response, next: NextFunc
         }
      */
     try {
-        console.log('HAHA')
+
         const sig = req.headers['stripe-signature'] as string;
+
         if(!sig) {
             throw new Error('Stripe signature missing');
         }
-        let event;
+
+        let event: Stripe.Event
+        
         try {
             event = StripeService.verifyStripeEvent(JSON.stringify(req.body), sig, endpointSecret || '');
             console.log('event', event)
