@@ -22,6 +22,12 @@ enum Role {
   USER
 }
 
+enum MembershipStatus {
+  NONE
+  STANDARD
+  PREMIUM
+}
+
 model User {
   id        String @id @default(uuid())
   email     String @unique
@@ -42,13 +48,13 @@ model User {
   religion          String?
   description       String   @default("")
   isVerified        Boolean  @default(false)
-  contribution      Boolean  @default(false)
   language          String   @default("fr")
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
-  politicSide Affiliation
-  role        Role
+  politicSide        Affiliation
+  role               Role
+  contributionStatus MembershipStatus? @default(NONE)
 
   notifications                  Notifications[]
   Personality                    Personality?
@@ -59,11 +65,31 @@ model User {
   MembershipInvites              MembershipInvite[]
   Opinion                        Opinion[]
   PartyComment                   PartyComment[]
-  VerifyUser                     VerifyUser[]
   Topic                          Topic[]
   VoteForReformulation           VoteForReformulation[]
   DebateDescriptionReformulation DebateDescriptionReformulation[]
   Follow                         Follow[]
+}
+
+model PreRegistrationUser {
+  id                String      @id @default(uuid())
+  email             String      @unique
+  name              String
+  firstName         String
+  password          String
+  telephone         String
+  address           String
+  politicSide       Affiliation
+  profession        String?
+  profilePicture    String?
+  formationName     String?
+  formationDuration String?
+  birthSex          String?
+  actualSex         String?
+  sexualOrientation String?
+  religion          String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
 }
 
 model Follow {
@@ -78,10 +104,13 @@ model Follow {
 
 model VerifyUser {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  recto     String
-  verso     String
+  email     String
+  recto1    String
+  verso1    String
+  idNumber1 String
+  recto2    String?
+  verso2    String?
+  idNumber2 String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

@@ -1,15 +1,19 @@
 import UserRepository from "@/repositories/UserRepository";
+import PreRegistrationRepository from "@/repositories/PreRegistrationRepository";
 import UserService from "./UserService";
 import { JwtPayload } from "@/types/JwtPayload";
 import Jwt from "@/classes/Jwt";
 import { JwtCheckException } from "@/exceptions/JwtExceptions";
-import { Role } from "@prisma/client";
+import { MembershipStatus, Role } from "@prisma/client";
 import AwsService from "./AwsService";
 import { sendReinitPasswordMail } from "./MailService";
 import { FreeUserCreateInputDto, StandardUserCreateInputDto } from "@/types/dtos/UserDto";
+import StripeService from "./StripeService";
 
 class AuthentificationService {
     private static userRepository: UserRepository = new UserRepository()
+    private static preRegistrationRepository: PreRegistrationRepository = new PreRegistrationRepository()   
+    private static stripeService: StripeService;
 
     private static timeExpiration = 60 * 60 * 24 * 7 // 7 days
 
@@ -24,19 +28,6 @@ class AuthentificationService {
         return new Jwt(payload, this.timeExpiration).jwt
     }
 
-    static async register(userInput: any, recto: Express.Multer.File, verso: Express.Multer.File) {
-        let finalUser = {
-            ...userInput,
-            role: Role.USER,
-            isVerified: false
-        }
-        const user = await this.userRepository.create(finalUser)
-        const rectoUrl = await AwsService.uploadIdentityPicture(recto)
-        const versoUrl = await AwsService.uploadIdentityPicture(verso)
-        await this.userRepository.createVerificationRequest(user.id, rectoUrl, versoUrl)
-        return
-    }
-
     static async registerFree(userInput: FreeUserCreateInputDto) {
         let finalUser = {
             ...userInput,
@@ -45,24 +36,92 @@ class AuthentificationService {
         await this.userRepository.create(finalUser)
     }
 
-    static async registerStandard(
+    //Returns the checkout session url.
+    static async preRegisterStandard(
         userInput: StandardUserCreateInputDto,
         recto1: Express.Multer.File,
         verso1: Express.Multer.File,
         recto2: Express.Multer.File | undefined,
         verso2: Express.Multer.File | undefined)
     {
-        //TODO
+        const recto1Url = await AwsService.uploadIdentityPicture(recto1)
+        const verso1Url = await AwsService.uploadIdentityPicture(verso1)
+        let recto2Url: string | undefined = undefined
+        let verso2Url: string | undefined = undefined
+        if(recto2 && verso2) {
+            recto2Url = await AwsService.uploadIdentityPicture(recto2)
+            verso2Url = await AwsService.uploadIdentityPicture(verso2)
+        }
+
+        try { 
+            await this.userRepository.createVerificationRequest(userInput.email, recto1Url, verso1Url, userInput.idNumber1, recto2Url, verso2Url, userInput.idNumber2)
+        } catch (error) {
+            console.log(error)
+        }
+        let finalInput : any = {...userInput}
+        delete finalInput.idNumber1
+        delete finalInput.idNumber2
+
+        const preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
+        if(preRegistration) {
+            await this.preRegistrationRepository.deletePreRegistration(userInput.email)
+        }
+
+        this.preRegistrationRepository.createPreRegistration(finalInput)
+
+        const session = await StripeService.createCheckoutSessionForStandard(userInput.email)
+        return session.url;
     }
 
-    static async registerPremium(
+    static async preRegisterPremium(
         userInput: any,
         recto1: Express.Multer.File,
         verso1: Express.Multer.File,
         recto2: Express.Multer.File | undefined,
         verso2: Express.Multer.File | undefined)
     {
-        //TODO
+        const recto1Url = await AwsService.uploadIdentityPicture(recto1)
+        const verso1Url = await AwsService.uploadIdentityPicture(verso1)
+        let recto2Url: string | undefined = undefined
+        let verso2Url: string | undefined = undefined
+        if(recto2 && verso2) {
+            recto2Url = await AwsService.uploadIdentityPicture(recto2)
+            verso2Url = await AwsService.uploadIdentityPicture(verso2)
+        }
+
+        await this.userRepository.createVerificationRequest(userInput.email, recto1Url, verso1Url, userInput.idNumber1, recto2Url, verso2Url, userInput.idNumber2)
+
+        let finalInput : any = {...userInput}
+        delete finalInput.idNumber1
+        delete finalInput.idNumber2
+
+        const preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
+        if(preRegistration) {
+            await this.preRegistrationRepository.deletePreRegistration(userInput.email)
+        }
+
+        this.preRegistrationRepository.createPreRegistration(finalInput)
+        const session = await StripeService.createCheckoutSessionForPremium(userInput.email)
+        return session.url;
+    }
+
+    static async registerFromPreRegistration(email: string, isPremium: boolean) {
+        const preRegistration = await this.preRegistrationRepository.getPreRegistration(email)
+        if(!preRegistration) {
+            throw new Error('PreRegistration not found')
+        }
+
+        const contributionStatus = isPremium ? MembershipStatus.PREMIUM : MembershipStatus.STANDARD
+
+        const user = {
+            ...preRegistration,
+            role: Role.USER,
+            contributionStatus,
+            isVerified: false
+        }
+        await this.userRepository.create(user)
+        await this.preRegistrationRepository.deletePreRegistration(email)
+        return
     }
 
     static async checkToken(token: string): Promise<boolean> {
@@ -122,16 +181,24 @@ class AuthentificationService {
         if(!request) {
             throw new Error('Request not found')
         }
+        const user = await UserService.getUserByEmail(request.email)
         if(verified) {
-            await UserService.setUserVerified(request.userId)
+            await UserService.setUserVerified(request.email)
         } else {
-            await UserService.deleteUser(request.userId)
+            await UserService.deleteUser(user!.id)
         }
         await this.userRepository.deleteVerificationRequest(requestId)
 
         //Delete the files for RGPD
-        await AwsService.deleteFile(request.recto)
-        await AwsService.deleteFile(request.verso)
+        await AwsService.deleteFile(request.recto1)
+        await AwsService.deleteFile(request.verso1)
+
+        if(request.recto2) {
+            await AwsService.deleteFile(request.recto2)
+        }
+        if(request.verso2) {
+            await AwsService.deleteFile(request.verso2)
+        }
         return
     }
 

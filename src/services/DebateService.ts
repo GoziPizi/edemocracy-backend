@@ -1,14 +1,11 @@
-import Jwt from "@/classes/Jwt";
-import { toValue } from "@/mappers/DebateVoteMapper";
 import ArgumentRepository from "@/repositories/ArgumentRepository";
 import DebateRepository from "@/repositories/DebateRepository";
 import DebateVoteRepository from "@/repositories/DebateVoteRepository";
 import TopicRepository from "@/repositories/TopicRepository";
 import UserRepository from "@/repositories/UserRepository";
 import { ArgumentWithVoteOutputDto } from "@/types/dtos/ArgumentOutputDtos";
-import { Argument, DebateVoteType } from "@prisma/client";
+import { Argument, DebateVoteType, MembershipStatus } from "@prisma/client";
 import ArgumentService from "./ArgumentService";
-import { title } from "process";
 
 class DebateService {
 
@@ -152,7 +149,7 @@ class DebateService {
         const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
         const actualVote = await this.debateRepository.getDebateVote(debateId, userId);
         const user = await this.userRepository.findById(userId);
-        const contribution = user!.contribution;
+        const contribution = user!.contributionStatus === MembershipStatus.PREMIUM || user!.contributionStatus === MembershipStatus.STANDARD;
 
         //Handling vote
 
@@ -182,7 +179,7 @@ class DebateService {
         const debateContributorsResult = await this.debateRepository.getDebateResult(debate!.debateContributorsResultId);
         const actualVote = await this.debateRepository.getDebateVote(debateId, userId);
         const user = await this.userRepository.findById(userId);
-        const contribution = user!.contribution;
+        const contribution = user!.contributionStatus === MembershipStatus.PREMIUM || user!.contributionStatus === MembershipStatus.STANDARD;
 
         if(!debate) {
             throw new Error('Debate not found');

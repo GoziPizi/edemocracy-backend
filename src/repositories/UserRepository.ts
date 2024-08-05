@@ -1,4 +1,4 @@
-import { Affiliation, Role } from "@prisma/client";
+import { Affiliation, MembershipStatus, Role } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 import RawQueryRepository from "./RawQueryRepository";
 
@@ -25,19 +25,6 @@ class UserRepository extends PrismaRepository {
             },
             data: {
                 password: hashedPassword
-            }
-        })
-        return
-    }
-
-    //Updates the contribution field to true, based on the email to clarify on Stripe.
-    updateContribution = async (email: string) => {
-        await this.prismaClient.user.update({
-            where: {
-                email
-            },
-            data: {
-                contribution: true
             }
         })
         return
@@ -88,6 +75,12 @@ class UserRepository extends PrismaRepository {
     }
 
     update = async (id: string, user: any) => {
+        if(user.contributionStatus) {
+            delete user.contributionStatus
+        }
+        if(user.role) {
+            delete user.role
+        }
         const updatedUser = await this.prismaClient.user.update({
             where: {
                 id
@@ -97,6 +90,18 @@ class UserRepository extends PrismaRepository {
             }
         })
         return updatedUser
+    }
+
+    updateContributionStatus = async (id: string, contributionStatus: MembershipStatus) => {
+        await this.prismaClient.user.update({
+            where: {
+                id
+            },
+            data: {
+                contributionStatus
+            }
+        })
+        return
     }
 
     findById = async (id: string) => {
@@ -242,12 +247,24 @@ class UserRepository extends PrismaRepository {
         return user
     }
 
-    createVerificationRequest = async (userId: string, recto: string, verso: string) => {
+    createVerificationRequest = async (
+        email: string,
+        recto1: string,
+        verso1: string,
+        idNumber1:string,
+        recto2?: string,
+        verso2?: string,
+        idNumber2?:string
+    ) => {
         const verification = await this.prismaClient.verifyUser.create({
             data: {
-                userId,
-                recto,
-                verso
+                email,
+                recto1,
+                verso1,
+                idNumber1,
+                recto2,
+                verso2,
+                idNumber2
             }
         })
         return verification
@@ -262,10 +279,10 @@ class UserRepository extends PrismaRepository {
         return
     }
 
-    setUserVerified = async (userId: string) => {
+    setUserVerified = async (email: string) => {
         await this.prismaClient.user.update({
             where: {
-                id: userId
+                email
             },
             data: {
                 isVerified: true

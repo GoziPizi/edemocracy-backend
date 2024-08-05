@@ -87,34 +87,6 @@ LoginRouter.post('/change-password', async (req: Request, res: Response, next: N
 });
 
 LoginRouter.post(
-    '/register',
-    upload.fields([{name: 'recto', maxCount: 1}, {name: 'verso', maxCount: 1}]),
-    async (req: Request, res: Response, next: NextFunction) => {
-    /**
-    #swagger.tags = ['Login', 'Register']
-    #swagger.summary = 'Endpoint to register an account'
-    #swagger.parameters['body] = {
-        description: 'password and email',
-        required: true,
-        schema: { $ref: "#/definitions/LoginPasswordDefinition" }
-    }
-     */
-    try {
-        const files = req.files as { [fieldname: string]: Express.Multer.File[] };
-        const recto = files['recto'] ? files['recto'][0] : undefined;
-        const verso = files['verso'] ? files['verso'][0] : undefined;
-        if(!recto || !verso) {
-            throw new Error('Recto and verso are required');
-        }
-        const userInput = req.body;
-        const jwt = await AuthentificationService.register(userInput, recto, verso);
-        res.status(200).send(jwt);
-    } catch (error) {
-        next(error);
-    }
-});
-
-LoginRouter.post(
     '/register-free',
     upload.none(),
     async (req: Request, res: Response, next: NextFunction) => {
@@ -234,6 +206,7 @@ LoginRouter.post(
     try {
 
         const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+
         const recto1 = files['recto1'] ? files['recto1'][0] : undefined;
         const verso1 = files['verso1'] ? files['verso1'][0] : undefined;
         const recto2 = files['recto2'] ? files['recto2'][0] : undefined;
@@ -258,6 +231,7 @@ LoginRouter.post(
             telephone: Joi.string().required(),
             address: Joi.string().required(),
             politicSide: Joi.string().required(),
+            password: Joi.string().required(),
             idNumber1: Joi.string().required(),
             idNumber2: Joi.string(),
             profession: Joi.string(),
@@ -271,6 +245,7 @@ LoginRouter.post(
 
         const { error } = schema.validate(userInput);
         if(error) {
+            console.log(error);
             throw new InvalidRegisterTypeException();
         }
 
@@ -282,8 +257,8 @@ LoginRouter.post(
 
         //end of input validation
 
-        await AuthentificationService.registerStandard(userInput as StandardUserCreateInputDto, recto1, verso1, recto2, verso2);
-
+        const checkoutUrl = await AuthentificationService.preRegisterStandard(userInput as StandardUserCreateInputDto, recto1, verso1, recto2, verso2);
+        return res.status(200).send({checkoutUrl});
 
     } catch (error) {
         next(error);
@@ -354,6 +329,7 @@ LoginRouter.post(
             telephone: Joi.string().required(),
             address: Joi.string().required(),
             politicSide: Joi.string().required(),
+            password: Joi.string().required(),
             idNumber1: Joi.string().required(),
             idNumber2: Joi.string(),
             profession: Joi.string(),
@@ -378,9 +354,9 @@ LoginRouter.post(
 
         //end of input validation
 
-        const jwt = await AuthentificationService.registerPremium(userInput, recto1, verso1, recto2, verso2);
-        res.status(200).send(jwt);
-        
+        const checkoutUrl = await AuthentificationService.preRegisterPremium(userInput, recto1, verso1, recto2, verso2);
+        return res.status(200).send({checkoutUrl});
+
     } catch (error) {
         next(error);
     }
