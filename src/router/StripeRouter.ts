@@ -21,8 +21,7 @@ StripeRouter.post(
      */
     try {
 
-        const sig = req.headers['stripe-signature'] as string;
-        console.log('sig', sig)
+        const sig = req.headers['stripe-signature'];
 
         if(!sig) {
             throw new Error('Stripe signature missing');
@@ -31,8 +30,8 @@ StripeRouter.post(
         let event: Stripe.Event
 
         try {
-            event = StripeService.verifyStripeEvent(req.body, sig, endpointSecret || '');
-            console.log('event', event)
+            event = StripeService.constructStripeEvent(req.body, sig, endpointSecret!);
+            console.log('event', event);
         } catch (error: any) {
             res.status(400).send(`Webhook Error: ${error.message}`);
             return;

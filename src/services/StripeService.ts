@@ -58,6 +58,10 @@ class StripeService {
         return this.stripe.webhooks.constructEvent(payload, sig, endpointSecret);
     }
 
+    static constructStripeEvent(payload: any, sig: string | string[], endpointSecret: string) {
+        return this.stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+    }
+
     static async handleStripeEvent(stripeEvent: any) {
         
         console.log('handleStripeEvent');
