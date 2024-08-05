@@ -1,7 +1,7 @@
-import { UserCreateInputDto, UserOutputDto, UserPublicOutputDto, UserUpdateInputDto } from '@/types/dtos/UserDto'
-import { Affiliation } from '@prisma/client'
+import { FreeUserCreateInputDto, UserOutputDto, UserPublicOutputDto, UserUpdateInputDto } from '@/types/dtos/UserDto'
+import { Affiliation, MembershipStatus } from '@prisma/client'
 
-export const UserCreateInputDefinition: UserCreateInputDto = {
+export const UserCreateInputDefinition: FreeUserCreateInputDto = {
     email: 'string',
     password: 'string',
     name: 'string',
@@ -23,7 +23,13 @@ export const UserOutputDefinition: UserOutputDto = {
     telephone: 'string',
     firstName: 'string',
     profilePicture: 'string',
-    contribution: false,
+    religion: 'string',
+    formationName: 'string',
+    formationDuration: 'string',
+    birthSex: 'string',
+    actualSex: 'string',
+    sexualOrientation: 'string',
+    contributionStatus: MembershipStatus.NONE,
     language: 'string',
     politicSide: Affiliation.RIGHT,
     role: 'USER',
@@ -36,8 +42,8 @@ export const UserPublicOutputDefinition: UserPublicOutputDto = {
     name: 'string',
     firstName: 'string',
     language: 'string',
-    contribution: false,
     profilePicture: 'string',
+    contributionStatus: MembershipStatus.NONE,
     politicSide: Affiliation.RIGHT,
     createdAt: new Date(),
     updatedAt: new Date()
