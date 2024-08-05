@@ -74,19 +74,19 @@ class StripeService {
 
     static async handleCompletedSession(stripeEvent: any) {
 
-        console.log('COMPLETE SESSION');
 
-        const email = stripeEvent.customer_email;
+        const email = stripeEvent.data.object.customer_email;
         const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
-        const paiementStatus = stripeEvent.payment_status;
-        const productId = stripeEvent.display_items[0].price.product;
-        const premium = productId === this.premium_product_id;
+        const paiementStatus = stripeEvent.data.object.payment_status;
 
-        console.log(stripeEvent);
+        const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.data.object.id);
 
-        if(productId !== this.contribution_product_id && productId !== this.standard_product_id) {
+        if(!checkoutSession.line_items?.data[0].price?.product) {
             return;
         }
+
+        console.log(checkoutSession.line_items?.data[0].price.product);
+        const premium = checkoutSession.line_items?.data[0].price.product === this.premium_product_id;
 
         if(paiementStatus !== 'paid') {
             await this.preRegistrationRepository.deletePreRegistration(email);
