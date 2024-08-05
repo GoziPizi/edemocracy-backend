@@ -57,9 +57,12 @@ app.use(cors(corsOptions));
 console.log('isProdEnvironment:', isProdEnvironment());
 console.log('PORT:', PORT);
 
+app.use('', router.stripeRouter)
+
 app.use(express.json({ limit: '50mb' }))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
-app.use('', router);
+app.use('', router.router);
+
 if (isProdEnvironment())
     httpsServer.listen(PORT, () => {
       console.info(`⚡️ HTTPS Server is running on port: ${PORT}`)
