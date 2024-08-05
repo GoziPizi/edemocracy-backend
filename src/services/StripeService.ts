@@ -78,13 +78,13 @@ class StripeService {
         const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.id);
 
         if(!checkoutSession) {
-            return;
+            throw new Error('Checkout session not found');
         }
 
         const productId = checkoutSession.line_items?.data[0].price?.product as string;
 
         if(productId !== this.standard_product_id && productId !== this.premium_product_id) {
-            return;
+            throw new Error('Invalid product id');
         }
 
         const premium = productId === this.premium_product_id;
@@ -94,7 +94,9 @@ class StripeService {
             return;
         }
         if(preRegistration) {
+            console.log('PRE REGISTRATION FOUND');
             await AuthentificationService.registerFromPreRegistration(email, premium);
+            console.log('USER REGISTERED');
             return;
         }
         const user = await this.userRepository.getUserByEmail(email);
