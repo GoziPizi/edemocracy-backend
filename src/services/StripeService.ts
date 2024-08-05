@@ -54,7 +54,7 @@ class StripeService {
     }
 
     //throw an error if the signature is not valid
-    static verifyStripeEvent(payload: any, sig: string, endpointSecret: string) {
+    static verifyStripeEvent(payload: string, sig: string, endpointSecret: string) {
         return this.stripe.webhooks.constructEvent(payload, sig, endpointSecret);
     }
 
@@ -76,11 +76,11 @@ class StripeService {
     static async handleCompletedSession(stripeEvent: any) {
 
         console.log('handleCompletedSession', stripeEvent);
-        const email = stripeEvent.data.object.customer_email;
+        const email = stripeEvent.customer_email;
         const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
         const paiementStatus = stripeEvent.data.object.payment_status;
 
-        const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.data.object.id);
+        const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.id);
 
         if(!checkoutSession) {
             return;
