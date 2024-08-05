@@ -52,10 +52,6 @@ class StripeService {
     }
 
     static constructStripeEvent(payload: Buffer, sig: string | string[]) {
-        console.log('constructStripeEvent');
-        console.log('payload', payload);
-        console.log('sig', sig);
-        console.log('process.env.STRIPE_ENDPOINT_SECRET', process.env.STRIPE_ENDPOINT_SECRET);
         return this.stripe.webhooks.constructEvent(payload, sig, process.env.STRIPE_ENDPOINT_SECRET!);
     }
 

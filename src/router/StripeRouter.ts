@@ -35,9 +35,7 @@ StripeRouter.post(
             res.status(400).send(`Webhook Error: ${error.message}`);
             return;
         }
-        const stripeEvent = req.body;
-        console.log('stripeEvent', stripeEvent);
-        await StripeService.handleStripeEvent(stripeEvent);
+        await StripeService.handleStripeEvent(event);
         res.json({received: true});
     } catch (error) {
         next(error);
