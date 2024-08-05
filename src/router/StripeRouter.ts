@@ -22,15 +22,16 @@ StripeRouter.post(
     try {
 
         const sig = req.headers['stripe-signature'] as string;
+        console.log('sig', sig)
 
         if(!sig) {
             throw new Error('Stripe signature missing');
         }
-
-        let event: Stripe.Event
         
+        let event: Stripe.Event
+
         try {
-            event = StripeService.verifyStripeEvent(JSON.stringify(req.body), sig, endpointSecret || '');
+            event = StripeService.verifyStripeEvent(req.body, sig, endpointSecret || '');
             console.log('event', event)
         } catch (error: any) {
             res.status(400).send(`Webhook Error: ${error.message}`);
