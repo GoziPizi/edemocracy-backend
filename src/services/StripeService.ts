@@ -82,13 +82,13 @@ class StripeService {
             throw new Error('Checkout session not found');
         }
 
-        const productId = checkoutSession.line_items?.data[0].price?.product as string;
+        const price = checkoutSession.amount_total;
 
-        if(productId !== this.standard_product_id && productId !== this.premium_product_id) {
-            throw new Error('Invalid product id');
+        if(price !== 499 && price !== 1499) {
+            throw new Error('Invalid product');
         }
 
-        const premium = productId === this.premium_product_id;
+        const premium = price === 1499;
 
         if(paiementStatus !== 'paid') {
             await this.preRegistrationRepository.deletePreRegistration(email);
