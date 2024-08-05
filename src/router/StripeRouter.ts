@@ -1,6 +1,5 @@
 import express, { NextFunction, Request, Response } from 'express';
 import StripeService from '@/services/StripeService';
-import ContributionService from '@/services/ContributionService';
 
 const StripeRouter = express.Router();
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -24,13 +23,13 @@ StripeRouter.post('/webhook', async (req: Request, res: Response, next: NextFunc
         let event;
         try {
             event = StripeService.verifyStripeEvent(req.body, sig, endpointSecret || '');
-            console.log('event', event);
+            console.log('HOHOHO');
         } catch (error: any) {
             res.status(400).send(`Webhook Error: ${error.message}`);
         }
         const stripeEvent = req.body;
         console.log('stripeEvent', stripeEvent);
-        await StripeService.handleStripeEvent(event);
+        await StripeService.handleStripeEvent(stripeEvent);
         res.status(200).send();
     } catch (error) {
         next(error);

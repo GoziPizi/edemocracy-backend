@@ -60,6 +60,7 @@ class StripeService {
 
     static async handleStripeEvent(stripeEvent: any) {
         
+        console.log('handleStripeEvent');
         switch(stripeEvent.type) {
             case 'checkout.session.completed':
                 StripeService.handleCompletedSession(stripeEvent.data.object);
@@ -74,7 +75,7 @@ class StripeService {
 
     static async handleCompletedSession(stripeEvent: any) {
 
-
+        console.log('handleCompletedSession');
         const email = stripeEvent.data.object.customer_email;
         const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
         const paiementStatus = stripeEvent.data.object.payment_status;
