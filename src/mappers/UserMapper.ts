@@ -11,7 +11,7 @@ export const toUserOutput = (user: User): UserOutputDto => {
         address: user.address,
         profession: user.profession,
         formationName: user.formationName,
-        formationDuration: user.formationDuration,
+        formationObtention: user.formationObtention,
         birthSex: user.birthSex,
         actualSex: user.actualSex,
         sexualOrientation: user.sexualOrientation,

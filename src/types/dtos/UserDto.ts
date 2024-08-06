@@ -16,7 +16,7 @@ export type UserPublicOutputDto = Omit<
     | 'address' 
     | 'profession' 
     | 'formationName'
-    | 'formationDuration'
+    | 'formationObtention'
     | 'telephone' 
     | 'follows' 
     | 'religion'

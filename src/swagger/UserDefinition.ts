@@ -25,7 +25,7 @@ export const UserOutputDefinition: UserOutputDto = {
     profilePicture: 'string',
     religion: 'string',
     formationName: 'string',
-    formationDuration: 'string',
+    formationObtention: 0,
     birthSex: 'string',
     actualSex: 'string',
     sexualOrientation: 'string',
