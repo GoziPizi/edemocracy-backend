@@ -4,8 +4,8 @@ const emailAdress = process.env.EMAIL_ADRESS
 const emailPassCode = process.env.EMAIL_PASS_CODE
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', //TODO
-  port: 465, //TODO
+  host: 'ssl0.ovh.net',
+  port: 465,
   secure: true,
   auth: {
     user: emailAdress,
@@ -32,7 +32,7 @@ function sendEmail(email: string, subject: string, text: string) {
 
 function sendReinitPasswordMail(email: string, token: string) {
   const subject = 'Réinitialisation de votre mot de passe'
-  const text = `Bonjour, veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : https://weebz.fr/change-password/?token=${token}&email=${email}`
+  const text = `Bonjour, veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : https://digital-democracy.eu/change-password/?token=${token}&email=${email}`
   sendEmail(email, subject, text)
 }
 

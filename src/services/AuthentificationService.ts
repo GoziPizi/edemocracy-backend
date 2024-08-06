@@ -208,7 +208,7 @@ class AuthentificationService {
             throw new Error('User not found')
         }
         const token = new Jwt({id: user.id}, 60 * 60).jwt
-        sendReinitPasswordMail(email, token.toString())
+        sendReinitPasswordMail(email, token.key)
         return
     }
 

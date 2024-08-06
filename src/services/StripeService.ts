@@ -91,8 +91,9 @@ class StripeService {
         const premium = price === 1499;
 
         if(paiementStatus !== 'paid') {
+            console.log('PAIEMENT NOT PAID');
             await this.preRegistrationRepository.deletePreRegistration(email);
-            return;
+            throw new Error('Paiement not paid');
         }
         if(preRegistration) {
             console.log('PRE REGISTRATION FOUND');
