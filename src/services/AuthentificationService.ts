@@ -33,6 +33,14 @@ class AuthentificationService {
             ...userInput,
             role: Role.USER,
         }
+
+        if(userInput.formationObtention) {
+            finalUser = {
+                ...finalUser,
+                formationObtention: Number(userInput.formationObtention)
+            }
+        }
+
         await this.userRepository.create(finalUser)
     }
 
@@ -113,12 +121,20 @@ class AuthentificationService {
 
         const contributionStatus = isPremium ? MembershipStatus.PREMIUM : MembershipStatus.STANDARD
 
-        const user = {
+        let user : any = {
             ...preRegistration,
             role: Role.USER,
             contributionStatus,
             isVerified: false
         }
+
+        if(preRegistration.formationObtention) {
+            user = {
+                ...user,
+                formationObtention: Number(preRegistration.formationObtention)
+            }
+        }
+
         await this.userRepository.create(user)
         await this.preRegistrationRepository.deletePreRegistration(email)
         return
