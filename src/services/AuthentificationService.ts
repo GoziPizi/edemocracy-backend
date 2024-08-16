@@ -122,7 +122,6 @@ class AuthentificationService {
             delete finalInput.idNumber3
 
             let diplomas : {name:string; obtention: number}[] | undefined = undefined
-            console.log('diplomas', finalInput.diplomas)
 
             if(finalInput.diplomas) {
                 diplomas = JSON.parse(finalInput.diplomas)
@@ -144,8 +143,11 @@ class AuthentificationService {
                 throw new Error('Error while creating preRegistration')
             }
 
+            console.log('PRE REGISTRATION', preRegistration)
+            console.log('DIPLMAS', diplomas)
             if(diplomas && preRegistration) {
                 for (let diploma of diplomas) {
+                    console.log('in the loop')
                     await this.preRegistrationRepository.createPreregistrationDiploma(preRegistration.id, diploma.name, diploma.obtention)
                 }
             }
