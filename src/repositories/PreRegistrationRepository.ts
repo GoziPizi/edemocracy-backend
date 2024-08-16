@@ -30,7 +30,13 @@ class PreRegistrationRepository extends PrismaRepository {
     }
 
     createPreregistrationDiploma = async (preRegistrationId: string, name: string, obtention: number) => {
-        await this.prismaClient.preRegistrationDiploma.create
+        await this.prismaClient.preRegistrationDiploma.create({
+            data: {
+                preRegistrationId,
+                name,
+                obtention
+            }
+        })
     }
 
     getPreRegistrationDiplomas = async (preRegistrationId: string) => {
