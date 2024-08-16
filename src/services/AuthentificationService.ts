@@ -29,19 +29,41 @@ class AuthentificationService {
     }
 
     static async registerFree(userInput: FreeUserCreateInputDto) {
-        let finalUser = {
-            ...userInput,
-            role: Role.USER,
-        }
 
-        if(userInput.formationObtention) {
-            finalUser = {
-                ...finalUser,
-                formationObtention: Number(userInput.formationObtention)
+        try {
+
+            let finalUser = {
+                ...userInput,
+                role: Role.USER,
             }
-        }
 
-        await this.userRepository.create(finalUser)
+            let diplomas = ''
+
+            if(userInput.diplomas) {
+                diplomas = userInput.diplomas
+                delete finalUser.diplomas
+            }
+
+            if(userInput.yearsOfExperience) {
+                finalUser = {
+                    ...finalUser,
+                    yearsOfExperience: Number(userInput.yearsOfExperience)
+                }
+            }
+
+            let user = await this.userRepository.create(finalUser)
+
+            if(diplomas && user) {
+                let finalDiplomas : {name: string; obtention: number}[] = JSON.parse(diplomas)
+                for (let diploma of finalDiplomas) {
+                    await this.userRepository.createDiploma(user.id, diploma.name, diploma.obtention)
+                }
+            }
+
+        } catch (error) {
+            console.log(error)
+            throw new Error('Error while creating user')
+        }
     }
 
     //Returns the checkout session url.
@@ -50,35 +72,92 @@ class AuthentificationService {
         recto1: Express.Multer.File,
         verso1: Express.Multer.File,
         recto2: Express.Multer.File | undefined,
-        verso2: Express.Multer.File | undefined)
+        verso2: Express.Multer.File | undefined,
+        recto3: Express.Multer.File | undefined,
+        verso3: Express.Multer.File | undefined    
+    )
     {
-        const recto1Url = await AwsService.uploadIdentityPicture(recto1)
-        const verso1Url = await AwsService.uploadIdentityPicture(verso1)
-        let recto2Url: string | undefined = undefined
-        let verso2Url: string | undefined = undefined
-        if(recto2 && verso2) {
-            recto2Url = await AwsService.uploadIdentityPicture(recto2)
-            verso2Url = await AwsService.uploadIdentityPicture(verso2)
-        }
 
-        try { 
-            await this.userRepository.createVerificationRequest(userInput.email, recto1Url, verso1Url, userInput.idNumber1, recto2Url, verso2Url, userInput.idNumber2)
+        try {
+
+            let data : any = { }
+
+            const recto1Url = await AwsService.uploadIdentityPicture(recto1)
+            const verso1Url = await AwsService.uploadIdentityPicture(verso1)
+
+            data.email = userInput.email
+            data.recto1 = recto1Url
+            data.verso1 = verso1Url
+            data.idNumber1 = userInput.idNumber1
+            data.idNationality1 = userInput.idNationality1
+
+            let recto2Url: string | undefined = undefined
+            let verso2Url: string | undefined = undefined
+            if(recto2 && verso2) {
+                recto2Url = await AwsService.uploadIdentityPicture(recto2)
+                verso2Url = await AwsService.uploadIdentityPicture(verso2)
+                data.recto2 = recto2Url
+                data.verso2 = verso2Url
+                data.idNumber2 = userInput.idNumber2
+                data.idNationality2 = userInput.idNationality2
+            }
+
+            let recto3Url: string | undefined = undefined
+            let verso3Url: string | undefined = undefined
+            if(recto3 && verso3) {
+                recto3Url = await AwsService.uploadIdentityPicture(recto3)
+                verso3Url = await AwsService.uploadIdentityPicture(verso3)
+                data.recto3 = recto3Url
+                data.verso3 = verso3Url
+                data.idNumber3 = userInput.idNumber3
+                data.idNationality3 = userInput.idNationality3
+            }
+
+        
+            await this.userRepository.createVerificationRequest(data)
+        
+            let finalInput : any = {...userInput}
+            delete finalInput.idNumber1
+            delete finalInput.idNumber2
+            delete finalInput.idNumber3
+
+            let diplomas : {name:string; obtention: number}[] | undefined = undefined
+
+            if(finalInput.diplomas) {
+                diplomas = JSON.parse(finalInput.diplomas)
+                delete finalInput.diplomas
+            }
+
+            if(finalInput.yearsOfExperience) {
+                finalInput.yearsOfExperience = Number(finalInput.yearsOfExperience)
+            }
+
+            let preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
+            if(preRegistration) {
+                await this.preRegistrationRepository.deletePreRegistration(userInput.email)
+            }
+
+            preRegistration = await this.preRegistrationRepository.createPreRegistration(finalInput)
+
+            if(!preRegistration) {
+                throw new Error('Error while creating preRegistration')
+            }
+
+            if(diplomas && preRegistration) {
+                for (let diploma of diplomas) {
+                    await this.preRegistrationRepository.createPreregistrationDiploma(preRegistration.id, diploma.name, diploma.obtention)
+                }
+            }
+
+            const session = await StripeService.createCheckoutSessionForStandard(userInput.email)
+            return session.url;
+
         } catch (error) {
+
             console.log(error)
+            throw new Error('Error while registering user')
+
         }
-        let finalInput : any = {...userInput}
-        delete finalInput.idNumber1
-        delete finalInput.idNumber2
-
-        const preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
-        if(preRegistration) {
-            await this.preRegistrationRepository.deletePreRegistration(userInput.email)
-        }
-
-        this.preRegistrationRepository.createPreRegistration(finalInput)
-
-        const session = await StripeService.createCheckoutSessionForStandard(userInput.email)
-        return session.url;
     }
 
     static async preRegisterPremium(
@@ -86,31 +165,69 @@ class AuthentificationService {
         recto1: Express.Multer.File,
         verso1: Express.Multer.File,
         recto2: Express.Multer.File | undefined,
-        verso2: Express.Multer.File | undefined)
+        verso2: Express.Multer.File | undefined,
+        recto3: Express.Multer.File | undefined,
+        verso3: Express.Multer.File | undefined
+    )
     {
-        const recto1Url = await AwsService.uploadIdentityPicture(recto1)
-        const verso1Url = await AwsService.uploadIdentityPicture(verso1)
-        let recto2Url: string | undefined = undefined
-        let verso2Url: string | undefined = undefined
-        if(recto2 && verso2) {
-            recto2Url = await AwsService.uploadIdentityPicture(recto2)
-            verso2Url = await AwsService.uploadIdentityPicture(verso2)
+        try {
+            let data : any = { }
+
+            const recto1Url = await AwsService.uploadIdentityPicture(recto1)
+            const verso1Url = await AwsService.uploadIdentityPicture(verso1)
+
+            data.email = userInput.email
+            data.recto1 = recto1Url
+            data.verso1 = verso1Url
+            data.idNumber1 = userInput.idNumber1
+            data.idNationality1 = userInput.idNationality1
+
+            let recto2Url: string | undefined = undefined
+            let verso2Url: string | undefined = undefined
+            if(recto2 && verso2) {
+                recto2Url = await AwsService.uploadIdentityPicture(recto2)
+                verso2Url = await AwsService.uploadIdentityPicture(verso2)
+                data.recto2 = recto2Url
+                data.verso2 = verso2Url
+                data.idNumber2 = userInput.idNumber2
+                data.idNationality2 = userInput.idNationality2
+            }
+
+            let recto3Url: string | undefined = undefined
+            let verso3Url: string | undefined = undefined
+
+            if(recto3 && verso3) {
+                recto3Url = await AwsService.uploadIdentityPicture(recto3)
+                verso3Url = await AwsService.uploadIdentityPicture(verso3)
+                data.recto3 = recto3Url
+                data.verso3 = verso3Url
+                data.idNumber3 = userInput.idNumber3
+                data.idNationality3 = userInput.idNationality3
+            }
+
+            await this.userRepository.createVerificationRequest(data)
+
+            let finalInput : any = {...userInput}
+            delete finalInput.idNumber1
+            delete finalInput.idNumber2
+            delete finalInput.idNumber3
+
+            if(finalInput.yearsOfExperience) {
+                finalInput.yearsOfExperience = Number(finalInput.yearsOfExperience)
+            }
+
+            const preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
+            if(preRegistration) {
+                await this.preRegistrationRepository.deletePreRegistration(userInput.email)
+            }
+
+            this.preRegistrationRepository.createPreRegistration(finalInput)
+            const session = await StripeService.createCheckoutSessionForPremium(userInput.email)
+            return session.url;
+        } catch (error) {
+            console.log(error)
+            throw new Error('Error while registering user')
         }
-
-        await this.userRepository.createVerificationRequest(userInput.email, recto1Url, verso1Url, userInput.idNumber1, recto2Url, verso2Url, userInput.idNumber2)
-
-        let finalInput : any = {...userInput}
-        delete finalInput.idNumber1
-        delete finalInput.idNumber2
-
-        const preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
-        if(preRegistration) {
-            await this.preRegistrationRepository.deletePreRegistration(userInput.email)
-        }
-
-        this.preRegistrationRepository.createPreRegistration(finalInput)
-        const session = await StripeService.createCheckoutSessionForPremium(userInput.email)
-        return session.url;
     }
 
     static async registerFromPreRegistration(email: string, isPremium: boolean) {
@@ -128,15 +245,22 @@ class AuthentificationService {
             isVerified: false
         }
 
-        if(preRegistration.formationObtention) {
-            user = {
-                ...user,
-                formationObtention: Number(preRegistration.formationObtention)
+        await this.userRepository.create(user)
+
+        //diploma handeling
+
+        let diplomas = await this.preRegistrationRepository.getPreRegistrationDiplomas(preRegistration.id)
+
+        if(diplomas) {
+            for (let diploma of diplomas) {
+                await this.userRepository.createDiploma(user.id, diploma.name, diploma.obtention)
             }
+
+            await this.preRegistrationRepository.deletePreRegistrationDiplomas(preRegistration.id)
         }
 
-        await this.userRepository.create(user)
         await this.preRegistrationRepository.deletePreRegistration(email)
+
         return
     }
 

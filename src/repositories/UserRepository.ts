@@ -1,4 +1,4 @@
-import { Affiliation, MembershipStatus, Role } from "@prisma/client";
+import { Affiliation, MembershipStatus, Role, VerifyUser } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 import RawQueryRepository from "./RawQueryRepository";
 
@@ -15,6 +15,17 @@ class UserRepository extends PrismaRepository {
             }
         })
         return createdUser
+    }
+
+    createDiploma = async (userId : string, name : string, obtention: number) => {
+        const diploma = await this.prismaClient.userDiploma.create({
+            data: {
+                name,
+                obtention,
+                userId
+            }
+        })
+        return diploma
     }
 
     updatePassword = async (id: string, password: string) => {
@@ -247,25 +258,9 @@ class UserRepository extends PrismaRepository {
         return user
     }
 
-    createVerificationRequest = async (
-        email: string,
-        recto1: string,
-        verso1: string,
-        idNumber1:string,
-        recto2?: string,
-        verso2?: string,
-        idNumber2?:string
-    ) => {
+    createVerificationRequest = async ( data: VerifyUser ) => {
         const verification = await this.prismaClient.verifyUser.create({
-            data: {
-                email,
-                recto1,
-                verso1,
-                idNumber1,
-                recto2,
-                verso2,
-                idNumber2
-            }
+            data: data
         })
         return verification
     }

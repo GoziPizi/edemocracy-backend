@@ -29,28 +29,29 @@ enum MembershipStatus {
 }
 
 model User {
-  id        String @id @default(uuid())
-  email     String @unique
-  name      String
-  firstName String
-  password  String
-  telephone String
-  address   String
+  id         String @id @default(uuid())
+  email      String @unique
+  name       String
+  firstName  String
+  password   String
+  telephone  String
+  address    String
+  postalCode String
+  city       String
 
   //optional fields
-  profession         String?
-  profilePicture     String?
-  formationName      String?
-  formationObtention Int?
-  birthSex           String?
-  actualSex          String?
-  sexualOrientation  String?
-  religion           String?
-  description        String   @default("")
-  isVerified         Boolean  @default(false)
-  language           String   @default("fr")
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  profession        String?
+  yearsOfExperience Int?
+  profilePicture    String?
+  birthSex          String?
+  actualSex         String?
+  sexualOrientation String?
+  religion          String?
+  description       String   @default("")
+  isVerified        Boolean  @default(false)
+  language          String   @default("fr")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
 
   politicSide        Affiliation
   role               Role
@@ -69,27 +70,49 @@ model User {
   VoteForReformulation           VoteForReformulation[]
   DebateDescriptionReformulation DebateDescriptionReformulation[]
   Follow                         Follow[]
+  UserDiploma                    UserDiploma[]
 }
 
 model PreRegistrationUser {
-  id                 String      @id @default(uuid())
-  email              String      @unique
-  name               String
-  firstName          String
-  password           String
-  telephone          String
-  address            String
-  politicSide        Affiliation
-  profession         String?
-  profilePicture     String?
-  formationName      String?
-  formationObtention String?
-  birthSex           String?
-  actualSex          String?
-  sexualOrientation  String?
-  religion           String?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  id                     String                   @id @default(uuid())
+  email                  String                   @unique
+  name                   String
+  firstName              String
+  password               String
+  telephone              String
+  address                String
+  postalCode             String
+  city                   String
+  politicSide            Affiliation
+  idNationality1         String?
+  idNationality2         String?
+  idNationality3         String?
+  profession             String?
+  yearsOfExperience      Int?
+  profilePicture         String?
+  birthSex               String?
+  actualSex              String?
+  sexualOrientation      String?
+  religion               String?
+  createdAt              DateTime                 @default(now())
+  updatedAt              DateTime                 @updatedAt
+  PreRegistrationDiploma PreRegistrationDiploma[]
+}
+
+model UserDiploma {
+  id        String @id @default(uuid())
+  name      String
+  obtention Int
+  userId    String
+  User      User   @relation(fields: [userId], references: [id])
+}
+
+model PreRegistrationDiploma {
+  id                String              @id @default(uuid())
+  name              String
+  obtention         Int
+  preRegistrationId String
+  PreRegistration   PreRegistrationUser @relation(fields: [preRegistrationId], references: [id])
 }
 
 model Follow {
@@ -103,16 +126,22 @@ model Follow {
 }
 
 model VerifyUser {
-  id        String   @id @default(uuid())
-  email     String
-  recto1    String
-  verso1    String
-  idNumber1 String
-  recto2    String?
-  verso2    String?
-  idNumber2 String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id             String   @id @default(uuid())
+  email          String
+  recto1         String
+  verso1         String
+  idNumber1      String
+  idNationality1 String
+  recto2         String?
+  verso2         String?
+  idNumber2      String?
+  idNationality2 String?
+  recto3         String?
+  verso3         String?
+  idNumber3      String?
+  idNationality3 String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Notifications {

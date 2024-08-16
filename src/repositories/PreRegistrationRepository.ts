@@ -5,12 +5,6 @@ class PreRegistrationRepository extends PrismaRepository {
 
     createPreRegistration = async (user : StandardUserCreateInputDto) => {
         let finalUser: any = { ...user }
-        if(user.formationObtention) {
-            finalUser = {
-                ...finalUser,
-                formationObtention: Number(user.formationObtention)
-            }
-        }
         const preRegistration = await this.prismaClient.preRegistrationUser.create({
             data: finalUser
         })
@@ -30,6 +24,28 @@ class PreRegistrationRepository extends PrismaRepository {
         await this.prismaClient.preRegistrationUser.delete({
             where: {
                 email
+            }
+        })
+        return
+    }
+
+    createPreregistrationDiploma = async (preRegistrationId: string, name: string, obtention: number) => {
+        await this.prismaClient.preRegistrationDiploma.create
+    }
+
+    getPreRegistrationDiplomas = async (preRegistrationId: string) => {
+        const preRegistrationDiploma = await this.prismaClient.preRegistrationDiploma.findMany({
+            where: {
+                preRegistrationId
+            }
+        })
+        return preRegistrationDiploma
+    }
+
+    deletePreRegistrationDiplomas = async (preRegistrationId: string) => {
+        await this.prismaClient.preRegistrationDiploma.deleteMany({
+            where: {
+                preRegistrationId
             }
         })
         return
