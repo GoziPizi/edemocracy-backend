@@ -71,43 +71,44 @@ class StripeService {
 
     static async handleCompletedSession(stripeEvent: any) {
 
-        const email = stripeEvent.customer_email;
-        const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
-        const paiementStatus = stripeEvent.payment_status;
+        try {
 
-        const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.id);
-        console.log('CHECKOUT SESSION', checkoutSession);
+            const email = stripeEvent.customer_email;
+            const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
+            const paiementStatus = stripeEvent.payment_status;
 
-        if(!checkoutSession) {
-            throw new Error('Checkout session not found');
-        }
+            const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.id);
+            console.log('CHECKOUT SESSION', checkoutSession);
 
-        const price = checkoutSession.amount_total;
+            if(!checkoutSession) {
+                throw new Error('Checkout session not found');
+            }
 
-        if(price !== 499 && price !== 1499) {
-            throw new Error('Invalid product');
-        }
+            const price = checkoutSession.amount_total;
 
-        const premium = price === 1499;
+            if(price !== 499 && price !== 1499) {
+                throw new Error('Invalid product');
+            }
 
-        if(paiementStatus !== 'paid') {
-            console.log('PAIEMENT NOT PAID');
-            await this.preRegistrationRepository.deletePreRegistration(email);
-            throw new Error('Paiement not paid');
-        }
-        if(preRegistration) {
-            console.log('PRE REGISTRATION FOUND');
-            await AuthentificationService.registerFromPreRegistration(email, premium);
-            console.log('USER REGISTERED');
-            return;
-        }
-        const user = await this.userRepository.getUserByEmail(email);
-        if(user) {
-            console.log('USER FOUND');
-            const contributionStatus = premium ? MembershipStatus.PREMIUM : MembershipStatus.STANDARD;
-            await this.userRepository.updateContributionStatus(user.id, contributionStatus);
-            console.log('USER UPDATED');
-            return;
+            const premium = price === 1499;
+
+            if(paiementStatus !== 'paid') {
+                await this.preRegistrationRepository.deletePreRegistration(email);
+                throw new Error('Paiement not paid');
+            }
+            if(preRegistration) {
+                await AuthentificationService.registerFromPreRegistration(email, premium);
+                return;
+            }
+            const user = await this.userRepository.getUserByEmail(email);
+            if(user) {
+                const contributionStatus = premium ? MembershipStatus.PREMIUM : MembershipStatus.STANDARD;
+                await this.userRepository.updateContributionStatus(user.id, contributionStatus);
+                return;
+            }
+
+        } catch(e) {
+            console.error(e);
         }
     }
 

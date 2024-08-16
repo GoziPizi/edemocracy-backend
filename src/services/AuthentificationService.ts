@@ -231,39 +231,46 @@ class AuthentificationService {
     }
 
     static async registerFromPreRegistration(email: string, isPremium: boolean) {
-        const preRegistration = await this.preRegistrationRepository.getPreRegistration(email)
-        if(!preRegistration) {
-            throw new Error('PreRegistration not found')
-        }
 
-        const contributionStatus = isPremium ? MembershipStatus.PREMIUM : MembershipStatus.STANDARD
+        try {
 
-        let user : any = {
-            ...preRegistration,
-            role: Role.USER,
-            contributionStatus,
-            isVerified: false
-        }
-
-        delete user.id
-
-        await this.userRepository.create(user)
-
-        //diploma handeling
-
-        let diplomas = await this.preRegistrationRepository.getPreRegistrationDiplomas(preRegistration.id)
-
-        if(diplomas) {
-            for (let diploma of diplomas) {
-                await this.userRepository.createDiploma(user.id, diploma.name, diploma.obtention)
+            const preRegistration = await this.preRegistrationRepository.getPreRegistration(email)
+            if(!preRegistration) {
+                throw new Error('PreRegistration not found')
             }
 
-            await this.preRegistrationRepository.deletePreRegistrationDiplomas(preRegistration.id)
+            const contributionStatus = isPremium ? MembershipStatus.PREMIUM : MembershipStatus.STANDARD
+
+            let user : any = {
+                ...preRegistration,
+                role: Role.USER,
+                contributionStatus,
+                isVerified: false
+            }
+
+            delete user.id
+
+            await this.userRepository.create(user)
+
+            //diploma handeling
+
+            let diplomas = await this.preRegistrationRepository.getPreRegistrationDiplomas(preRegistration.id)
+
+            if(diplomas) {
+                for (let diploma of diplomas) {
+                    await this.userRepository.createDiploma(user.id, diploma.name, diploma.obtention)
+                }
+
+                await this.preRegistrationRepository.deletePreRegistrationDiplomas(preRegistration.id)
+            }
+
+            await this.preRegistrationRepository.deletePreRegistration(email)
+
+            return
+        } catch (error) {
+            console.log(error)
+            throw new Error('Error while registering user')
         }
-
-        await this.preRegistrationRepository.deletePreRegistration(email)
-
-        return
     }
 
     static async checkToken(token: string): Promise<boolean> {
