@@ -143,11 +143,8 @@ class AuthentificationService {
                 throw new Error('Error while creating preRegistration')
             }
 
-            console.log('PRE REGISTRATION', preRegistration)
-            console.log('DIPLMAS', diplomas)
             if(diplomas && preRegistration) {
                 for (let diploma of diplomas) {
-                    console.log('in the loop')
                     await this.preRegistrationRepository.createPreregistrationDiploma(preRegistration.id, diploma.name, diploma.obtention)
                 }
             }
@@ -253,7 +250,7 @@ class AuthentificationService {
 
             delete user.id
 
-            await this.userRepository.create(user)
+            let createdUser = await this.userRepository.create(user)
 
             //diploma handeling
 
@@ -261,7 +258,7 @@ class AuthentificationService {
 
             if(diplomas) {
                 for (let diploma of diplomas) {
-                    await this.userRepository.createDiploma(user.id, diploma.name, diploma.obtention)
+                    await this.userRepository.createDiploma(createdUser.id, diploma.name, diploma.obtention)
                 }
 
                 await this.preRegistrationRepository.deletePreRegistrationDiplomas(preRegistration.id)
