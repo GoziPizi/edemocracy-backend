@@ -122,6 +122,7 @@ class AuthentificationService {
             delete finalInput.idNumber3
 
             let diplomas : {name:string; obtention: number}[] | undefined = undefined
+            console.log('diplomas', finalInput.diplomas)
 
             if(finalInput.diplomas) {
                 diplomas = JSON.parse(finalInput.diplomas)
