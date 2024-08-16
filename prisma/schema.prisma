@@ -40,6 +40,9 @@ model User {
   city       String
 
   //optional fields
+  idNationality1    String?
+  idNationality2    String?
+  idNationality3    String?
   profession        String?
   yearsOfExperience Int?
   profilePicture    String?

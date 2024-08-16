@@ -245,6 +245,8 @@ class AuthentificationService {
             isVerified: false
         }
 
+        delete user.id
+
         await this.userRepository.create(user)
 
         //diploma handeling
