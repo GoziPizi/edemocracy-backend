@@ -9,11 +9,12 @@ import AwsService from "./AwsService";
 import { sendReinitPasswordMail } from "./MailService";
 import { FreeUserCreateInputDto, StandardUserCreateInputDto } from "@/types/dtos/UserDto";
 import StripeService from "./StripeService";
+import SponsorshipRepository from "@/repositories/SponsorshipRepository";
 
 class AuthentificationService {
     private static userRepository: UserRepository = new UserRepository()
-    private static preRegistrationRepository: PreRegistrationRepository = new PreRegistrationRepository()   
-    private static stripeService: StripeService;
+    private static preRegistrationRepository: PreRegistrationRepository = new PreRegistrationRepository()
+    private static sponsorshipRepository: SponsorshipRepository = new SponsorshipRepository()
 
     private static timeExpiration = 60 * 60 * 24 * 7 // 7 days
 
@@ -49,6 +50,10 @@ class AuthentificationService {
                     ...finalUser,
                     yearsOfExperience: Number(userInput.yearsOfExperience)
                 }
+            }
+
+            if(userInput.sponsorshipCode) {
+                delete finalUser.sponsorshipCode
             }
 
             let user = await this.userRepository.create(finalUser)
@@ -241,6 +246,8 @@ class AuthentificationService {
 
             const contributionStatus = isPremium ? MembershipStatus.PREMIUM : MembershipStatus.STANDARD
 
+            let sponsorshipCode = preRegistration.sponsorshipCode
+
             let user : any = {
                 ...preRegistration,
                 role: Role.USER,
@@ -249,8 +256,17 @@ class AuthentificationService {
             }
 
             delete user.id
+            delete user.sponsorshipCode
 
             let createdUser = await this.userRepository.create(user)
+
+            if(createdUser && sponsorshipCode) {
+                //handeling sponsorship code
+                let sponsor = await this.userRepository.getUserBySponsorshipCode(sponsorshipCode)
+                if(sponsor) {
+                    await this.sponsorshipRepository.incrementJackpotOfUser(sponsor.id, 1)
+                }
+            }
 
             //diploma handeling
 

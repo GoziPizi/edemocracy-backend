@@ -285,6 +285,28 @@ class UserRepository extends PrismaRepository {
         })
         return
     }
+
+    //Sponsorship methods
+    setSponsorshipCodeToUser = async (userId: string, code: string) => {
+        await this.prismaClient.user.update({
+            where: {
+                id: userId
+            },
+            data: {
+                sponsorshipCode: code
+            }
+        })
+        return
+    }
+
+    getUserBySponsorshipCode = async (code: string) => {
+        const user = await this.prismaClient.user.findFirst({
+            where: {
+                sponsorshipCode: code
+            }
+        })
+        return user
+    }
 }
 
 export default UserRepository;

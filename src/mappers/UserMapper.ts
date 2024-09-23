@@ -27,7 +27,8 @@ export const toUserOutput = (user: User): UserOutputDto => {
         role: user.role,
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
-        profilePicture: user.profilePicture
+        profilePicture: user.profilePicture,
+        sponsorshipCode: user.sponsorshipCode,
     }
 }
 

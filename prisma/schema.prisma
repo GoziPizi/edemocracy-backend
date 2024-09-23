@@ -53,6 +53,7 @@ model User {
   description       String   @default("")
   isVerified        Boolean  @default(false)
   language          String   @default("fr")
+  sponsorshipCode   String?
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -74,6 +75,7 @@ model User {
   DebateDescriptionReformulation DebateDescriptionReformulation[]
   Follow                         Follow[]
   UserDiploma                    UserDiploma[]
+  PersonalJackpot                PersonalJackpot[]
 }
 
 model PreRegistrationUser {
@@ -97,6 +99,7 @@ model PreRegistrationUser {
   actualSex              String?
   sexualOrientation      String?
   religion               String?
+  sponsorshipCode        String?
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt
   PreRegistrationDiploma PreRegistrationDiploma[]
@@ -402,4 +405,19 @@ model Reporting {
   entityType ReportingType
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
+}
+
+enum jackpotStatus {
+  WAITING //Not asked
+  PENDING //asked but not done
+}
+
+model PersonalJackpot {
+  user      User          @relation(fields: [userId], references: [id])
+  userId    String        @id
+  amount    Int           @default(0)
+  iban      String?
+  status    jackpotStatus @default(WAITING)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }
