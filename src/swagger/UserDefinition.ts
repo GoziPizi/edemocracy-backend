@@ -39,6 +39,7 @@ export const UserOutputDefinition: UserOutputDto = {
     language: 'string',
     politicSide: Affiliation.RIGHT,
     role: 'USER',
+    sponsorshipCode: 'string',
     createdAt: new Date(),
     updatedAt: new Date()
 }
