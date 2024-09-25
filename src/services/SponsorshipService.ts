@@ -128,6 +128,14 @@ class SponsorshipService {
 
     }
 
+    static async adminConfirmJackpotPayment(userId: string): Promise<void> {
+        //set the status of the jackpot to paid
+        //set the amount to 0, the iban to null and the status to pending
+
+        await this.sponsorshipRepository.resetUserJackpot(userId);
+
+    }
+
 }
 
 export default SponsorshipService;

@@ -82,6 +82,20 @@ class SponsorshipRepository extends PrismaRepository {
         return jackpots;
     }
 
+    async resetUserJackpot(userId: string) {
+        const jackpot = await this.prismaClient.personalJackpot.update({
+            where: {
+                userId
+            },
+            data: {
+                amount: 0,
+                iban: null,
+                status: jackpotStatus.PENDING
+            }
+        });
+        return jackpot;
+    }
+
 }
 
 export default SponsorshipRepository;

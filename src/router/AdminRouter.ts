@@ -242,4 +242,26 @@ AdminRouter.get('/non-empty-jackpots', async (req: Request, res: Response, next:
     }
 });
 
+AdminRouter.post('/confirm-payment/:id', async (req: Request, res: Response, next: NextFunction) => {
+    //Called by the admin when he confirms to have paid the jackpot of the user.
+
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Error('You are not allowed to see this');
+        }
+
+        const userId = req.params.userId;
+
+        await SponsorshipService.adminConfirmJackpotPayment(userId);
+        res.status(200).send();
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 export default AdminRouter;
