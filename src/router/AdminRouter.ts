@@ -242,7 +242,7 @@ AdminRouter.get('/non-empty-jackpots', async (req: Request, res: Response, next:
     }
 });
 
-AdminRouter.post('/confirm-payment/:id', async (req: Request, res: Response, next: NextFunction) => {
+AdminRouter.post('/confirm-payment', async (req: Request, res: Response, next: NextFunction) => {
     //Called by the admin when he confirms to have paid the jackpot of the user.
 
     try {
@@ -255,7 +255,7 @@ AdminRouter.post('/confirm-payment/:id', async (req: Request, res: Response, nex
             throw new Error('You are not allowed to see this');
         }
 
-        const userId = req.params.userId;
+        const userId = req.body.userId;
 
         await SponsorshipService.adminConfirmJackpotPayment(userId);
         res.status(200).send();
