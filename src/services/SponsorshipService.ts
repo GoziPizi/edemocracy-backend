@@ -125,7 +125,7 @@ class SponsorshipService {
         });
 
         return formattedJackpots;
-
+        
     }
 
     static async adminConfirmJackpotPayment(userId: string): Promise<void> {
