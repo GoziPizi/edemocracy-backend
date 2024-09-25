@@ -288,6 +288,20 @@ class UserRepository extends PrismaRepository {
 
     //Sponsorship methods
     setSponsorshipCodeToUser = async (userId: string, code: string) => {
+        //fetch the user to check if it exists and if it has a code
+        const user = await this.prismaClient.user.findFirst({
+            where: {
+                id: userId
+            }
+        })
+        if(!user) {
+            throw new Error('User not found')
+        }
+        if(user.sponsorshipCode) {
+            throw new Error('User already has a sponsorship code')
+        }
+        console.log(user)
+        //update the user with the code
         await this.prismaClient.user.update({
             where: {
                 id: userId
@@ -296,7 +310,6 @@ class UserRepository extends PrismaRepository {
                 sponsorshipCode: code
             }
         })
-        return
     }
 
     getUserBySponsorshipCode = async (code: string) => {
