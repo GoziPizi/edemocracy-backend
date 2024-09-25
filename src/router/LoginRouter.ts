@@ -149,7 +149,8 @@ LoginRouter.post(
             birthSex: Joi.string(),
             actualSex: Joi.string(),
             sexualOrientation: Joi.string(),
-            religion: Joi.string()
+            religion: Joi.string(),
+            sponsorshipCode: Joi.string()
         });
 
         const { error } = schema.validate(userInput);
@@ -281,7 +282,8 @@ LoginRouter.post(
             birthSex: Joi.string(),
             actualSex: Joi.string(),
             sexualOrientation: Joi.string(),
-            religion: Joi.string()
+            religion: Joi.string(),
+            sponsorshipCode: Joi.string()
         });
 
         const { error } = schema.validate(userInput);
