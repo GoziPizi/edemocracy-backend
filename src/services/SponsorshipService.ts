@@ -4,8 +4,8 @@ import { PersonalJackpotOutputDto } from "@/types/dtos/JackpotDtos";
 
 class SponsorshipService {
   
-    private static userRepository: UserRepository;
-    private static sponsorshipRepository: SponsorshipRepository
+    private static userRepository: UserRepository = new UserRepository();
+    private static sponsorshipRepository: SponsorshipRepository = new SponsorshipRepository();
 
     static async getSponsorshipCode(userId: string): Promise<string> {
         //Get the user from the database
@@ -37,6 +37,7 @@ class SponsorshipService {
             await this.userRepository.setSponsorshipCodeToUser(userId, code);
             return code;
         } catch (error) {
+            console.log(error);
             throw new Error('Could not generate the code');
         }
     }

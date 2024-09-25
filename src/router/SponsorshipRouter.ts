@@ -13,7 +13,7 @@ SponsorshipRouter.get('/generate-sponsorship-code', async (req: Request, res: Re
         }
         const userId = AuthentificationService.getUserId(token);
         const code = await SponsorshipService.generateSponsorshipCode(userId);
-        res.status(200).send(code);
+        res.status(200).send(JSON.stringify({code}));
     } catch (error) {
         next(error);
     }
