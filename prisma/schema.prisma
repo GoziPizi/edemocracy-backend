@@ -408,8 +408,8 @@ model Reporting {
 }
 
 enum jackpotStatus {
-  WAITING //Not asked
-  PENDING //asked but not done
+  PENDING //Not asked
+  REQUESTED //asked but not done
 }
 
 model PersonalJackpot {
@@ -417,7 +417,7 @@ model PersonalJackpot {
   userId    String        @id
   amount    Int           @default(0)
   iban      String?
-  status    jackpotStatus @default(WAITING)
+  status    jackpotStatus @default(PENDING)
   createdAt DateTime      @default(now())
   updatedAt DateTime      @updatedAt
 }
