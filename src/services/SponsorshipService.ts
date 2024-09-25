@@ -82,7 +82,7 @@ class SponsorshipService {
         //withdraw the jackpot from the db
         //return the formatted jackpot
 
-        const jackpot = await this.sponsorshipRepository.setSponsorshipStatusToPending(userId);
+        const jackpot = await this.sponsorshipRepository.setSponsorshipStatusToRequested(userId);
 
         const formattedJackpot = {
             amount: jackpot.amount,

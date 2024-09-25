@@ -33,13 +33,13 @@ class SponsorshipRepository extends PrismaRepository {
         return jackpot;
     }
 
-    async setSponsorshipStatusToPending(userId: string) {
+    async setSponsorshipStatusToRequested(userId: string) {
         const jackpot = await this.prismaClient.personalJackpot.update({
             where: {
                 userId
             },
             data: {
-                status: jackpotStatus.PENDING
+                status: jackpotStatus.REQUESTED
             }
         });
         return jackpot;
