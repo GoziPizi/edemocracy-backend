@@ -1,6 +1,7 @@
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import BanWordService from '@/services/BanWordService';
+import SponsorshipService from '@/services/SponsorshipService';
 import { Role } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express'
 
@@ -215,6 +216,27 @@ AdminRouter.post('/verifications-request/:id', async (req: Request, res: Respons
         const requestId = req.params.id;
         await AuthentificationService.acceptVerificationRequest(requestId, req.body.verified);
         res.status(200).send();
+    } catch (error) {
+        console.log(error);
+    }
+
+});
+
+AdminRouter.get('/non-empty-jackpots', async (req: Request, res: Response, next: NextFunction) => {
+
+    //Retufn all the jackpots that are not empty
+
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Error('You are not allowed to see this');
+        }
+        const requests = await SponsorshipService.adminGetNonEmptyJackpots();
+        res.status(200).send(requests);
     } catch (error) {
         console.log(error);
     }

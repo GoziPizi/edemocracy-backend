@@ -1,6 +1,6 @@
 import SponsorshipRepository from "@/repositories/SponsorshipRepository";
 import UserRepository from "@/repositories/UserRepository";
-import { PersonalJackpotOutputDto } from "@/types/dtos/JackpotDtos";
+import { AdminViewPersonalJackpot, PersonalJackpotOutputDto } from "@/types/dtos/JackpotDtos";
 
 class SponsorshipService {
   
@@ -105,6 +105,26 @@ class SponsorshipService {
         }
 
         return true;
+
+    }
+
+    static async adminGetNonEmptyJackpots(): Promise<AdminViewPersonalJackpot[]> {
+
+        //get all the jackpots from the db
+        //return the formatted jackpots
+
+        const jackpots = await this.sponsorshipRepository.getNonEmptyJackpots();
+
+        const formattedJackpots = jackpots.map(jackpot => {
+            return {
+                amount: jackpot.amount,
+                iban: jackpot.iban,
+                status: jackpot.status,
+                userId: jackpot.userId
+            }
+        });
+
+        return formattedJackpots;
 
     }
 

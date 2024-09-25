@@ -71,6 +71,17 @@ class SponsorshipRepository extends PrismaRepository {
 
     }
 
+    async getNonEmptyJackpots() {
+        const jackpots = await this.prismaClient.personalJackpot.findMany({
+            where: {
+                amount: {
+                    not: 0
+                }
+            }
+        });
+        return jackpots;
+    }
+
 }
 
 export default SponsorshipRepository;
