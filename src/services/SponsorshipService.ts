@@ -1,6 +1,8 @@
+import { JackpotAlreadyRequestedException, JackpotAmountIsZeroException, JackpotIbanNullException, JackpotNotFoundException } from "@/exceptions/SponsorshipExceptions";
 import SponsorshipRepository from "@/repositories/SponsorshipRepository";
 import UserRepository from "@/repositories/UserRepository";
 import { AdminViewPersonalJackpot, PersonalJackpotOutputDto } from "@/types/dtos/JackpotDtos";
+import { jackpotStatus } from "@prisma/client";
 
 class SponsorshipService {
   
@@ -37,7 +39,6 @@ class SponsorshipService {
             await this.userRepository.setSponsorshipCodeToUser(userId, code);
             return code;
         } catch (error) {
-            console.log(error);
             throw new Error('Could not generate the code');
         }
     }
@@ -82,15 +83,39 @@ class SponsorshipService {
         //withdraw the jackpot from the db
         //return the formatted jackpot
 
-        const jackpot = await this.sponsorshipRepository.setSponsorshipStatusToRequested(userId);
+        //Throw a error if amount is 0 or iban is null or jackpot already requested or jackpot not found
 
-        const formattedJackpot = {
-            amount: jackpot.amount,
-            iban: jackpot.iban,
-            status: jackpot.status
+        try {
+
+            let jackpot = await this.sponsorshipRepository.getPersonalJackpot(userId);
+
+            if (!jackpot) throw new JackpotNotFoundException();
+            if (jackpot.amount === 0) throw new JackpotAmountIsZeroException();
+            if (!jackpot.iban) throw new JackpotIbanNullException();
+            if (jackpot.status === jackpotStatus.REQUESTED) throw new JackpotAlreadyRequestedException();
+
+            jackpot = await this.sponsorshipRepository.setSponsorshipStatusToRequested(userId);
+
+            const formattedJackpot = {
+                amount: jackpot.amount,
+                iban: jackpot.iban,
+                status: jackpot.status
+            }
+
+            return formattedJackpot;
+
+        } catch (error:any) {
+            if (
+                error instanceof JackpotNotFoundException ||
+                error instanceof JackpotAmountIsZeroException ||
+                error instanceof JackpotIbanNullException ||
+                error instanceof JackpotAlreadyRequestedException
+            ) {
+                throw error;
+            }
+            throw new Error('Could not withdraw the jackpot');
         }
 
-        return formattedJackpot;
     }
 
     static async checkSponsorshipCode(code: string): Promise<boolean> {
