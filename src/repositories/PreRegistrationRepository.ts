@@ -1,3 +1,4 @@
+import { PreRegistrationNotFoundException } from "@/exceptions/RegisterException";
 import PrismaRepository from "./PrismaRepository";
 import { StandardUserCreateInputDto } from "@/types/dtos/UserDto";
 
@@ -21,11 +22,29 @@ class PreRegistrationRepository extends PrismaRepository {
     }
 
     deletePreRegistration = async (email: string) => {
-        await this.prismaClient.preRegistrationUser.delete({
-            where: {
-                email
+        try {
+            let preregistration =  await this.prismaClient.preRegistrationUser.findUnique({
+                where: {
+                    email
+                }
+            })
+            if (!preregistration) {
+                throw new PreRegistrationNotFoundException()
             }
-        })
+            await this.deletePreRegistrationDiplomas(preregistration.id);
+            await this.prismaClient.preRegistrationUser.delete({
+                where: {
+                    email
+                }
+            })
+            return;
+        }
+        catch (error:any) {
+            if (error instanceof PreRegistrationNotFoundException) {
+                throw error;
+            }
+            throw new Error('Could not delete the pre registration');
+        }
         return
     }
 

@@ -57,15 +57,20 @@ class StripeService {
 
     static async handleStripeEvent(stripeEvent: any) {
         
-        switch(stripeEvent.type) {
-            case 'checkout.session.completed':
-                StripeService.handleCompletedSession(stripeEvent.data.object);
-                break;
-
-            case 'checkout.session.expired':
-                StripeService.handleExpiredSession(stripeEvent.data.object);
-            default:
-                throw new Error('Unhandled event');
+        try {
+            switch(stripeEvent.type) {
+                case 'checkout.session.completed':
+                    StripeService.handleCompletedSession(stripeEvent.data.object);
+                    break;
+    
+                case 'checkout.session.expired':
+                    StripeService.handleExpiredSession(stripeEvent.data.object);
+                default:
+                    throw new Error('Unhandled event');
+            }
+        }
+        catch(e) {
+            console.error(e);
         }
     }
 
@@ -113,14 +118,21 @@ class StripeService {
     }
 
     static async handleExpiredSession(stripeEvent: any) {
-        const email = stripeEvent.customer_email;
-        const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
-        if(preRegistration) {
-            await this.preRegistrationRepository.deletePreRegistration(email);
-        }
-        const verification = await this.userRepository.getVerificationRequest(email);
-        if(verification) {
-            await this.userRepository.deleteVerificationRequest(verification.id);
+
+        try {
+
+            const email = stripeEvent.customer_email;
+            const preRegistration = await this.preRegistrationRepository.getPreRegistration(email);
+            if(preRegistration) {
+                await this.preRegistrationRepository.deletePreRegistration(email);
+            }
+            const verification = await this.userRepository.getVerificationRequest(email);
+            if(verification) {
+                await this.userRepository.deleteVerificationRequest(verification.id);
+            }
+
+        } catch(e) {
+            console.error(e);
         }
     }
 }
