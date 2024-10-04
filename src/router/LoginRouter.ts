@@ -375,6 +375,12 @@ LoginRouter.post(
             }
         }
 
+        if(recto3 || verso3 || userInput.idNumber3) {
+            if(!recto3 || !verso3 || !userInput.idNumber3) {
+                throw new NoIdentityCardException();
+            }
+        }
+
         const schema = Joi.object({
             email: Joi.string().email().required(),
             firstName: Joi.string().required(),

@@ -216,6 +216,13 @@ class AuthentificationService {
             delete finalInput.idNumber2
             delete finalInput.idNumber3
 
+            let diplomas : {name:string; obtention: number}[] | undefined = undefined
+
+            if(finalInput.diplomas) {
+                diplomas = JSON.parse(finalInput.diplomas)
+                delete finalInput.diplomas
+            }
+
             if(finalInput.yearsOfExperience) {
                 finalInput.yearsOfExperience = Number(finalInput.yearsOfExperience)
             }
