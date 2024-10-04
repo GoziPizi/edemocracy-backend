@@ -381,6 +381,8 @@ LoginRouter.post(
             name: Joi.string().required(),
             telephone: Joi.string().required(),
             address: Joi.string().required(),
+            postalCode: Joi.string().required(),
+            city: Joi.string().required(),
             politicSide: Joi.string().required(),
             password: Joi.string().required(),
             idNumber1: Joi.string().required(),
@@ -390,13 +392,15 @@ LoginRouter.post(
             idNumber3: Joi.string(),
             idNationality3: Joi.string(),
             profession: Joi.string(),
+            diplomas: Joi.string(),
             yearsOfExperience: Joi.string(),
             formationName: Joi.string(),
             formationObtention: Joi.string(),
             birthSex: Joi.string(),
             actualSex: Joi.string(),
             sexualOrientation: Joi.string(),
-            religion: Joi.string()
+            religion: Joi.string(),
+            sponsorshipCode: Joi.string()
         });
 
         const { error } = schema.validate(userInput);
