@@ -227,12 +227,23 @@ class AuthentificationService {
                 finalInput.yearsOfExperience = Number(finalInput.yearsOfExperience)
             }
 
-            const preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
+            let preRegistration = await this.preRegistrationRepository.getPreRegistration(userInput.email)
             if(preRegistration) {
                 await this.preRegistrationRepository.deletePreRegistration(userInput.email)
             }
 
-            this.preRegistrationRepository.createPreRegistration(finalInput)
+            preRegistration = await this.preRegistrationRepository.createPreRegistration(finalInput)
+
+            if(!preRegistration) {
+                throw new Error('Error while creating preRegistration')
+            }
+
+            if(diplomas && preRegistration) {
+                for (let diploma of diplomas) {
+                    await this.preRegistrationRepository.createPreregistrationDiploma(preRegistration.id, diploma.name, diploma.obtention)
+                }
+            }
+
             const session = await StripeService.createCheckoutSessionForPremium(userInput.email)
             return session.url;
         } catch (error) {
