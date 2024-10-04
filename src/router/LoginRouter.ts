@@ -401,6 +401,7 @@ LoginRouter.post(
 
         const { error } = schema.validate(userInput);
         if(error) {
+            console.log(error);
             throw new InvalidRegisterTypeException();
         }
 
