@@ -3,6 +3,8 @@ import UserRepository from '@/repositories/UserRepository';
 import AuthentificationService from './AuthentificationService';
 import Stripe from 'stripe';
 import { MembershipStatus } from '@prisma/client';
+import DonationRepository from '@/repositories/DonationRepository';
+import { sendThankDonationMail } from './MailService';
 
 class StripeService {
     private static stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
@@ -10,6 +12,7 @@ class StripeService {
     private static premium_product_id: string = process.env.PREMIUM_PRODUCT_ID!;
     private static userRepository: UserRepository = new UserRepository();
     private static preRegistrationRepository: PreRegistrationRepository = new PreRegistrationRepository();
+    private static donationRepository: DonationRepository = new DonationRepository();
 
     static async createCheckoutSessionForStandard(email: string) {
         const session = await this.stripe.checkout.sessions.create({
@@ -115,7 +118,13 @@ class StripeService {
     static async handleCompletedDonation(stripeEvent: any) {
         //TODO add donatio to database
         //TODO send email to user
-        console.log('Donation completed');
+        try {
+            await this.donationRepository.createDonation(stripeEvent.customer_email, stripeEvent.amount_total);
+            sendThankDonationMail(stripeEvent.customer_email, stripeEvent.amount_total / 100);
+            return;
+        } catch(e) {
+            console.error(e);
+        }
     }
 
     static async handleCompletedRegistration(stripeEvent: any) {

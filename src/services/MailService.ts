@@ -36,4 +36,10 @@ function sendReinitPasswordMail(email: string, token: string) {
   sendEmail(email, subject, text)
 }
 
-export { sendEmail, sendReinitPasswordMail }
+function sendThankDonationMail(email: string, amount: number) {
+  const subject = 'Merci pour votre don'
+  const text = `Bonjour, nous vous remercions pour votre don de ${amount}€`
+  sendEmail(email, subject, text)
+}
+
+export { sendEmail, sendReinitPasswordMail, sendThankDonationMail }

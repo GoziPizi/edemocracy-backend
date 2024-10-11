@@ -10,3 +10,5 @@ class DonationRepository extends PrismaRepository {
         });
     }
 }
+
+export default DonationRepository;
