@@ -26,6 +26,9 @@ class StripeService {
                     quantity: 1,
                 },
             ],
+            metadata: {
+                productType: 'standard'
+            },
             success_url: process.env.SUCCESS_STANDARD_URL
         })
         return session;
@@ -46,8 +49,38 @@ class StripeService {
                     quantity: 1,
                 },
             ],
+            metadata: {
+                productType: 'premium'
+            },
             success_url: process.env.SUCCESS_PREMIUM_URL
         })
+        return session;
+    }
+
+    //The amount is in euros
+    static async createCheckoutSessionDonation(email: string, amount: number) {
+        const session = await this.stripe.checkout.sessions.create({
+            mode: 'payment',
+            payment_method_types: ['card'],
+            customer_email: email,
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'eur',
+                        product_data: {
+                            name: 'Donation',
+                        },
+                        unit_amount: amount * 100,
+                    },
+                    quantity: 1,
+                },
+            ],
+            metadata: {
+                productType: 'donation'
+            },
+            success_url: process.env.SUCCESS_DONATION_URL
+        })
+
         return session;
     }
 
@@ -60,7 +93,12 @@ class StripeService {
         try {
             switch(stripeEvent.type) {
                 case 'checkout.session.completed':
-                    StripeService.handleCompletedSession(stripeEvent.data.object);
+                    if(stripeEvent.metadata?.productType === 'standard' || stripeEvent.metadata?.productType === 'premium') {
+                        StripeService.handleCompletedRegistration(stripeEvent.data.object);
+                    }
+                    if(stripeEvent.metadata?.productType === 'donation') {
+                        console.log('Donation completed');
+                    }
                     break;
     
                 case 'checkout.session.expired':
@@ -74,7 +112,13 @@ class StripeService {
         }
     }
 
-    static async handleCompletedSession(stripeEvent: any) {
+    static async handleCompletedDonation(stripeEvent: any) {
+        //TODO add donatio to database
+        //TODO send email to user
+        console.log('Donation completed');
+    }
+
+    static async handleCompletedRegistration(stripeEvent: any) {
 
         try {
 
@@ -89,18 +133,13 @@ class StripeService {
                 throw new Error('Checkout session not found');
             }
 
-            const price = checkoutSession.amount_total;
-
-            if(price !== 499 && price !== 1499) {
-                throw new Error('Invalid product');
-            }
-
-            const premium = price === 1499;
-
             if(paiementStatus !== 'paid') {
                 await this.preRegistrationRepository.deletePreRegistration(email);
                 throw new Error('Paiement not paid');
             }
+
+            const premium = checkoutSession.metadata?.productType === 'premium';
+
             if(preRegistration) {
                 await AuthentificationService.registerFromPreRegistration(email, premium);
                 return;
