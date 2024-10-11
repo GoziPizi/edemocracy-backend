@@ -17,6 +17,7 @@ import ContributionRouter from './ContributionRouter';
 import ModerationRouter from './ModerationRouter';
 import StripeRouter from './StripeRouter';
 import SponsorshipRouter from './SponsorshipRouter';
+import DonationRouter from './DonationRouter';
 
 const stripeRouter = express.Router();
 stripeRouter.use('/api/stripe', StripeRouter);
@@ -37,6 +38,7 @@ router.use('/api/notification', NotificationRouter);
 router.use('/api/contribution', ContributionRouter);
 router.use('/api/moderation', ModerationRouter);
 router.use('/api/sponsorship', SponsorshipRouter);
+router.use('/api/donation', DonationRouter);
 
 router.all('*', (req: Request, res: Response) => {
     throw new EndpointNotFoundException(req.path, req.method)

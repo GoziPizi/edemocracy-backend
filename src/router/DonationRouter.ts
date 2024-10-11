@@ -44,3 +44,5 @@ DonationRouter.post('/get-checkout-session', async (req: Request, res: Response,
         next(error);
     }
 });
+
+export default DonationRouter;
