@@ -98,12 +98,12 @@ class StripeService {
         try {
             switch(stripeEvent.type) {
                 case 'checkout.session.completed':
-                    if(stripeEvent.metadata?.productType === 'standard' || stripeEvent.metadata?.productType === 'premium') {
-                        StripeService.handleCompletedRegistration(stripeEvent);
+                    if(stripeEvent.data.object.metadata?.productType === 'standard' || stripeEvent.data.object.metadata?.productType === 'premium') {
+                        StripeService.handleCompletedRegistration(stripeEvent.data.object);
                     }
-                    if(stripeEvent.metadata?.productType === 'donation') {
+                    if(stripeEvent.data.object.metadata?.productType === 'donation') {
                         console.log('Donation');
-                        StripeService.handleCompletedDonation(stripeEvent);
+                        StripeService.handleCompletedDonation(stripeEvent.data.object);
                     }
                     break;
     
@@ -122,9 +122,6 @@ class StripeService {
         //TODO add donatio to database
         //TODO send email to user
         try {
-            console.log('Donation');
-            console.log(stripeEvent.customer_email);
-            console.log(stripeEvent.amount_total);
             await this.donationRepository.createDonation(stripeEvent.customer_email, stripeEvent.amount_total);
             sendThankDonationMail(stripeEvent.customer_email, stripeEvent.amount_total / 100);
             return;
