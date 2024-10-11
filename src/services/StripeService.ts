@@ -100,7 +100,7 @@ class StripeService {
                         StripeService.handleCompletedRegistration(stripeEvent.data.object);
                     }
                     if(stripeEvent.metadata?.productType === 'donation') {
-                        console.log('Donation completed');
+                        StripeService.handleCompletedDonation(stripeEvent.data.object);
                     }
                     break;
     
