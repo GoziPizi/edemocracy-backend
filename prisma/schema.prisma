@@ -423,7 +423,8 @@ model PersonalJackpot {
 }
 
 model Donation {
-  email     String   @id
+  id        String   @id @default(uuid())
+  email     String
   amount    Int
   createdAt DateTime @default(now())
 }
