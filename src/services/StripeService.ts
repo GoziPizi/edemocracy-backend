@@ -93,14 +93,17 @@ class StripeService {
 
     static async handleStripeEvent(stripeEvent: any) {
         
+        console.log('STRIPE EVENT', stripeEvent);
+
         try {
             switch(stripeEvent.type) {
                 case 'checkout.session.completed':
                     if(stripeEvent.metadata?.productType === 'standard' || stripeEvent.metadata?.productType === 'premium') {
-                        StripeService.handleCompletedRegistration(stripeEvent.data.object);
+                        StripeService.handleCompletedRegistration(stripeEvent);
                     }
                     if(stripeEvent.metadata?.productType === 'donation') {
-                        StripeService.handleCompletedDonation(stripeEvent.data.object);
+                        console.log('Donation');
+                        StripeService.handleCompletedDonation(stripeEvent);
                     }
                     break;
     
@@ -119,6 +122,9 @@ class StripeService {
         //TODO add donatio to database
         //TODO send email to user
         try {
+            console.log('Donation');
+            console.log(stripeEvent.customer_email);
+            console.log(stripeEvent.amount_total);
             await this.donationRepository.createDonation(stripeEvent.customer_email, stripeEvent.amount_total);
             sendThankDonationMail(stripeEvent.customer_email, stripeEvent.amount_total / 100);
             return;
@@ -136,7 +142,6 @@ class StripeService {
             const paiementStatus = stripeEvent.payment_status;
 
             const checkoutSession = await this.stripe.checkout.sessions.retrieve(stripeEvent.id);
-            console.log('CHECKOUT SESSION', checkoutSession);
 
             if(!checkoutSession) {
                 throw new Error('Checkout session not found');
