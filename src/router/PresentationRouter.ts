@@ -13,7 +13,7 @@ PresentationRouter.get('/main-presentation', async (req: Request, res: Response,
      */
     try {
         const data = await fs.readFile('src/utils/presentation/presentation', 'utf8');
-        res.status(200).send(data);
+        res.status(200).send({content: data});
     } catch (error) {
         next(error);
     }
@@ -29,7 +29,7 @@ PresentationRouter.get('/founder', async (req: Request, res: Response, next: Nex
      */
     try {
         const data = await fs.readFile('src/utils/presentation/founder', 'utf8');
-        res.status(200).send(data);
+        res.status(200).send({content: data});
     } catch (error) {
         next(error);
     }
