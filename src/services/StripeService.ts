@@ -63,7 +63,7 @@ class StripeService {
     //The amount is in euros
     static async createCheckoutSessionDonation(email: string | null, amount: number, isRecurring: boolean) {
         const session = await this.stripe.checkout.sessions.create({
-            mode: 'payment',
+            mode: isRecurring ? 'subscription' : 'payment',
             payment_method_types: ['card'],
             customer_email: email? email : undefined,
             line_items: [
