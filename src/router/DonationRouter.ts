@@ -12,6 +12,11 @@ DonationRouter.post('/get-checkout-session', async (req: Request, res: Response,
     try {
         const email:string | null = req.body.email;
         const amount = req.body.amount;
+        const isRecurring = req.body.isRecurring;
+
+        if(!isRecurring) {
+            throw new Error('isRecurring is required');
+        }
 
         //Input validation
 
@@ -33,7 +38,7 @@ DonationRouter.post('/get-checkout-session', async (req: Request, res: Response,
             throw new Error('Amount must be an integer');
         }
 
-        const session = await StripeService.createCheckoutSessionDonation(email, amount);
+        const session = await StripeService.createCheckoutSessionDonation(email, amount, isRecurring);
         res.status(200).json({url: session.url});
     } catch (error) {
         next(error);

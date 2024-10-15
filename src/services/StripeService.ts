@@ -61,7 +61,7 @@ class StripeService {
     }
 
     //The amount is in euros
-    static async createCheckoutSessionDonation(email: string | null, amount: number) {
+    static async createCheckoutSessionDonation(email: string | null, amount: number, isRecurring: boolean) {
         const session = await this.stripe.checkout.sessions.create({
             mode: 'payment',
             payment_method_types: ['card'],
@@ -71,8 +71,9 @@ class StripeService {
                     price_data: {
                         currency: 'eur',
                         product_data: {
-                            name: 'Donation',
+                            name: 'Donation' + (isRecurring ? ' (récurrente)' : ''),
                         },
+                        recurring: isRecurring ? {interval: 'month'} : undefined,
                         unit_amount: amount * 100,
                     },
                     quantity: 1,
@@ -93,8 +94,6 @@ class StripeService {
 
     static async handleStripeEvent(stripeEvent: any) {
         
-        console.log('STRIPE EVENT', stripeEvent);
-
         try {
             switch(stripeEvent.type) {
                 case 'checkout.session.completed':
@@ -102,7 +101,6 @@ class StripeService {
                         StripeService.handleCompletedRegistration(stripeEvent.data.object);
                     }
                     if(stripeEvent.data.object.metadata?.productType === 'donation') {
-                        console.log('Donation');
                         StripeService.handleCompletedDonation(stripeEvent.data.object);
                     }
                     break;
@@ -119,11 +117,11 @@ class StripeService {
     }
 
     static async handleCompletedDonation(stripeEvent: any) {
-        //TODO add donatio to database
-        //TODO send email to user
         try {
-            await this.donationRepository.createDonation(stripeEvent.customer_email, stripeEvent.amount_total);
-            sendThankDonationMail(stripeEvent.customer_email, stripeEvent.amount_total / 100);
+            if(stripeEvent.customer_email) {
+                await this.donationRepository.createDonation(stripeEvent.customer_email, stripeEvent.amount_total);
+                sendThankDonationMail(stripeEvent.customer_email, stripeEvent.amount_total / 100);
+            }
             return;
         } catch(e) {
             console.error(e);
