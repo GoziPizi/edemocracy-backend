@@ -8,17 +8,12 @@ DonationRouter.post('/get-checkout-session', async (req: Request, res: Response,
         Endpoint to create a checkout session.
         #swagger.tags = ['Donation']
         Needs the amount in the body
-        Needs an email in the body
      */
     try {
-        const email = req.body.email;
+        const email:string | null = req.body.email;
         const amount = req.body.amount;
 
         //Input validation
-
-        if(!email) {
-            throw new Error('Email is required');
-        }
 
         if(!amount) {
             throw new Error('Amount is required');

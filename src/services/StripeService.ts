@@ -61,11 +61,11 @@ class StripeService {
     }
 
     //The amount is in euros
-    static async createCheckoutSessionDonation(email: string, amount: number) {
+    static async createCheckoutSessionDonation(email: string | null, amount: number) {
         const session = await this.stripe.checkout.sessions.create({
             mode: 'payment',
             payment_method_types: ['card'],
-            customer_email: email,
+            customer_email: email? email : undefined,
             line_items: [
                 {
                     price_data: {
