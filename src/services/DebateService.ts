@@ -60,6 +60,19 @@ class DebateService {
         return debates;
     }
 
+    static async getTrendingDebatesThumbnails(page: number = 1) {
+        const debates = await this.debateRepository.getTrendingDebatesThumbnails(page);
+        //Add the medias.
+        const debatesWithMedias = await Promise.all(debates.map(async (debate: any) => {
+            const media : string | null = await this.debateRepository.getDebateMedia(debate.id);
+            return {
+                ...debate,
+                media: media
+            }
+        }));
+        return debatesWithMedias;
+    }
+
     static async getDebateWithUserVote(id: string, userId: string) {
         const debate = await this.debateRepository.getDebateById(id);
         const debateResult = await this.debateRepository.getDebateResult(debate!.debateResultId);

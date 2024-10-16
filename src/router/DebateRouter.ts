@@ -55,6 +55,32 @@ DebateRouter.get('/by-popularity', async (req: Request, res: Response, next: Nex
     }
 });
 
+DebateRouter.get('/trending/:page', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Debate']
+        #swagger.summary = 'Endpoint to get trending debates.'
+        #swagger.parameters['path'] = {
+            page: 1
+        }
+        #swagger.responses[200] = {
+            description: 'Debates found',
+            schema: { $ref: "#/definitions/DebateOutputDefinition" }
+        }
+        #swagger.responses[500] = {
+            description: 'An error occured'
+        }
+     */
+    //Returns MediaDebates
+    //Pages start at 1
+    try {
+        const page = Number(req.params.page);
+        const debates = await DebateService.getTrendingDebatesThumbnails(page);
+        res.status(200).send(debates);
+    } catch (error) {
+        next(error);
+    }
+});
+
 DebateRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']

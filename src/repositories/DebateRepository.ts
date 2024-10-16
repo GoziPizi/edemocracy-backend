@@ -51,6 +51,71 @@ class DebateRepository extends PrismaRepository {
     return debates;
   }
 
+  //Thumbnails for trends related methods
+
+  getTrendingDebatesThumbnails = async (page: number = 1) => {
+    const debates = await this.prismaClient.debate.findMany({
+      take: 20,
+      skip: (page - 1) * 20,
+      orderBy: {
+        createdAt: 'desc',
+      },
+    });
+    //joins the results of debates aswell
+    const finalDebates = await Promise.all(debates.map(async (debate) => {
+      const debateResult = await this.prismaClient.debateResult.findFirst({
+        where: {
+          id: debate.debateResultId,
+        },
+      });
+      const debateContributorsResult = await this.prismaClient.debateResult.findFirst({
+        where: {
+          id: debate.debateContributorsResultId,
+        },
+      });
+      return {
+        ...debate,
+        debateResult,
+        debateContributorsResult,
+      };
+    }));
+    return finalDebates;
+  }
+
+  //slow method
+  getDebateMedia = async (debateId: string) : Promise<string|null> => {
+
+    const debate = await this.prismaClient.debate.findFirst({
+      where: {
+        id: debateId,
+      },
+    });
+
+    if (debate?.topicId) {
+      const topic = await this.prismaClient.topic.findFirst({
+        where: {
+          id: debate.topicId,
+        },
+      });
+      return topic?.medias[0] || null;
+    }
+
+    if (debate?.argumentId) {
+      const argument = await this.prismaClient.argument.findFirst({
+        where: {
+          id: debate.argumentId,
+        },
+      });
+      if(argument) {
+        return this.getDebateMedia(argument.debateId);
+      }
+    }
+
+    return null;
+  }
+
+  //End of thumbnails for trends related methods
+
   getByDebatesIds = async (ids: string[]) => {
     const debates = await this.prismaClient.debate.findMany({
       where: {
