@@ -13,7 +13,7 @@ DonationRouter.post('/get-checkout-session', async (req: Request, res: Response,
     try {
         const email:string | null = req.body.email;
         const amount = req.body.amount;
-        const interval : string | null = req.body.isRecurring;
+        const interval : string | null = req.body.interval;
 
         //Input validation
 

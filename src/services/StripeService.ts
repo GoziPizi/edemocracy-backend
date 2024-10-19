@@ -62,6 +62,7 @@ class StripeService {
 
     //The amount is in euros
     static async createCheckoutSessionDonation(email: string | null, amount: number, interval: string | null) {
+        console.log(email, amount, interval);
         const session = await this.stripe.checkout.sessions.create({
             mode: interval ? 'subscription' : 'payment',
             payment_method_types: ['card'],
