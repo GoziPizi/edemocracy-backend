@@ -61,9 +61,9 @@ class StripeService {
     }
 
     //The amount is in euros
-    static async createCheckoutSessionDonation(email: string | null, amount: number, isRecurring: boolean) {
+    static async createCheckoutSessionDonation(email: string | null, amount: number, interval: string | null) {
         const session = await this.stripe.checkout.sessions.create({
-            mode: isRecurring ? 'subscription' : 'payment',
+            mode: interval ? 'subscription' : 'payment',
             payment_method_types: ['card'],
             customer_email: email? email : undefined,
             line_items: [
@@ -71,9 +71,9 @@ class StripeService {
                     price_data: {
                         currency: 'eur',
                         product_data: {
-                            name: 'Donation' + (isRecurring ? ' (récurrente)' : ''),
+                            name: 'Donation' + (interval ? ' (récurrente)' : ''),
                         },
-                        recurring: isRecurring ? {interval: 'month'} : undefined,
+                        recurring: interval ? {interval: interval as Stripe.Price.Recurring.Interval} : undefined,
                         unit_amount: amount * 100,
                     },
                     quantity: 1,
