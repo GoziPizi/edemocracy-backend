@@ -71,3 +71,5 @@ if (isProdEnvironment())
     app.listen(PORT, () => {
       console.info(`⚡️ Server is running on port: ${PORT}`)
     })
+
+export default app;
