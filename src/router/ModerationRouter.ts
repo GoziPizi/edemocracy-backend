@@ -1,3 +1,4 @@
+import { Forbidden } from '@/exceptions/AdminExceptions';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import { ReportIntToReportType } from '@/mappers/ReportType';
 import AuthentificationService from '@/services/AuthentificationService';
@@ -54,12 +55,18 @@ ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextF
         }
         const role = await AuthentificationService.getUserRole(token);
         if(role !== 'ADMIN' && role !== 'MODERATOR') {
-            throw new Error('You are not allowed to see this');
+            throw new Forbidden();
         }
         const reports = await ModerationService.getReports();
         res.status(200).send(reports);
-    } catch (error) {
-        console.log(error);
+    } catch (error:any) {
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        if (error instanceof Forbidden) {
+            return res.status(403).json({error:'Forbidden'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
     }
 });
 

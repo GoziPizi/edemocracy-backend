@@ -53,10 +53,6 @@ const app = express();
 const httpsServer = https.createServer(credentials, app);
 app.use(cors(corsOptions));
 
-//show the cors configuration of app
-console.log('isProdEnvironment:', isProdEnvironment());
-console.log('PORT:', PORT);
-
 app.use('', router.stripeRouter)
 
 app.use(express.json({ limit: '50mb' }))
@@ -67,7 +63,12 @@ if (isProdEnvironment())
     httpsServer.listen(PORT, () => {
       console.info(`⚡️ HTTPS Server is running on port: ${PORT}`)
     })
-  else
-    app.listen(PORT, () => {
-      console.info(`⚡️ Server is running on port: ${PORT}`)
-    })
+  else {
+    if (require.main === module) {
+      app.listen(PORT, () => {
+      console.info(`⚡️ Server is running on port: ${PORT}`);
+    });
+  }
+}
+
+export default app;
