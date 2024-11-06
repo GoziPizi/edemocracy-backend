@@ -18,6 +18,7 @@ beforeAll(async () => {
   await prisma.user.createMany({
     data : [
       {firstName: 'Alice', name: 'Dupont', email: 'alice.dupont@gmail.com', password: hashedDefaultPassword, telephone: '0123456789', isVerified: true, language: 'fr', role: Role.ADMIN, address: '1 rue de la Paix, Paris', politicSide: Affiliation.LEFT, contributionStatus: null, postalCode: '77777', city: 'aaaa'},
+      {firstName: 'Bob', name: 'Martin', email: 'bob.martin@gmail.com', password: hashedDefaultPassword, telephone: '0123456789', isVerified: true, language: 'fr', role: Role.MODERATOR, address: '1 rue de la Paix, Paris', politicSide: Affiliation.LEFT, contributionStatus: null, postalCode: '77777', city: 'aaaa'},
     ]
   })
 
