@@ -140,8 +140,11 @@ DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
         await BanWordService.checkStringForBanWords(debate.content)
         const createdDebate = await DebateService.createDebate(debate, userId);
         res.status(200).send(createdDebate);
-    } catch (error) {
-        next(error);
+    } catch (error:any) {
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
     }
 });
 

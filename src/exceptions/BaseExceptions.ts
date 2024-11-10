@@ -16,3 +16,10 @@ export class EndpointNotFoundException extends BaseException {
     super(message, HttpStatus.NOT_FOUND)
   }
 }
+
+export class MissingArgumentException extends BaseException {
+  constructor(argument: string) {
+    const message = `The argument "${argument}" is missing`
+    super(message, HttpStatus.BAD_REQUEST)
+  }
+}

@@ -30,10 +30,13 @@ ArgumentRouter.post('/', async (req: Request, res: Response, next: NextFunction)
         let data = req.body;
         data.argumentType = data.argumentType as ArgumentType;
         data.userId = userId;
-        await ArgumentService.createArgument(data);
-        res.status(200).send();
-    } catch (error) {
-        next(error);
+        const argument = await ArgumentService.createArgument(data);
+        res.status(200).send(argument);
+    } catch (error:any) {
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
     }
 });
 

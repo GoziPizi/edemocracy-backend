@@ -9,12 +9,33 @@ class ModerationService {
 
     private static reportRepository: ReportRepository = new ReportRepository()
 
-    static async report(id: string, type: ReportingType){
-        this.reportRepository.createReport(id, type);
+    //Gives the ability for any authenticated user to report an entity.
+    //If there is no current report for this entity, a new report is created.
+    //If there is already a report for this entity, the array of events is updated.
+    static async report(reporterId: string, entityId: string, entityType: ReportingType, reason: string){
+        let currentReport = await this.reportRepository.getReportFromEntity(entityId);
+        if(currentReport) {
+            await this.reportRepository.addEventToReport(currentReport.id, reason,'report', reporterId);
+        } else {
+            currentReport = await this.reportRepository.initializeEmptyReportForEntity(entityId, entityType)
+            await this.reportRepository.addEventToReport(currentReport.id, reason,'report', reporterId);
+        }
+        const report = await this.reportRepository.updateReportTime(currentReport.id)
+        return report;
     }
 
     static async getReports(){
         return this.reportRepository.getReports();
+    }
+
+    static async getReport(id: string){
+        const events = await this.reportRepository.getEvents(id);
+        const report = await this.reportRepository.getReport(id);
+        const result = {
+            ...report,
+            events
+        }
+        return result;
     }
 
     static async ignoreReport(id: string){

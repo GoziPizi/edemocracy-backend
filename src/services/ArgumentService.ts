@@ -63,7 +63,7 @@ class ArgumentService {
         return data;
     }
 
-    static async createArgument(data: any): Promise<void>  {
+    static async createArgument(data: any)  {
         const userId = data.userId;
         const argument = await this.argumentRepository.createArgument(data);
         if(!argument) {
@@ -75,7 +75,7 @@ class ArgumentService {
             argumentId: argument.id
         }
         await DebateService.createDebate(debateToCreate, userId);
-        return ;
+        return argument;
     }
 
     static async voteForArgument(id: string, userId: string, value: boolean): Promise<void> {

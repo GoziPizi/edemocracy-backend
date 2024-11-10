@@ -16,7 +16,7 @@ class DebateService {
     private static userRepository: UserRepository = new UserRepository()
 
     static async createDebate(debate: any, userId: string) {
-        const argument = await this.argumentRepository.getArgumentById(debate.argumentId);
+        const argument = debate.argumentId ? await this.argumentRepository.getArgumentById(debate.argumentId) : null;
         if(argument && argument.childDebateId) {
             throw new Error('Argument already has a debate');
         }

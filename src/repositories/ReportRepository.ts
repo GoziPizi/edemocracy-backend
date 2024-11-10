@@ -1,13 +1,70 @@
 import { ReportingType } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
+import { connect } from "http2";
 
 class ReportRepository extends PrismaRepository {
     
-    createReport = async (id: string, type: ReportingType) => {
+    initializeEmptyReportForEntity = async (entityId: string, entityType: ReportingType) => {
+        
         const report = await this.prismaClient.reporting.create({
             data: {
-                entityType: type,
-                entityId: id
+                entityId,
+                entityType
+            }
+        });
+        return report;
+    }
+
+    addEventToReport = async (reportId: string,reason: string, type: string, userId: string) => {
+        const event = await this.prismaClient.reportingEvent.create({
+            //Connects the user to the event
+            data: {
+                type,
+                reason,
+                reportingId: reportId,
+                userId
+            }
+        });
+        return event;
+    }
+
+    getReport = async (id: string) => {
+        const report = await this.prismaClient.reporting.findUnique({
+            where: {
+                id
+            }
+        });
+        return report;
+    }
+
+    getReportFromEntity = async (entityId: string) => {
+        const report = await this.prismaClient.reporting.findFirst({
+            where: {
+                entityId
+            }
+        });   
+        return report;
+    }
+
+    getEvents = async (reportId: string) => {
+        const events = await this.prismaClient.reportingEvent.findMany({
+            where: {
+                reportingId: reportId
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        return events;
+    }
+
+    updateReportTime = async(reportId: string) => {
+        const report = await this.prismaClient.reporting.update({
+            where: {
+                id: reportId
+            },
+            data: {
+                updatedAt: new Date()
             }
         });
         return report;
@@ -25,15 +82,6 @@ class ReportRepository extends PrismaRepository {
     getReports = async () => {
         const reports = await this.prismaClient.reporting.findMany();
         return reports;
-    }
-
-    getReport = async (id: string) => {
-        const report = await this.prismaClient.reporting.findUnique({
-            where: {
-                id
-            }
-        });
-        return report;
     }
 }
 

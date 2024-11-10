@@ -1,8 +1,10 @@
 import { Forbidden } from '@/exceptions/AdminExceptions';
+import { MissingArgumentException } from '@/exceptions/BaseExceptions';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import { ReportIntToReportType } from '@/mappers/ReportType';
 import AuthentificationService from '@/services/AuthentificationService';
 import ModerationService from '@/services/ModerationService';
+import { ReportingType } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express'
 
 const ModerationRouter = express.Router();
@@ -30,11 +32,22 @@ ModerationRouter.post('/report', async (req: Request, res: Response, next: NextF
         if(!token) {
             throw new JwtNotInHeaderException();
         }
-        console.log(req.body.entityId, req.body.entityType);
-        await ModerationService.report(req.body.entityId, ReportIntToReportType(req.body.entityType));
-        res.status(200).send();
-    } catch (error) {
-        console.log(error);
+        const entityType = ReportIntToReportType(req.body.entityType);
+        const entityId = req.body.entityId;
+        const reason = req.body.reason;
+
+        if(!entityType || !entityId || !reason) {
+            throw new MissingArgumentException('entityType, entityId or reason');
+        }
+
+        const userId = AuthentificationService.getUserId(token);
+        const report = await ModerationService.report(userId, entityId, entityType as ReportingType, reason);
+        res.status(200).send(report);
+    } catch (error:any) {
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
     }
 });
 
@@ -54,7 +67,7 @@ ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextF
             throw new JwtNotInHeaderException();
         }
         const role = await AuthentificationService.getUserRole(token);
-        if(role !== 'ADMIN' && role !== 'MODERATOR') {
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Forbidden();
         }
         const reports = await ModerationService.getReports();
@@ -64,6 +77,42 @@ ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextF
             return res.status(401).json({error:'Unauthorized, token not found'});
         }
         if (error instanceof Forbidden) {
+            return res.status(403).json({error:'Forbidden'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+ModerationRouter.get('/reports/:id', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Moderation']
+        #swagger.description = 'Get a report by id'
+        #swagger.parameters['id'] = {
+            description: 'Report id',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'Report found',
+            schema: { $ref: "#/definitions/ReportOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+        console.log('Param',req.params.id);
+        const report = await ModerationService.getReport(req.params.id);
+        res.status(200).send(report);
+    } catch (error:any) {
+        if(error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        if(error instanceof Forbidden) {
             return res.status(403).json({error:'Forbidden'});
         }
         return res.status(500).json({error: 'Internal server error'});
@@ -89,7 +138,7 @@ ModerationRouter.delete('/reports/:id', async (req: Request, res: Response, next
             throw new JwtNotInHeaderException();
         }
         const role = await AuthentificationService.getUserRole(token);
-        if(role !== 'ADMIN' && role !== 'MODERATOR') {
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Error('You are not allowed to see this');
         }
         await ModerationService.ignoreReport(req.params.id);
@@ -118,7 +167,7 @@ ModerationRouter.delete('/reports/:id/delete-entity', async (req: Request, res: 
             throw new JwtNotInHeaderException();
         }
         const role = await AuthentificationService.getUserRole(token);
-        if(role !== 'ADMIN' && role !== 'MODERATOR') {
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Error('You are not allowed to see this');
         }
         await ModerationService.deleteEntity(req.params.id);
@@ -146,7 +195,7 @@ ModerationRouter.delete('/user/:id', async (req: Request, res: Response, next: N
             throw new JwtNotInHeaderException();
         }
         const role = await AuthentificationService.getUserRole(token);
-        if(role !== 'ADMIN' && role !== 'MODERATOR') {
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Error('You are not allowed to see this');
         }
         await ModerationService.banUser(req.params.id);

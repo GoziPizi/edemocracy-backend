@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest tests/all.test.ts --runInBand",
     "start": "ts-node -r tsconfig-paths/register src/index.ts",
     "seed": "ts-node -r tsconfig-paths/register prisma/seeder//seed.ts",
     "swagger": "ts-node src/swagger.ts",
