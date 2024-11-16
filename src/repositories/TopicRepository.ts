@@ -2,9 +2,12 @@ import PrismaRepository from "./PrismaRepository";
 
 class TopicRepository extends PrismaRepository {
 
-    createTopic = async (topic: any) => {
+    createTopic = async (topic: any, userId: string) => {
         const newTopic = await this.prismaClient.topic.create({
-            data: topic
+            data: {
+                ...topic,
+                userId
+            }
         })
         if(topic.parentTopicId) {
             await this.updateChildrenIds(topic.parentTopicId, newTopic.id)

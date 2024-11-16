@@ -39,12 +39,13 @@ TopicRouter.post(
             throw new JwtNotInHeaderException();
         }
         await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token)
 
         const topic = req.body;
         await BanWordService.checkStringForBanWords(topic.title)
         await BanWordService.checkStringForBanWords(topic.description)
 
-        const newTopic = await TopicService.createTopic(topic, image);
+        const newTopic = await TopicService.createTopic(topic, userId, image);
         res.status(201).send(newTopic);
     } catch (error) {
         next(error);

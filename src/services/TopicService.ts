@@ -10,6 +10,7 @@ class TopicService {
 
     static async createTopic(
         topic: any,
+        userId: string,
         image: Express.Multer.File | undefined
     ) {
         let imageUrl = undefined;
@@ -27,7 +28,7 @@ class TopicService {
             topic.medias = [imageUrl];
         }
 
-        const createdTopic = await TopicService.topicRepository.createTopic(topic);
+        const createdTopic = await TopicService.topicRepository.createTopic(topic, userId);
         return createdTopic;
     }
 
