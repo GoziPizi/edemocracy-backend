@@ -40,6 +40,14 @@ class ArgumentService {
             childDebateId
         }
     }
+
+    static async getAuthor(id: string) {
+        const argument = await this.argumentRepository.getArgumentById(id);
+        if(!argument) {
+            throw new Error('Argument not found');
+        }
+        return argument.userId;
+    }
     
     static async getUsernformationsOfArgument(id: string) {
         const argument = await this.argumentRepository.getArgumentById(id);

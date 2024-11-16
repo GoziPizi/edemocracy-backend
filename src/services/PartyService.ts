@@ -186,6 +186,14 @@ class PartyService {
         return comment;
     }
 
+    static async getCommentAuthor(commentId: string) {
+        const comment = await this.partyRepository.getCommentById(commentId);
+        if(!comment) {
+            return '';
+        }
+        return comment.userId;
+    }
+
 }
 
 export default PartyService;

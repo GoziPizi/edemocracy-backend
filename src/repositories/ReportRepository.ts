@@ -4,25 +4,26 @@ import { connect } from "http2";
 
 class ReportRepository extends PrismaRepository {
     
-    initializeEmptyReportForEntity = async (entityId: string, entityType: ReportingType) => {
+    initializeEmptyReportForEntity = async (entityId: string, entityType: ReportingType, userId: string) => {
         
         const report = await this.prismaClient.reporting.create({
             data: {
                 entityId,
-                entityType
+                entityType, 
+                userId
             }
         });
         return report;
     }
 
-    addEventToReport = async (reportId: string,reason: string, type: string, userId: string) => {
+    addEventToReport = async (reportId: string, userId: string, reason: string, type: string, duration?: number) => {
         const event = await this.prismaClient.reportingEvent.create({
-            //Connects the user to the event
             data: {
+                reportingId: reportId,
+                userId,
                 type,
                 reason,
-                reportingId: reportId,
-                userId
+                duration 
             }
         });
         return event;
@@ -70,6 +71,18 @@ class ReportRepository extends PrismaRepository {
         return report;
     }
 
+    setModerated = async (reportId: string) => {
+        const report = await this.prismaClient.reporting.update({
+            where: {
+                id: reportId
+            },
+            data: {
+                isModerated: true
+            }
+        });
+        return report;
+    }
+
     deleteReport = async (id: string) => {
         const report = await this.prismaClient.reporting.delete({
             where: {
@@ -83,6 +96,66 @@ class ReportRepository extends PrismaRepository {
         const reports = await this.prismaClient.reporting.findMany();
         return reports;
     }
+
+    getRecentReports = async () => {
+        const reports = await this.prismaClient.reporting.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        return reports;
+    }
+
+    getModeration1Reports = async () => {
+        const reports = await this.prismaClient.reporting.findMany({
+            where: {
+                isModeration2Required: false,
+                isModerated: false
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        return reports;
+    }
+
+    getModeration2Reports = async () => {
+        const reports = await this.prismaClient.reporting.findMany({
+            where: {
+                isModeration2Required: true
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        return reports;
+    }
+
+    getPersonalReports = async (userId: string) => {
+        const reports = await this.prismaClient.reporting.findMany({
+            where: {
+                userId,
+                isModerated: true
+            }, 
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        return reports;
+    }
+
+    setModeration2Required = async (reportId: string) => {
+        const report = await this.prismaClient.reporting.update({
+            where: {
+                id: reportId
+            },
+            data: {
+                isModeration2Required: true
+            }
+        });
+        return report;
+    }
+
 }
 
 export default ReportRepository;

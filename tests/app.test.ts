@@ -25,14 +25,14 @@ beforeAll(async () => {
       {id:'1', firstName: 'Alice', name: 'Dupont', email: 'alice.dupont@gmail.com', password: hashedDefaultPassword, telephone: '0123456789', isVerified: true, language: 'fr', role: Role.ADMIN, address: '1 rue de la Paix, Paris', politicSide: Affiliation.LEFT, contributionStatus: null, postalCode: '77777', city: 'aaaa'},
       {firstName: 'Bob', name: 'Martin', email: 'bob.martin@gmail.com', password: hashedDefaultPassword, telephone: '0123456789', isVerified: true, language: 'fr', role: Role.MODERATOR1, address: '1 rue de la Paix, Paris', politicSide: Affiliation.LEFT, contributionStatus: null, postalCode: '77777', city: 'aaaa'},
       {firstName: 'Charlie', name: 'Dupuis', email: 'charlie.dupuis@gmail.com', password: hashedDefaultPassword, telephone: '0123456789', isVerified: true, language: 'fr', role: Role.MODERATOR2, address: '1 rue de la Paix, Paris', politicSide: Affiliation.LEFT, contributionStatus: null, postalCode: '77777', city: 'aaaa'},
-      {firstName: 'David', name: 'Durand', email: 'david.durand@gmail.com', password: hashedDefaultPassword, telephone: '0123456789', isVerified: true, language: 'fr', role: Role.USER, address: '1 rue de la Paix, Paris', politicSide: Affiliation.LEFT, contributionStatus: null, postalCode: '77777', city: 'aaaa'},
+      {id:'JESUISBOB', firstName: 'David', name: 'Durand', email: 'david.durand@gmail.com', password: hashedDefaultPassword, telephone: '0123456789', isVerified: true, language: 'fr', role: Role.USER, address: '1 rue de la Paix, Paris', politicSide: Affiliation.LEFT, contributionStatus: null, postalCode: '77777', city: 'aaaa'},
     ]
   })
 
   //create topics
   await prisma.topic.createMany({
     data: [
-      {id: 'topic-first-id', title: 'topic1', description: 'description1', userId: '1'}
+      {id: 'topic-first-id', userId: 'JESUISBOB', title: 'topic1', description: 'description1'}
     ]
   })
 

@@ -248,7 +248,7 @@ model Personality {
 model Topic {
   id            String    @id @default(uuid())
   user          User?     @relation(fields: [userId], references: [id])
-  userId        String?
+  userId        String
   title         String
   parentTopicId String?
   childrenId    String[]
@@ -262,6 +262,7 @@ model Topic {
 
 model Debate {
   id                         String                           @id @default(uuid())
+  userId                     String
   title                      String
   content                    String
   descriptionReformulations  DebateDescriptionReformulation[]
@@ -402,12 +403,15 @@ enum ReportingType {
 }
 
 model Reporting {
-  id             String           @id @default(uuid())
-  entityId       String
-  entityType     ReportingType
-  createdAt      DateTime         @default(now())
-  updatedAt      DateTime         @updatedAt
-  ReportingEvent ReportingEvent[]
+  id                    String           @id @default(uuid())
+  entityId              String
+  entityType            ReportingType
+  userId                String?
+  isModerated           Boolean          @default(false)
+  isModeration2Required Boolean          @default(false)
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+  ReportingEvent        ReportingEvent[]
 }
 
 model ReportingEvent {
@@ -415,6 +419,7 @@ model ReportingEvent {
   user        User       @relation(fields: [userId], references: [id])
   userId      String
   type        String //ban, warning, signalement, approval, etc...
+  duration    Int? //in hours
   reason      String
   Reporting   Reporting? @relation(fields: [reportingId], references: [id])
   reportingId String?

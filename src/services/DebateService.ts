@@ -24,6 +24,7 @@ class DebateService {
         const debateResult = await this.debateRepository.createDebateResult();
         const debateContributorsResult = await this.debateRepository.createDebateResult();
         const newDebate = await this.debateRepository.createDebate({
+            userId,
             ...debate,
             debateResultId: debateResult.id,
             debateContributorsResultId: debateContributorsResult.id
@@ -96,6 +97,22 @@ class DebateService {
             debateResult,
             debateContributorsResult,
         }
+    }
+
+    static async getAuthor(debateId: string) {
+        const debate = await this.debateRepository.getDebateById(debateId);
+        if(!debate) {
+            throw new Error('Debate not found');
+        }
+        return debate.userId;
+    }
+
+    static async getReformulationAuthor(reformulationId: string) {
+        const reformulation = await this.debateRepository.getDebateReformulation(reformulationId);
+        if(!reformulation) {
+            throw new Error('Reformulation not found');
+        }
+        return reformulation.userId;
     }
 
     static async getDebateReformulations(id: string) {

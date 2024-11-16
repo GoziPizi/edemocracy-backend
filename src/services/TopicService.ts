@@ -31,6 +31,14 @@ class TopicService {
         return createdTopic;
     }
 
+    static async getAuthor(id: string) {
+        const topic = await TopicService.topicRepository.findTopicById(id);
+        if (!topic) {
+            throw new Error("Topic not found");
+        }
+        return topic.userId;
+    }
+
     static async updateTopic(id: string, topic: any, userId: string) {
         const actualTopic = await TopicService.topicRepository.findTopicById(id);
         if (!actualTopic) {

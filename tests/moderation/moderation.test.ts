@@ -1,5 +1,7 @@
 import request from 'supertest';
 import app from '../../src/index';
+import { ReportingType } from '@prisma/client';
+import { report } from 'process';
 
 beforeAll(async () => {
 
@@ -102,10 +104,10 @@ describe('GET /moderation/reports', () => {
 
 //Signal one entity as unidentified user
 
-describe('POST api/moderation/report', () => {
+describe('POST api/moderation/report as unidentified', () => {
     it('should return 401', async () => {
         const response = await request(app).post('/api/moderation/report').send({
-            entityId: '1',
+            entityId: 'topic-first-id',
             entityType: 0,
             reason: 'Raison'
         });
@@ -115,15 +117,18 @@ describe('POST api/moderation/report', () => {
 
 //Signal one entity as identified user
 
-describe('POST api/moderation/report', () => {
+describe('POST api/moderation/report as identified', () => {
     it('should return 200', async () => {
         const response = await request(app).post('/api/moderation/report').send({
             entityId: process.env.ARGUMENT_ID,
-            entityType: 0,
+            entityType: 2,
             reason: 'Raison'
         }).set('Authorization', `${process.env.USER_TOKEN}`);
         expect(response.status).toBe(200);
         process.env.FIRST_REPORT_ID = response.body.id;
+        console.log('-------------------------------------------------');
+        console.log('First report id : ' + process.env.FIRST_REPORT_ID);
+        console.log('-------------------------------------------------');
     });
 });
 
@@ -152,11 +157,11 @@ describe('GET api/moderation/report/id after report', () => {
 });
 
 //Report the same entity again as someone else
-describe('POST api/moderation/report', () => {
+describe('POST api/moderation/report second report of the first entity', () => {
     it('should return 200', async () => {
         const response = await request(app).post('/api/moderation/report').send({
             entityId: process.env.ARGUMENT_ID,
-            entityType: 0,
+            entityType: 2,
             reason: 'Raison2'
         }).set('Authorization', `${process.env.MODERATOR1_TOKEN}`);
         expect(response.status).toBe(200);
@@ -194,6 +199,8 @@ describe('GET api/moderation/report/id after 2 reports', () => {
 //He can get a report
 //He can ignore a report
 //He can mask an entity
+//He can delete an entity
+//He can sanction a user
 
 //--------------------------------------------------------
 //Moderation as Mod2
@@ -201,8 +208,54 @@ describe('GET api/moderation/report/id after 2 reports', () => {
 
 //He can get the list of reports    
 //He can get the list of hot reports
-//He can get the activity of a specific moderator
-//He can get the history of all recent signaling, with associated actions
+
+//sanction as a moderator
+
+describe('POST api/moderation/sanction as a moderator, set a ban for one day for the first report', () => {
+    it('should return 200', async () => {
+        const response = await request(app).post(`/api/moderation/sanction`).send({
+            reportId: process.env.FIRST_REPORT_ID,
+            sanctionType: 'ban',
+            sanctionDuration: 24,
+            reason: 'Raison',
+        }).set('Authorization', `${process.env.MODERATOR2_TOKEN}`);
+        expect(response.status).toBe(200);
+    });
+});
+
+//Contest as a user
+
+describe('POST api/moderation/contest contest as not the user from the first report', () => {
+    it('should return 403', async () => {
+        const response = await request(app).post(`/api/moderation/reports/${process.env.FIRST_REPORT_ID}/contest`).send({
+            reason: 'Raison'
+        }).set('Authorization', `${process.env.USER_TOKEN}`);
+        expect(response.status).toBe(403);
+    });
+});
+
+describe('POST api/moderation/contest contest a s the user from the first report', () => {
+    it('should return 200', async () => {
+        const response = await request(app).post(`/api/moderation/reports/${process.env.FIRST_REPORT_ID}/contest`).send({
+            reason: 'Raison'
+        }).set('Authorization', `${process.env.ADMIN_TOKEN}`);
+        expect(response.status).toBe(200);
+    });
+});
+
+//The list of hot reports must now be of 1
+describe('GET api/moderation/moderation-2-reports', () => {
+    it('should return 200', async () => {
+        const response = await request(app).get('/api/moderation/moderation-2-reports').set('Authorization', `${process.env.MODERATOR2_TOKEN}`);
+        expect(response.status).toBe(200);
+        expect(response.body.length).toBe(1);
+    });
+});
+
+//He can sanction
+
+//He can get the activity of a specific moderator TODO
+//He can get the history of all recent signaling, with associated actions TODO
 
 
 //--------------------------------------------------------
@@ -210,5 +263,5 @@ describe('GET api/moderation/report/id after 2 reports', () => {
 //--------------------------------------------------------
 
 //He can signal an entity
-//He can get the list of his reports
-//He can contest a report
+//He can get the list of his reports TODO
+//He can contest a report TODO

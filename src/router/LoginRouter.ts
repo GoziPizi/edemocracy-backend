@@ -127,8 +127,6 @@ LoginRouter.post(
     try {
         const userInput = req.body;
 
-        console.log(userInput);
-
         //Input validation
 
         const schema = Joi.object({
@@ -155,7 +153,6 @@ LoginRouter.post(
 
         const { error } = schema.validate(userInput);
         if(error) {
-            console.log(error);
             throw new InvalidRegisterTypeException();
         }
 
@@ -288,7 +285,6 @@ LoginRouter.post(
 
         const { error } = schema.validate(userInput);
         if(error) {
-            console.log(error);
             throw new InvalidRegisterTypeException();
         }
 
@@ -411,7 +407,6 @@ LoginRouter.post(
 
         const { error } = schema.validate(userInput);
         if(error) {
-            console.log(error);
             throw new InvalidRegisterTypeException();
         }
 

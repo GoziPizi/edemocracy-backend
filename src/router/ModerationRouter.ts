@@ -4,6 +4,7 @@ import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import { ReportIntToReportType } from '@/mappers/ReportType';
 import AuthentificationService from '@/services/AuthentificationService';
 import ModerationService from '@/services/ModerationService';
+import { personalReport } from '@/types/dtos/ModerationDtos';
 import { ReportingType } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express'
 
@@ -44,6 +45,51 @@ ModerationRouter.post('/report', async (req: Request, res: Response, next: NextF
         const report = await ModerationService.report(userId, entityId, entityType as ReportingType, reason);
         res.status(200).send(report);
     } catch (error:any) {
+        console.log(error);
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+//Poster une sanction
+ModerationRouter.post('/sanction', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Moderation']
+        #swagger.description = 'Post a sanction'
+        #swagger.parameters['userId'] = {
+            description: 'User id',
+            required: true
+        }
+        #swagger.parameters['sanctionType'] = {
+            description: 'Sanction type',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'Sanction posted',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+
+        const reportId: string = req.body.reportId;
+        const sanctionType: string = req.body.sanctionType;
+        const sanctionDuration: number = req.body.sanctionDuration;
+
+        const moderatorId = AuthentificationService.getUserId(token);
+
+        const newSanction = await ModerationService.postSanction(reportId, moderatorId, sanctionType, sanctionDuration);
+        res.status(200).send(newSanction);
+    } catch (error:any) {
+        console.log(error);
         if (error instanceof JwtNotInHeaderException) {
             return res.status(401).json({error:'Unauthorized, token not found'});
         }
@@ -55,7 +101,7 @@ ModerationRouter.post('/report', async (req: Request, res: Response, next: NextF
 ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Moderation']
-        #swagger.description = 'Get the list of reports'
+        #swagger.description = 'Get the list of reports, ordered by most recent'
         #swagger.responses[200] = {
             description: 'Reports found',
             schema: { $ref: "#/definitions/ReportOutputDefinition" }
@@ -70,7 +116,40 @@ ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextF
         if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Forbidden();
         }
-        const reports = await ModerationService.getReports();
+        //TODO : get report for lvl1
+        const reports = await ModerationService.getReportsForModerationLvl1();
+        res.status(200).send(reports);
+    } catch (error:any) {
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        if (error instanceof Forbidden) {
+            return res.status(403).json({error:'Forbidden'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+ModerationRouter.get('/moderation-2-reports', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Moderation']
+        #swagger.description = 'Get the list of reports only for mod2, ordered by most recent'
+        #swagger.responses[200] = {
+            description: 'Reports found',
+            schema: { $ref: "#/definitions/ReportOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'MODERATOR2' && role !== 'ADMIN') {
+            throw new Forbidden();
+        }
+        //TODO : get report for lvl2
+        const reports = await ModerationService.getModeration2Reports();
         res.status(200).send(reports);
     } catch (error:any) {
         if (error instanceof JwtNotInHeaderException) {
@@ -105,7 +184,6 @@ ModerationRouter.get('/reports/:id', async (req: Request, res: Response, next: N
         if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Forbidden();
         }
-        console.log('Param',req.params.id);
         const report = await ModerationService.getReport(req.params.id);
         res.status(200).send(report);
     } catch (error:any) {
@@ -170,6 +248,7 @@ ModerationRouter.delete('/reports/:id/delete-entity', async (req: Request, res: 
         if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Error('You are not allowed to see this');
         }
+        //TODO : update this, it is obsolete
         await ModerationService.deleteEntity(req.params.id);
         res.status(200).send();
     } catch (error) {
@@ -202,6 +281,70 @@ ModerationRouter.delete('/user/:id', async (req: Request, res: Response, next: N
         res.status(200).send();
     } catch (error) {
         console.log(error);
+    }
+});
+
+//Moderation as a user 
+
+ModerationRouter.get('/personal-reports', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Moderation']
+        #swagger.description = 'Get the list of reports that concerns you'
+        #swagger.responses[200] = {
+            description: 'Reports found',
+            schema: { $ref: "#/definitions/ReportOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+        const reports: personalReport[] = await ModerationService.getPersonalReports(userId);
+        res.status(200).send(reports);
+    } catch (error:any) {
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+//Contest a report
+ModerationRouter.post('/reports/:id/contest', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Moderation']
+        #swagger.description = 'Contest a report'
+        #swagger.parameters['id'] = {
+            description: 'Report id',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'Report contested',
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const userId = AuthentificationService.getUserId(token);
+
+        const reason = req.body.reason;
+        const reportId = req.params.id;
+
+        const contestEvent = await ModerationService.contestReport(reportId, userId, reason);
+        res.status(200).send(contestEvent);
+    } catch (error:any) {
+        console.log(error);
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        if(error instanceof Forbidden) {
+            return res.status(403).json({error:'Forbidden'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
     }
 });
 

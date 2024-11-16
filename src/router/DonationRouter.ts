@@ -15,8 +15,6 @@ DonationRouter.post('/get-checkout-session', async (req: Request, res: Response,
         const amount = req.body.amount;
         const interval : string | null = req.body.interval;
 
-        console.log(interval)
-
         //Input validation
 
         if(interval) {
