@@ -115,6 +115,14 @@ class UserRepository extends PrismaRepository {
         return
     }
 
+    getUser( id: string ) {
+        return this.prismaClient.user.findUnique({
+            where: {
+                id
+            }
+        })
+    }
+
     findById = async (id: string) => {
         const user = await this.prismaClient.user.findUnique({
             where: {

@@ -116,9 +116,40 @@ ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextF
         if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
             throw new Forbidden();
         }
-        //TODO : get report for lvl1
         const reports = await ModerationService.getReportsForModerationLvl1();
         res.status(200).send(reports);
+    } catch (error:any) {
+        if (error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        if (error instanceof Forbidden) {
+            return res.status(403).json({error:'Forbidden'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+ModerationRouter.get('/reports/:id/escalate-to-moderation-2', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Moderation']
+        #swagger.description = 'Escalate the report to a mod2'
+        #swagger.responses[200] = {
+            description: 'Reports found',
+            schema: { $ref: "#/definitions/ReportOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+        const id = req.params.id;
+        await ModerationService.escalateToModeration2(id);
+        res.status(200).send();
     } catch (error:any) {
         if (error instanceof JwtNotInHeaderException) {
             return res.status(401).json({error:'Unauthorized, token not found'});
@@ -148,7 +179,6 @@ ModerationRouter.get('/moderation-2-reports', async (req: Request, res: Response
         if(role !== 'MODERATOR2' && role !== 'ADMIN') {
             throw new Forbidden();
         }
-        //TODO : get report for lvl2
         const reports = await ModerationService.getModeration2Reports();
         res.status(200).send(reports);
     } catch (error:any) {
@@ -197,6 +227,41 @@ ModerationRouter.get('/reports/:id', async (req: Request, res: Response, next: N
     }
 });
 
+ModerationRouter.get('/reports/:id/entity', async (req: Request, res: Response, next: NextFunction) => {
+    /**
+        #swagger.tags = ['Moderation']
+        #swagger.description = 'Get a report by id'
+        #swagger.parameters['id'] = {
+            description: 'Report id',
+            required: true
+        }
+        #swagger.responses[200] = {
+            description: 'Report found',
+            schema: { $ref: "#/definitions/ReportOutputDefinition" }
+        }
+     */
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN' && role !== 'MODERATOR1' && role !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+        const report = await ModerationService.getEntityOfReport(req.params.id);
+        res.status(200).send(report);
+    } catch (error:any) {
+        if(error instanceof JwtNotInHeaderException) {
+            return res.status(401).json({error:'Unauthorized, token not found'});
+        }
+        if(error instanceof Forbidden) {
+            return res.status(403).json({error:'Forbidden'});
+        }
+        return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
 //ignore report
 ModerationRouter.delete('/reports/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
@@ -222,7 +287,7 @@ ModerationRouter.delete('/reports/:id', async (req: Request, res: Response, next
         await ModerationService.ignoreReport(req.params.id);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -252,7 +317,7 @@ ModerationRouter.delete('/reports/:id/delete-entity', async (req: Request, res: 
         await ModerationService.deleteEntity(req.params.id);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

@@ -409,6 +409,7 @@ model Reporting {
   userId                String?
   isModerated           Boolean          @default(false)
   isModeration2Required Boolean          @default(false)
+  isModerated2          Boolean          @default(false)
   createdAt             DateTime         @default(now())
   updatedAt             DateTime         @updatedAt
   ReportingEvent        ReportingEvent[]
@@ -421,7 +422,7 @@ model ReportingEvent {
   type        String //ban, warning, signalement, approval, etc...
   duration    Int? //in hours
   reason      String
-  Reporting   Reporting? @relation(fields: [reportingId], references: [id])
+  Reporting   Reporting? @relation(fields: [reportingId], references: [id], onDelete: Cascade)
   reportingId String?
   createdAt   DateTime   @default(now())
 }

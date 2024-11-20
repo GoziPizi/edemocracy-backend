@@ -83,6 +83,17 @@ class ReportRepository extends PrismaRepository {
         return report;
     }
 
+    setModerated2 = async (reportId: string) => {
+        const report = await this.prismaClient.reporting.update({
+            where: {
+                id: reportId
+            },
+            data: {
+                isModerated2: true
+            }
+        })
+    }
+
     deleteReport = async (id: string) => {
         const report = await this.prismaClient.reporting.delete({
             where: {

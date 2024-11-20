@@ -1,11 +1,12 @@
 import https from 'https';
-import express from 'express';
+import express, { NextFunction, Request, Response } from 'express';
 import router from './router/Router';
 import swaggerUi from 'swagger-ui-express';
 import swaggerOutput from './swagger-output.json';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
+import BaseException from './exceptions/BaseExceptions';
 
 function isProdEnvironment(): boolean {
     return process.env.NODE_ENV === 'prod';
@@ -58,6 +59,14 @@ app.use('', router.stripeRouter)
 app.use(express.json({ limit: '50mb' }))
 app.use('/swagger', swaggerUi.serve, swaggerUi.setup(swaggerOutput));
 app.use('', router.router);
+
+const errorHandler = (error: BaseException, req: Request, res: Response, next: NextFunction) => {
+  const status = error.httpCode || 500;
+  const message = error.message || 'Something went wrong';
+  res.status(status).send({ error: message });
+}
+
+app.use(errorHandler);
 
 if (isProdEnvironment())
     httpsServer.listen(PORT, () => {
