@@ -7,6 +7,7 @@ import TopicService from "./TopicService";
 import { Forbidden } from "@/exceptions/AdminExceptions";
 import { personalReport } from "@/types/dtos/ModerationDtos";
 import UserRepository from "@/repositories/UserRepository";
+import { sendWarnMail } from "./MailService";
 
 class ModerationService {
 
@@ -16,6 +17,8 @@ class ModerationService {
     //Gives the ability for any authenticated user to report an entity.
     //If there is no current report for this entity, a new report is created.
     //If there is already a report for this entity, the array of events is updated.
+    //TODO handle case where entity has already been moderated
+        //TODO handle case it has already been reported by this user
     static async report(reporterId: string, entityId: string, entityType: ReportingType, reason: string){
         try {
             let currentReport = await this.reportRepository.getReportFromEntity(entityId);
@@ -27,9 +30,15 @@ class ModerationService {
                 await this.reportRepository.addEventToReport(currentReport.id, reporterId, reason, 'report');
             }
             const report = await this.reportRepository.updateReportTime(currentReport.id)
+
+            //Update flags
+            const events = await this.reportRepository.getEvents(currentReport.id);
+            if(events.filter(event => event.type === 'report').length >= 5) {
+                this.setFlag(entityId, entityType, true);
+            }
+
             return report;
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -100,6 +109,17 @@ class ModerationService {
     }
 
     static async ignoreReport(id: string){
+        const report = await this.reportRepository.getReport(id);
+        if(!report) {
+            return;
+        }
+        //Update reputation
+        this.updateReputationsOfReporters(id, -1);
+
+        //TODO remove flags
+        this.setFlag(report.entityId, report.entityType, false);
+
+        //Delete report
         this.reportRepository.deleteReport(id);
     }
 
@@ -129,6 +149,10 @@ class ModerationService {
         } catch (error) {
             console.log(error);
         }
+        //Update reputation
+        this.updateReputationsOfReporters(id, -1);
+
+        //Delete report
         this.reportRepository.deleteReport(id);
     }
 
@@ -169,6 +193,27 @@ class ModerationService {
         }
     }
 
+    static async warnUser(userId: string, moderatorId: string, reason: string, reportId?: string) {
+        //TOTEST
+        try {
+            const user = await this.userRepository.getUser(userId);
+            if(!user) {
+                throw new Error('User not found');
+            }
+            const report = await this.reportRepository.getReport(reportId!);
+            let warn: ReportingEvent | null = null;
+            if(report) {
+                warn = await this.reportRepository.addEventToReport(reportId!, moderatorId, reason, 'warn' + userId);
+            }
+
+            sendWarnMail(user.email, reason);
+            return warn;
+
+        } catch (error) {
+            throw error;
+        }
+    }
+
     static async postSanction(reportId: string, moderatorId: string, type: string, duration? :number, reason?: string){
         try {
             const report = await this.reportRepository.getReport(reportId);
@@ -192,6 +237,10 @@ class ModerationService {
             const event = await this.reportRepository.addEventToReport(reportId, moderatorId, reason ? reason : 'No reason specified', type, duration);
             await this.reportRepository.updateReportTime(report.id);
             await this.reportRepository.setModerated(report.id);
+
+            //Update reputation
+            this.updateReputationsOfReporters(reportId, 1);
+
             return event;
 
         } catch (error) {
@@ -226,6 +275,51 @@ class ModerationService {
             throw error;
         }
     }
+
+    //Historic related methods
+    static async getModerators(): Promise<{name: string, id: string}[]> {
+        return this.reportRepository.getModerators();
+    }
+
+    static async getHistoric(): Promise<ReportingEvent[]> {
+        return this.reportRepository.getFullHistoric();
+    }
+
+    static async getHistoricOfModerator(moderatorId: string): Promise<ReportingEvent[]> {
+        return this.reportRepository.getHistoricOfModerator(moderatorId);
+    }
+
+    //Reputation
+    static async updateReputationsOfReporters(reportId: string, value: number){
+        const events = await this.reportRepository.getEvents(reportId);
+        for (const event of events) {
+            if(event.type === 'report') {
+                await this.userRepository.updateReputation(event.userId, value);
+            }
+        }
+    }
+
+    //Flags
+    static async setFlag(entityId: string, entityType: ReportingType, isFlaged: boolean){
+        switch(entityType) {
+            case ReportingType.ARGUMENT:
+                ArgumentService.setFlag(entityId, isFlaged);
+                break;
+            case ReportingType.COMMENT:
+                PartyService.setFlag(entityId, isFlaged);
+                break;
+            case ReportingType.DEBATE:
+                DebateService.setDebateFlag(entityId, isFlaged);
+                break;
+            case ReportingType.TOPIC:
+                TopicService.setFlag(entityId, isFlaged);
+                break;
+            case ReportingType.REFORMULATION:
+                DebateService.setReformulationFlag(entityId, isFlaged);
+                break;
+        }
+    }
+
 
 }
 

@@ -167,6 +167,51 @@ class ReportRepository extends PrismaRepository {
         return report;
     }
 
+    getModerators = async () => {
+        const moderators = await this.prismaClient.user.findMany({
+            where: {
+                role: {
+                    in: ['MODERATOR1', 'MODERATOR2', 'ADMIN']
+                }
+            }
+        });
+        return moderators.map(moderator => {
+            return {
+                id: moderator.id,
+                name: moderator.name + ' ' + moderator.firstName,
+            }
+        });
+    }
+
+    getFullHistoric = async () => {
+        const reports = await this.prismaClient.reportingEvent.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            },
+            where: {
+                type: {
+                    in: ['ban']
+                }
+            }
+        });
+        return reports;
+    }
+
+    getHistoricOfModerator = async (userId: string) => {
+        const reports = await this.prismaClient.reportingEvent.findMany({
+            orderBy: {
+                createdAt: 'desc'
+            },
+            where: {
+                userId,
+                type: {
+                    in: ['ban']
+                }
+            }
+        });
+        return reports;
+    }
+
 }
 
 export default ReportRepository;

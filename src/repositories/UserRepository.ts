@@ -332,6 +332,22 @@ class UserRepository extends PrismaRepository {
         })
         return user
     }
+
+    //Reputation
+
+    updateReputation = async (id: string, reputation: number) => {
+        await this.prismaClient.user.update({
+            where: {
+                id
+            },
+            data: {
+                reputation: {
+                    increment: reputation
+                }
+            }
+        })
+        return
+    }
 }
 
 export default UserRepository;

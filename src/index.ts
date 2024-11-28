@@ -7,6 +7,7 @@ import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
 import BaseException from './exceptions/BaseExceptions';
+import { startCronJobs } from './cron/cron';
 
 function isProdEnvironment(): boolean {
     return process.env.NODE_ENV === 'prod';
@@ -66,7 +67,13 @@ const errorHandler = (error: BaseException, req: Request, res: Response, next: N
   res.status(status).send({ error: message });
 }
 
+//Error handler
 app.use(errorHandler);
+
+//Start cron jobs
+if(isProdEnvironment()) {
+  startCronJobs();
+}
 
 if (isProdEnvironment())
     httpsServer.listen(PORT, () => {

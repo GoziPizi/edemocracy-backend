@@ -42,14 +42,12 @@ ModerationRouter.post('/report', async (req: Request, res: Response, next: NextF
         }
 
         const userId = AuthentificationService.getUserId(token);
+        //TODO handle case where entity has already been moderated
+        //TODO handle case it has already been reported by this user
         const report = await ModerationService.report(userId, entityId, entityType as ReportingType, reason);
         res.status(200).send(report);
     } catch (error:any) {
-        console.log(error);
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -83,10 +81,11 @@ ModerationRouter.post('/sanction', async (req: Request, res: Response, next: Nex
         const reportId: string = req.body.reportId;
         const sanctionType: string = req.body.sanctionType;
         const sanctionDuration: number = req.body.sanctionDuration;
+        const reason: string = req.body.reason;
 
         const moderatorId = AuthentificationService.getUserId(token);
 
-        const newSanction = await ModerationService.postSanction(reportId, moderatorId, sanctionType, sanctionDuration);
+        const newSanction = await ModerationService.postSanction(reportId, moderatorId, sanctionType, sanctionDuration, reason);
         res.status(200).send(newSanction);
     } catch (error:any) {
         console.log(error);
@@ -410,6 +409,95 @@ ModerationRouter.post('/reports/:id/contest', async (req: Request, res: Response
             return res.status(403).json({error:'Forbidden'});
         }
         return res.status(500).json({error: 'Internal server error'});
+    }
+});
+
+//Warn user
+ModerationRouter.post('/user/:id/warn', async (req: Request, res: Response, next: NextFunction) => {
+    //TOTEST warn a user 
+    //Possible to add a report id to link the warn to a report
+    //Reason is mandatory
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+
+        const roleId = await AuthentificationService.getUserRole(token);
+        if(roleId !== 'ADMIN' && roleId !== 'MODERATOR1' && roleId !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+        const moderatorId = AuthentificationService.getUserId(token);
+
+        const userId = req.params.id;
+        const reason = req.body.reason;
+        const reportId = req.body.reportId;
+
+        if(!reason) {
+            throw new MissingArgumentException('reason');
+        }
+
+        const warn = await ModerationService.warnUser(userId, moderatorId, reason, reportId);
+        res.status(200).send(warn);
+
+    } catch (error:any) {
+        next(error);
+    }
+})
+
+//Historic
+
+ModerationRouter.get('/moderators', async (req: Request, res: Response, next: NextFunction) => {
+    //TOTEST Liste des modérateurs
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN' && role !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+        const moderators = await ModerationService.getModerators();
+        res.status(200).send(moderators);
+    } catch (error:any) {
+        next(error);
+    }
+});
+
+ModerationRouter.get('/historic', async (req: Request, res: Response, next: NextFunction) => {
+    //TOTEST Historique de tous les évènements de modération.
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN' && role !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+        const events = await ModerationService.getHistoric();
+        res.status(200).send(events);
+    } catch (error:any) {
+        next(error);
+    }
+});
+
+ModerationRouter.get('/historic/:moderatorId', async (req: Request, res: Response, next: NextFunction) => {
+    //TOTEST Historique de tous les évènements de modération pour un modérateur.
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN' && role !== 'MODERATOR2') {
+            throw new Forbidden();
+        }
+        const events = await ModerationService.getHistoricOfModerator(req.params.moderatorId);
+        res.status(200).send(events);
+    } catch (error:any) {
+        next(error);
     }
 });
 

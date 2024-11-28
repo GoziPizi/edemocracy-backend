@@ -194,6 +194,22 @@ class PartyService {
         return comment.userId;
     }
 
+    //Moderation
+
+    static async setFlag(commentId: string, isFlaged: boolean) {
+        try {
+            this.partyRepository.updateComment(commentId, {isFlaged});
+            if(isFlaged) {
+                const comment = this.partyRepository.getCommentById(commentId);
+                if(!comment) {
+                    throw new Error('Comment not found');
+                }
+            } 
+        } catch (error) {
+            return;
+        }
+    }
+
 }
 
 export default PartyService;

@@ -111,6 +111,10 @@ class TopicService {
             console.log(error);
         }
     }
+
+    static async setFlag(id: string, isFlaged: boolean) {
+        return this.topicRepository.updateTopic(id, {isFlaged});
+    }
 }
 
 export default TopicService;

@@ -34,4 +34,5 @@ export type UserPublicOutputDto = Omit<
     | 'actualSex'
     | 'sexualOrientation'
     | 'religion'
-    | 'sponsorshipCode'>
+    | 'sponsorshipCode'
+    | 'reputation'>

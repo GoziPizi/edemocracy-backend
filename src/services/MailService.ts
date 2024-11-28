@@ -13,7 +13,7 @@ const transporter = nodemailer.createTransport({
   }
 })
 
-function sendEmail(email: string, subject: string, text: string) {
+export function sendEmail(email: string, subject: string, text: string) {
   const mailOptions = {
     from: emailAdress,
     to: email,
@@ -30,16 +30,30 @@ function sendEmail(email: string, subject: string, text: string) {
   })
 }
 
-function sendReinitPasswordMail(email: string, token: string) {
+export function sendReinitPasswordMail(email: string, token: string) {
   const subject = 'Réinitialisation de votre mot de passe'
   const text = `Bonjour, veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : https://digital-democracy.eu/change-password/?token=${token}&email=${email}`
   sendEmail(email, subject, text)
 }
 
-function sendThankDonationMail(email: string, amount: number) {
+export function sendThankDonationMail(email: string, amount: number) {
   const subject = 'Merci pour votre don'
   const text = `Bonjour, nous vous remercions pour votre don de ${amount}€`
   sendEmail(email, subject, text)
 }
 
-export { sendEmail, sendReinitPasswordMail, sendThankDonationMail }
+//Moderation related emails
+
+export function sendWarnMail(email: string, reason: string) {
+  const subject = 'Avertissement'
+  const text = `Bonjour, vous avez reçu un avertissement pour la raison suivante : ${reason}`
+  sendEmail(email, subject, text)
+}
+
+//Notifications related emails
+
+export function sendFollowUpdateMail(email: string, entityName: string) {
+  const subject = 'Mise à jour d\'un sujet suivi'
+  const text = `Bonjour, un sujet que vous suivez (${entityName}) a été mis à jour`
+  sendEmail(email, subject, text)
+}

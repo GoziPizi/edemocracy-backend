@@ -26,6 +26,40 @@ class DebateRepository extends PrismaRepository {
     return debate;
   }
 
+  updateReformulation = async (id: string, data: any) => {
+    const reformulation = await this.prismaClient.debateDescriptionReformulation.update({
+      where: {
+        id,
+      },
+      data,
+    });
+    return reformulation;
+  }
+
+  addPopularityScore = async (debateId: string, amount: number) => {
+    const debate = await this.prismaClient.debate.update({
+      where: {
+        id: debateId,
+      },
+      data: {
+        popularityScore: {
+          increment: amount,
+        },
+      },
+    });
+    return debate;
+  }
+
+  divideAllPopularitiesByTwo = async () => {
+    await this.prismaClient.debate.updateMany({
+      data: {
+        popularityScore: {
+          divide: 2,
+        },
+      },
+    });
+  }
+
   getDebateById = async (id: string) => {
     const debate = await this.prismaClient.debate.findUnique({
       where: {
@@ -58,7 +92,7 @@ class DebateRepository extends PrismaRepository {
       take: 20,
       skip: (page - 1) * 20,
       orderBy: {
-        createdAt: 'desc',
+        popularityScore: 'desc',
       },
     });
     //joins the results of debates aswell

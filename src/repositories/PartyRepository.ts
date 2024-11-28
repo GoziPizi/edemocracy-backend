@@ -36,6 +36,16 @@ class PartyRepository extends PrismaRepository {
         return party
     }
 
+    updateComment = async (id: string, data: any) => {
+        const comment = await this.prismaClient.partyComment.update({
+            where: {
+                id
+            },
+            data
+        })
+        return comment
+    }
+
     searchParty = async (criterias: any) => {
         const where: any = {};
         if(criterias.name) where.name = { contains: criterias.name };

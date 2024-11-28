@@ -29,6 +29,7 @@ export const toUserOutput = (user: User): UserOutputDto => {
         updatedAt: user.updatedAt,
         profilePicture: user.profilePicture,
         sponsorshipCode: user.sponsorshipCode,
+        reputation: user.reputation,
     }
 }
 

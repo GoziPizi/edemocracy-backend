@@ -6,6 +6,8 @@ import UserRepository from "@/repositories/UserRepository";
 import { ArgumentWithVoteOutputDto } from "@/types/dtos/ArgumentOutputDtos";
 import { Argument, DebateVoteType, MembershipStatus } from "@prisma/client";
 import ArgumentService from "./ArgumentService";
+import NotificationService from "./NotificationService";
+import PopularityService from "./PopularityService";
 
 class DebateService {
 
@@ -48,6 +50,9 @@ class DebateService {
             userId
         }
         await this.createDebateReformulation(data);
+        if(newDebate.topicId) {
+            NotificationService.incrementFollowUpdate(newDebate.topicId, "TOPIC");
+        }
         return newDebate;
     }
 
@@ -197,6 +202,11 @@ class DebateService {
             await this.debateRepository.updateDebateResult(debateContributorsResult!.id, this.createNewDebateResult(debateContributorsResult, value, actualVote?.value));
         }
         
+        //Handeling popularity 
+        if(!actualVote) {
+            await PopularityService.addPopularityScore(debateId, 2);
+        }
+
     }
 
     static async getDebateVote(debateId: string, userId: string) {
@@ -320,6 +330,10 @@ class DebateService {
             throw new Error('Debate not found');
         }
         const reformulation = await this.debateRepository.createDebateReformulation(data);
+
+        //Handeling popularity
+        await PopularityService.addPopularityScore(debateId, 5);
+
         return reformulation;
     }
 
@@ -451,6 +465,16 @@ class DebateService {
         } catch (error) {
             console.log(error);
         }
+    }
+
+    //Moderation
+
+    static async setDebateFlag(id: string, isFlaged: boolean) {
+        await this.debateRepository.update(id, {isFlaged});
+    }
+
+    static async setReformulationFlag(id: string, isFlaged: boolean) {
+        await this.debateRepository.updateReformulation(id, {isFlaged});
     }
 
 }

@@ -35,6 +35,51 @@ class NotificationsRepository extends PrismaRepository {
         });
     }
 
+    getEntityType = async (entityId: string) => {
+        const follow = await this.prismaClient.follow.findFirst({
+            where: {
+                entityId
+            }
+        });
+        return follow?.entityType || '';
+    }
+
+    resetNbUpdatesSinceLastView = async (entityId: string, userId: string) => {
+        await this.prismaClient.follow.updateMany({
+            where: {
+                entityId,
+                userId
+            },
+            data: {
+                nbUpdatesSinceLastView: 0
+            }
+        });
+    }
+
+    incrementFollowUpdate = async (entityId: string) => {
+        await this.prismaClient.follow.updateMany({
+            where: {
+                entityId
+            },
+            data: {
+                nbUpdatesSinceLastView: {
+                    increment: 1
+                }
+            }
+        });
+    }
+
+    //Returns the follows that have 1, 10 or 50 updates since the last view
+    getFollowsReadyForNotification = async (entityId: string) => {
+        return await this.prismaClient.follow.findMany({
+            where: {
+                entityId,
+                nbUpdatesSinceLastView: {
+                    in: [1, 10, 50]
+                }
+            }
+        });
+    }
 }
 
 export default NotificationsRepository;

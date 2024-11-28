@@ -4,6 +4,9 @@ import VoteRepository from "@/repositories/VoteRepository";
 import { ArgumentWithVoteOutputDto } from "@/types/dtos/ArgumentOutputDtos";
 import DebateService from "./DebateService";
 import UserRepository from "@/repositories/UserRepository";
+import NotificationService from "./NotificationService";
+import { ReportingType } from "@prisma/client";
+import PopularityService from "./PopularityService";
 
 class ArgumentService {
 
@@ -83,6 +86,12 @@ class ArgumentService {
             argumentId: argument.id
         }
         await DebateService.createDebate(debateToCreate, userId);
+        //Handeling notifs
+        NotificationService.incrementFollowUpdate(argument.debateId, "DEBATE");
+
+        //Handeling popularity
+        PopularityService.addPopularityScore(argument.debateId, 10);
+
         return argument;
     }
 
@@ -118,6 +127,11 @@ class ArgumentService {
             }
         }
         await this.argumentRepository.updateArgument(id, data);
+
+        //Handeling popularity
+        if(!hadVoted) {
+            PopularityService.addPopularityScore(argument.debateId, 1);
+        }
     }
 
     static async deleteVoteForArgument(id: string, userId: string): Promise<void> {
@@ -163,6 +177,20 @@ class ArgumentService {
         //delete argument
 
         await this.argumentRepository.deleteArgument(id);
+    }
+
+    static async setFlag(id: string, isFlaged: boolean) {
+        try {
+            await this.argumentRepository.updateArgument(id, {isFlaged});
+            if(isFlaged) {
+                const argument = await this.argumentRepository.getArgumentById(id);
+                if(!argument) {
+                    throw new Error('Argument not found');
+                }
+            } 
+        } catch (error) {
+            return;
+        }
     }
 
 }
