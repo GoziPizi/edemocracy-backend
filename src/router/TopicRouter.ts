@@ -1,3 +1,4 @@
+import { authMiddleware } from '@/checkAuthMiddleware';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import BanWordService from '@/services/BanWordService';
@@ -12,6 +13,7 @@ const TopicRouter = express.Router();
 
 TopicRouter.post(
     '/',
+    authMiddleware,
     upload.fields([{ name: 'image', maxCount: 1}]),
     async (req: Request, res: Response, next: NextFunction) => {
     /**

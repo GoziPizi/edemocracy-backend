@@ -8,6 +8,7 @@ import { Forbidden } from "@/exceptions/AdminExceptions";
 import { personalReport } from "@/types/dtos/ModerationDtos";
 import UserRepository from "@/repositories/UserRepository";
 import { sendWarnMail } from "./MailService";
+import { EntityAlreadyReportedByUserException } from "@/exceptions/ModerationException";
 
 class ModerationService {
 
@@ -24,10 +25,13 @@ class ModerationService {
             let currentReport = await this.reportRepository.getReportFromEntity(entityId);
             if(currentReport) {
                 await this.reportRepository.addEventToReport(currentReport.id, reporterId, reason, 'report');
+                const events_ = await this.reportRepository.getEvents(currentReport.id);
+                if(events_.find(event => event.userId === reporterId && event.type === 'report')) {
+                    throw new EntityAlreadyReportedByUserException();
+                } 
             } else {
                 const userId = await ModerationService.getAuthor(entityId, entityType);
                 currentReport = await this.reportRepository.initializeEmptyReportForEntity(entityId, entityType, userId)
-                await this.reportRepository.addEventToReport(currentReport.id, reporterId, reason, 'report');
             }
             const report = await this.reportRepository.updateReportTime(currentReport.id)
 
@@ -215,6 +219,7 @@ class ModerationService {
     }
 
     static async postSanction(reportId: string, moderatorId: string, type: string, duration? :number, reason?: string){
+        //TOTEST
         try {
             const report = await this.reportRepository.getReport(reportId);
             if(!report) {
@@ -234,7 +239,7 @@ class ModerationService {
 
             //TODO handle special case
 
-            const event = await this.reportRepository.addEventToReport(reportId, moderatorId, reason ? reason : 'No reason specified', type, duration);
+            const event = await this.reportRepository.addEventToReport(reportId, moderatorId, reason ? reason : 'No reason specified', type, duration, report.userId!);
             await this.reportRepository.updateReportTime(report.id);
             await this.reportRepository.setModerated(report.id);
 
@@ -318,6 +323,20 @@ class ModerationService {
                 DebateService.setReformulationFlag(entityId, isFlaged);
                 break;
         }
+    }
+
+    static async getUserStatus(userId: string) {
+        const sanctions = await this.reportRepository.getSanctions(userId);
+        console.log("sanctions", sanctions);
+        for (const sanction of sanctions) {
+            if(!sanction.duration) {
+                return sanction.type;
+            } 
+            if(sanction.createdAt.getTime() + sanction.duration * 60 * 60 * 1000 > Date.now()) {
+                return sanction.type;
+            }
+        }
+        return 'ok';
     }
 
 

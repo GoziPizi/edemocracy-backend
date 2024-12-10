@@ -424,15 +424,16 @@ model Reporting {
 }
 
 model ReportingEvent {
-  id          String     @id @default(uuid())
-  user        User       @relation(fields: [userId], references: [id])
-  userId      String
-  type        String //ban, warning, signalement, approval, etc...
-  duration    Int? //in hours
-  reason      String
-  Reporting   Reporting? @relation(fields: [reportingId], references: [id], onDelete: Cascade)
-  reportingId String?
-  createdAt   DateTime   @default(now())
+  id             String     @id @default(uuid())
+  user           User       @relation(fields: [userId], references: [id])
+  userId         String //user who made the event
+  type           String //ban, warning, signalement, approval, etc...
+  duration       Int? //in hours
+  targetedUserId String?
+  reason         String
+  Reporting      Reporting? @relation(fields: [reportingId], references: [id], onDelete: Cascade)
+  reportingId    String?
+  createdAt      DateTime   @default(now())
 }
 
 enum jackpotStatus {

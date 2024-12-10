@@ -1,3 +1,4 @@
+import { authMiddleware } from '@/checkAuthMiddleware';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import BanWordService from '@/services/BanWordService';
@@ -116,7 +117,7 @@ DebateRouter.get('/:id', async (req: Request, res: Response, next: NextFunction)
     }
 });
 
-DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+DebateRouter.post('/',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']
         #swagger.summary = 'Endpoint to create a debate.'
@@ -130,21 +131,23 @@ DebateRouter.post('/', async (req: Request, res: Response, next: NextFunction) =
         }
      */
     try {
+        console.log('create debate');
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
         }
         const userId = AuthentificationService.getUserId(token);
         const debate = req.body;
+
+        //Check for ban words
         await BanWordService.checkStringForBanWords(debate.title)
         await BanWordService.checkStringForBanWords(debate.content)
+
         const createdDebate = await DebateService.createDebate(debate, userId);
         res.status(200).send(createdDebate);
     } catch (error:any) {
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        console.log(error);
+        next(error);
     }
 });
 
@@ -183,7 +186,7 @@ DebateRouter.get('/:id/arguments', async (req: Request, res: Response, next: Nex
     }
 });
 
-DebateRouter.post('/:id/vote', async (req: Request, res: Response, next: NextFunction) => {
+DebateRouter.post('/:id/vote',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']
         #swagger.summary = 'Endpoint to vote for a debate.'
@@ -273,7 +276,7 @@ DebateRouter.delete('/:id/vote', async (req: Request, res: Response, next: NextF
     }
 });
 
-DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Response, next: NextFunction) => {
+DebateRouter.post('/:debateId/reformulations',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']
         #swagger.summary = 'Endpoint to reformulate a debate.'
@@ -299,8 +302,10 @@ DebateRouter.post('/:debateId/reformulations', async (req: Request, res: Respons
         const userId = AuthentificationService.getUserId(token);
         const debateId = String(req.params.debateId);
         const reformulation = req.body;
+
         await BanWordService.checkStringForBanWords(reformulation.title)
         await BanWordService.checkStringForBanWords(reformulation.content)
+        
         await DebateService.createDebateReformulation({debateId, ...reformulation, userId});
         res.status(200).send();
     } catch (error) {
@@ -388,7 +393,7 @@ DebateRouter.get('/reformulations/:reformulationId', async (req: Request, res: R
     }
 });
 
-DebateRouter.post('/reformulations/:reformulationId/vote', async (req: Request, res: Response, next: NextFunction) => {
+DebateRouter.post('/reformulations/:reformulationId/vote',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']
         #swagger.summary = 'Endpoint to vote for a debate reformulation.'

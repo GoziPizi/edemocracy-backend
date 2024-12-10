@@ -1,3 +1,4 @@
+import { ContentWithBanWordsException } from "@/exceptions/ModerationException";
 import { BanWordAlreadyExistsException, BannedContentException } from "@/exceptions/WordsExceptions";
 import BanWordRepository from "@/repositories/BanWordRepository";
 
@@ -36,8 +37,9 @@ class BanWordService {
     static async checkStringForBanWords(string: string) {
         const banWords = await this.getBanWords();
         for (const banWord of banWords) {
-            if (string.toLowerCase().includes(' ' + banWord.word.toLowerCase() + ' ')) {
-                throw new BannedContentException();
+            const regex = new RegExp(`\\b${banWord.word}\\b`, 'i');
+            if (regex.test(string)) {
+                throw new ContentWithBanWordsException();
             }
         }
     }

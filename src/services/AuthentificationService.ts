@@ -329,9 +329,13 @@ class AuthentificationService {
     }
 
     static getUserId(token: string): string {
-        const payload = Jwt.decode(token).payload
-        const id = payload.id
-        return id
+        try {
+            const payload = Jwt.decode(token).payload
+            const id = payload.id
+            return id
+        } catch (error) {
+            throw new Error('Error while getting user id')
+        }
     }
 
     static async getUserRole(token: string): Promise<Role> {

@@ -1,12 +1,14 @@
+import { authMiddleware } from '@/checkAuthMiddleware';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import ArgumentService from '@/services/ArgumentService';
 import AuthentificationService from '@/services/AuthentificationService';
+import BanWordService from '@/services/BanWordService';
 import { ArgumentType } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express';
 
 const ArgumentRouter = express.Router();
 
-ArgumentRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+ArgumentRouter.post('/',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Argument']
         #swagger.summary = 'Endpoint to create an argument.'
@@ -30,13 +32,14 @@ ArgumentRouter.post('/', async (req: Request, res: Response, next: NextFunction)
         let data = req.body;
         data.argumentType = data.argumentType as ArgumentType;
         data.userId = userId;
+
+        await BanWordService.checkStringForBanWords(data.title);
+        await BanWordService.checkStringForBanWords(data.content);
+
         const argument = await ArgumentService.createArgument(data);
         res.status(200).send(argument);
     } catch (error:any) {
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 

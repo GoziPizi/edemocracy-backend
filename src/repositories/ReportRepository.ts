@@ -16,14 +16,15 @@ class ReportRepository extends PrismaRepository {
         return report;
     }
 
-    addEventToReport = async (reportId: string, userId: string, reason: string, type: string, duration?: number) => {
+    addEventToReport = async (reportId: string, userId: string, reason: string, type: string, duration?: number, targetedUserId?: string) => {
         const event = await this.prismaClient.reportingEvent.create({
             data: {
                 reportingId: reportId,
                 userId,
                 type,
                 reason,
-                duration 
+                duration,
+                targetedUserId
             }
         });
         return event;
@@ -57,6 +58,21 @@ class ReportRepository extends PrismaRepository {
             }
         });
         return events;
+    }
+
+    getSanctions = async (userId: string) => {
+        const sanctions = await this.prismaClient.reportingEvent.findMany({
+            where: {
+                userId,
+                type: {
+                    in: ['ban', 'mute']
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+        return sanctions;
     }
 
     updateReportTime = async(reportId: string) => {
