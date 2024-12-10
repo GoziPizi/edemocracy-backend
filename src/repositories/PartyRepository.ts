@@ -1,5 +1,7 @@
 import { PartyRole } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
+import { exists } from "fs";
+import { exist } from "joi";
 
 class PartyRepository extends PrismaRepository {
 
@@ -116,6 +118,9 @@ class PartyRepository extends PrismaRepository {
             where: {
                 id: {
                     in: userIds
+                },
+                Personality: {
+                    isNot: null
                 }
             }
         })
