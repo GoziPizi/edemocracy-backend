@@ -23,7 +23,7 @@ PartyInvitationRouter.get('/', async (req: Request, res: Response, next: NextFun
         const partyInvitations = await PartyInvitationService.getPartyInvitationsByUserId(userId);
         res.status(200).send(partyInvitations);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -49,7 +49,7 @@ PartyInvitationRouter.get('/:id', async (req: Request, res: Response, next: Next
         const partyInvitation = await PartyInvitationService.getPartyInvitationById(req.params.id, userId);
         res.status(200).send(partyInvitation);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -79,7 +79,7 @@ PartyInvitationRouter.post('/:id/answer', async (req: Request, res: Response, ne
         await PartyInvitationService.answerPartyInvitation(req.params.id, userId, req.body.answer);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

@@ -449,7 +449,7 @@ class DebateService {
             //delete debate
             await this.debateRepository.deleteDebate(debateId);
         } catch (error) {
-            console.log(error);
+            throw(error);
         }
     }
 
@@ -463,7 +463,7 @@ class DebateService {
             //delete reformulation
             await this.debateRepository.deleteReformulation(reformulationId);
         } catch (error) {
-            console.log(error);
+            throw(error);
         }
     }
 

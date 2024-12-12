@@ -158,7 +158,6 @@ class AuthentificationService {
 
         } catch (error) {
 
-            console.log(error)
             throw new Error('Error while registering user')
 
         }
@@ -247,7 +246,6 @@ class AuthentificationService {
             const session = await StripeService.createCheckoutSessionForPremium(userInput.email)
             return session.url;
         } catch (error) {
-            console.log(error)
             throw new Error('Error while registering user')
         }
     }
@@ -301,7 +299,6 @@ class AuthentificationService {
 
             return
         } catch (error) {
-            console.log(error)
             throw new Error('Error while registering user')
         }
     }

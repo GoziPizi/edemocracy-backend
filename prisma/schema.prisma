@@ -51,6 +51,7 @@ model User {
   actualSex         String?
   sexualOrientation String?
   religion          String?
+  origin            String?
   description       String   @default("")
   isVerified        Boolean  @default(false)
   language          String   @default("fr")
@@ -104,6 +105,7 @@ model PreRegistrationUser {
   actualSex              String?
   sexualOrientation      String?
   religion               String?
+  origin                 String?
   sponsorshipCode        String?
   createdAt              DateTime                 @default(now())
   updatedAt              DateTime                 @updatedAt

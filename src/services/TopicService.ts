@@ -108,7 +108,7 @@ class TopicService {
             //delete topic
             await this.topicRepository.deleteTopic(id);
         } catch (error) {
-            console.log(error);
+            throw error;
         }
     }
 

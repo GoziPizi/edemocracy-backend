@@ -29,10 +29,10 @@ export type UserPublicOutputDto = Omit<
     | 'yearsOfExperience'
     | 'telephone' 
     | 'follows' 
-    | 'religion'
     | 'birthSex'
     | 'actualSex'
     | 'sexualOrientation'
     | 'religion'
+    | 'origin'
     | 'sponsorshipCode'
     | 'reputation'>

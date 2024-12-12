@@ -9,6 +9,7 @@ import { personalReport } from "@/types/dtos/ModerationDtos";
 import UserRepository from "@/repositories/UserRepository";
 import { sendWarnMail } from "./MailService";
 import { EntityAlreadyReportedByUserException } from "@/exceptions/ModerationException";
+import { ReportingEventInputDto } from "@/types/ModerationTypes";
 
 class ModerationService {
 
@@ -22,21 +23,29 @@ class ModerationService {
         //TODO handle case it has already been reported by this user
     static async report(reporterId: string, entityId: string, entityType: ReportingType, reason: string){
         try {
-            let currentReport = await this.reportRepository.getReportFromEntity(entityId);
-            if(currentReport) {
-                await this.reportRepository.addEventToReport(currentReport.id, reporterId, reason, 'report');
-                const events_ = await this.reportRepository.getEvents(currentReport.id);
-                if(events_.find(event => event.userId === reporterId && event.type === 'report')) {
-                    throw new EntityAlreadyReportedByUserException();
-                } 
-            } else {
+
+            let report = await this.reportRepository.getReportFromEntity(entityId);
+            if(!report) {
                 const userId = await ModerationService.getAuthor(entityId, entityType);
-                currentReport = await this.reportRepository.initializeEmptyReportForEntity(entityId, entityType, userId)
+                report = await this.reportRepository.initializeEmptyReportForEntity(entityId, entityType, userId);
             }
-            const report = await this.reportRepository.updateReportTime(currentReport.id)
+
+            const events = await this.reportRepository.getEvents(report.id);
+            if(events.find(event => event.userId === reporterId && event.type === 'report')) {
+                throw new EntityAlreadyReportedByUserException();
+            }
+
+            const event: ReportingEventInputDto = {
+                reportingId: report.id,
+                reason,
+                type: 'report',
+                duration: null,
+                targetedUserId: null
+            }
+
+            await this.reportRepository.addEventToReport(reporterId, event);
 
             //Update flags
-            const events = await this.reportRepository.getEvents(currentReport.id);
             if(events.filter(event => event.type === 'report').length >= 5) {
                 this.setFlag(entityId, entityType, true);
             }
@@ -85,7 +94,6 @@ class ModerationService {
                     return {};
             }
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -151,7 +159,7 @@ class ModerationService {
                     break;
             }
         } catch (error) {
-            console.log(error);
+            throw error;
         }
         //Update reputation
         this.updateReputationsOfReporters(id, -1);
@@ -206,8 +214,17 @@ class ModerationService {
             }
             const report = await this.reportRepository.getReport(reportId!);
             let warn: ReportingEvent | null = null;
+
+            const event: ReportingEventInputDto = {
+                reportingId: reportId!,
+                reason,
+                type: 'warn',
+                duration: null,
+                targetedUserId: null
+            }
+
             if(report) {
-                warn = await this.reportRepository.addEventToReport(reportId!, moderatorId, reason, 'warn' + userId);
+                warn = await this.reportRepository.addEventToReport(moderatorId, event);
             }
 
             sendWarnMail(user.email, reason);
@@ -218,7 +235,7 @@ class ModerationService {
         }
     }
 
-    static async postSanction(reportId: string, moderatorId: string, type: string, duration? :number, reason?: string){
+    static async postSanction(moderatorId: string, reportId: string, reportingEvent: ReportingEventInputDto){
         //TOTEST
         try {
             const report = await this.reportRepository.getReport(reportId);
@@ -237,9 +254,13 @@ class ModerationService {
                 }
             }
 
-            //TODO handle special case
+            const userId = report.userId;
+            const finalEvent: ReportingEventInputDto = {
+                ...reportingEvent,
+                targetedUserId: userId
+            }
 
-            const event = await this.reportRepository.addEventToReport(reportId, moderatorId, reason ? reason : 'No reason specified', type, duration, report.userId!);
+            const event = await this.reportRepository.addEventToReport(moderatorId, finalEvent);
             await this.reportRepository.updateReportTime(report.id);
             await this.reportRepository.setModerated(report.id);
 
@@ -249,7 +270,6 @@ class ModerationService {
             return event;
 
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -270,13 +290,20 @@ class ModerationService {
                 throw new Error('You already contested this report');
             }
 
-            const contestEvent = await this.reportRepository.addEventToReport(reportId, userId, reason, 'contest');
+            const event: ReportingEventInputDto = {
+                reportingId: reportId,
+                reason,
+                type: 'contest',
+                duration: null,
+                targetedUserId: null
+            }
+
+            const contestEvent = await this.reportRepository.addEventToReport(userId, event);
             await this.reportRepository.updateReportTime(reportId);
             await this.reportRepository.setModeration2Required(reportId);
             return contestEvent;
 
         } catch (error) {
-            console.log(error);
             throw error;
         }
     }
@@ -327,7 +354,6 @@ class ModerationService {
 
     static async getUserStatus(userId: string) {
         const sanctions = await this.reportRepository.getSanctions(userId);
-        console.log("sanctions", sanctions);
         for (const sanction of sanctions) {
             if(!sanction.duration) {
                 return sanction.type;

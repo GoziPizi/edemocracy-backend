@@ -23,7 +23,7 @@ NotificationRouter.get('/', async (req: Request, res: Response, next: NextFuncti
         const notifications = await NotificationService.getNotifications(userId);
         res.status(200).send(notifications);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -49,7 +49,7 @@ NotificationRouter.post('/r ead', async (req: Request, res: Response, next: Next
         await NotificationService.markAsRead(req.body.id, userId);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -75,7 +75,7 @@ NotificationRouter.delete('/:id', async (req: Request, res: Response, next: Next
         await NotificationService.deleteNotification(req.params.id, userId);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

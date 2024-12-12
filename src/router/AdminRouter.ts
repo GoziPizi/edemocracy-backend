@@ -28,7 +28,7 @@ AdminRouter.get('/banwords', async (req: Request, res: Response, next: NextFunct
         const banWords = await BanWordService.getBanWords();
         res.status(200).send(banWords);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -56,7 +56,7 @@ AdminRouter.delete('/banwords/:id', async (req: Request, res: Response, next: Ne
         await BanWordService.deleteBanWord(req.params.id);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -84,7 +84,7 @@ AdminRouter.post('/banwords', async (req: Request, res: Response, next: NextFunc
         await BanWordService.createBanWord(req.body.word);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -109,7 +109,7 @@ AdminRouter.get('/admins', async (req: Request, res: Response, next: NextFunctio
         const admins = await AuthentificationService.getAdmins();
         res.status(200).send(admins);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -134,7 +134,7 @@ AdminRouter.post('/admins', async (req: Request, res: Response, next: NextFuncti
         await AuthentificationService.setRoleToUserByEmail(userEmailToPromote, Role.ADMIN);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 })
 
@@ -163,7 +163,7 @@ AdminRouter.delete('/admins/:id', async (req: Request, res: Response, next: Next
         await AuthentificationService.setRoleToUser(userIdToPromote, Role.USER);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 })
 
@@ -188,7 +188,7 @@ AdminRouter.get('/verifications-request', async (req: Request, res: Response, ne
         const requests = await AuthentificationService.getVerificationRequests();
         res.status(200).send(requests);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -217,7 +217,7 @@ AdminRouter.post('/verifications-request/:id', async (req: Request, res: Respons
         await AuthentificationService.acceptVerificationRequest(requestId, req.body.verified);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 
 });
@@ -238,7 +238,7 @@ AdminRouter.get('/non-empty-jackpots', async (req: Request, res: Response, next:
         const requests = await SponsorshipService.adminGetNonEmptyJackpots();
         res.status(200).send(requests);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -260,7 +260,7 @@ AdminRouter.post('/confirm-payment', async (req: Request, res: Response, next: N
         await SponsorshipService.adminConfirmJackpotPayment(userId);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

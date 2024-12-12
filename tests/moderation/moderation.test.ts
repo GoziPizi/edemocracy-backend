@@ -117,7 +117,7 @@ describe('POST api/moderation/report as unidentified', () => {
 
 //Signal one entity as identified user
 
-describe('POST api/moderation/report as identified', () => {
+describe('Signalement classique par utilisateur classique', () => {
     it('should return 200', async () => {
         const response = await request(app).post('/api/moderation/report').send({
             entityId: process.env.ARGUMENT_ID,
@@ -125,10 +125,12 @@ describe('POST api/moderation/report as identified', () => {
             reason: 'Raison'
         }).set('Authorization', `${process.env.USER_TOKEN}`);
         expect(response.status).toBe(200);
+        expect(response.body.entityId).toBe(process.env.ARGUMENT_ID);
+        expect(response.body.entityType).toBe("ARGUMENT");
+        expect(response.body.isModerated).toBe(false);
+        expect(response.body.isModerated2).toBe(false);
+        expect(response.body.isModeration2Required).toBe(false);
         process.env.FIRST_REPORT_ID = response.body.id;
-        console.log('-------------------------------------------------');
-        console.log('First report id : ' + process.env.FIRST_REPORT_ID);
-        console.log('-------------------------------------------------');
     });
 });
 
@@ -136,7 +138,7 @@ describe('POST api/moderation/report as identified', () => {
 //Moderator 1, Moderator 2 and Admin can see it
 
 //Admins can get the list of reports, and the number of reports should be 1, and the number of events of the report should be 1
-describe('GET api/moderation/report', () => {
+describe('Recuperation de la list des rapports', () => {
     it('should return 200', async () => {
         const response = await request(app).get('/api/moderation/reports').set('Authorization', `${process.env.ADMIN_TOKEN}`);
         expect(response.status).toBe(200);
@@ -165,6 +167,7 @@ describe('POST api/moderation/report second report of the first entity', () => {
             reason: 'Raison2'
         }).set('Authorization', `${process.env.MODERATOR1_TOKEN}`);
         expect(response.status).toBe(200);
+        expect(response.body.id).toBe(process.env.FIRST_REPORT_ID);
         process.env.SECOND_REPORT_ID = response.body.id;
     });
 });
@@ -214,7 +217,7 @@ describe('GET api/moderation/report/id after 2 reports', () => {
 describe('POST api/moderation/sanction as a moderator, set a ban for one day for the first report', () => {
     it('should return 200', async () => {
         const response = await request(app).post(`/api/moderation/sanction`).send({
-            reportId: process.env.FIRST_REPORT_ID,
+            reportingId: process.env.FIRST_REPORT_ID,
             sanctionType: 'ban',
             sanctionDuration: 24,
             reason: 'Raison',

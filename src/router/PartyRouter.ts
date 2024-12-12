@@ -34,7 +34,7 @@ PartyRouter.post('/', async (req: Request, res: Response, next: NextFunction) =>
         const createdParty = await PartyService.createParty(party, userId);
         res.status(201).send(createdParty);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -54,11 +54,11 @@ PartyRouter.post('/search', async (req: Request, res: Response, next: NextFuncti
         const result = await PartyService.searchParty(req.body);
         res.status(201).send(result);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
-PartyRouter.get('/:id', async (req, res) => {
+PartyRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']
         #swagger.description = 'Endpoint to get a party by its id'
@@ -72,23 +72,23 @@ PartyRouter.get('/:id', async (req, res) => {
         const party = await PartyService.getPartyById(req.params.id);
         res.status(200).send(party);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
-PartyRouter.get('/:id/private-infos', async (req, res) => {
+PartyRouter.get('/:id/private-infos', async (req: Request, res: Response, next: NextFunction) => {
     //TODO
     try {
         //TODO
         //Accessible seulement si l'on est membre du parti ou admin du parti
         res.status(200)
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
 //get members list
-PartyRouter.get('/:id/members', async (req, res) => {
+PartyRouter.get('/:id/members', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']
         #swagger.description = 'Endpoint to get the members of a party'
@@ -102,7 +102,7 @@ PartyRouter.get('/:id/members', async (req, res) => {
         const members = await PartyService.getMembers(req.params.id);
         res.status(200).send(members);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -133,7 +133,7 @@ PartyRouter.post('/:id/members/invite', async (req: Request, res: Response, next
 
 });
 
-PartyRouter.get('/:id/check-admin', async (req, res) => {
+PartyRouter.get('/:id/check-admin', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']
         #swagger.description = 'Endpoint to check if the token has admin rights on the party'
@@ -152,7 +152,7 @@ PartyRouter.get('/:id/check-admin', async (req, res) => {
         const hasAdminRights = await PartyService.checkAdminRights(req.params.id, userId);
         res.status(200).send(hasAdminRights);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

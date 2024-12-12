@@ -25,7 +25,7 @@ PersonalityRouter.post('/', async (req: Request, res: Response, next: NextFuncti
         const result = await PersonalityService.createPersonality(userId);
         res.status(201).send(result);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -109,25 +109,25 @@ PersonalityRouter.get('/:id/opinions', async (req: Request, res: Response, next:
     }
 });
 
-PersonalityRouter.get('/:id/private-infos', async (req, res) => {
+PersonalityRouter.get('/:id/private-infos', async (req: Request, res: Response, next: NextFunction) => {
     //TODO
     try {
         //TODO
         //Accessible seulement si l'on est la personalité
         res.status(200)
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
-PersonalityRouter.put('/:id/description', async (req, res) => {
+PersonalityRouter.put('/:id/description', async (req: Request, res: Response, next: NextFunction) => {
     //TODO
     try {
         //TODO
         //Accessible seulement si l'on est la personalité
         res.status(200)
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

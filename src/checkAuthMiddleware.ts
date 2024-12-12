@@ -7,7 +7,6 @@ import { UserBannedException } from './exceptions/ModerationException';
 //responsible for decoding the user, checking if it exists, and checking if it is banned
 
 export const authMiddleware = async (req: Request, res: Response, next: NextFunction) => {
-  console.log('authMiddleware');
   try {
     const token = req.headers.authorization;
       if(!token) {

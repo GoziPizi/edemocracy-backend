@@ -35,7 +35,6 @@ class AwsService {
         try {
           await this.aws3.deleteObject({ Bucket: this.bucketName, Key: key })
         } catch (e) {
-          console.log(e)
           throw new Error('Error deleting file')
         }
       }

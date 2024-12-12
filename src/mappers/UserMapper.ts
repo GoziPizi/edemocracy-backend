@@ -20,6 +20,7 @@ export const toUserOutput = (user: User): UserOutputDto => {
         actualSex: user.actualSex,
         sexualOrientation: user.sexualOrientation,
         religion: user.religion,
+        origin: user.origin,
         description: user.description,
         politicSide: user.politicSide,
         language: user.language,

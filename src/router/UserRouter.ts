@@ -27,7 +27,7 @@ UserRouter.get('/', async (req: Request, res: Response, next: NextFunction) => {
         const user = await UserService.getUserById(userId);
         res.status(200).send(user);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -54,7 +54,7 @@ UserRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
         const user = await UserService.updateUserById(userId, req.body);
         res.status(200).send(user);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -111,7 +111,7 @@ UserRouter.get('/personality', async (req: Request, res: Response, next: NextFun
         const user = await UserService.getUserPersonalityById(userId);
         res.status(200).send(user);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -133,7 +133,7 @@ UserRouter.get('/partis', async (req: Request, res: Response, next: NextFunction
         const userPerties = await UserService.getUserPartisById(userId);
         res.status(200).send(userPerties);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -154,7 +154,7 @@ UserRouter.get('/follows', async (req: Request, res: Response, next: NextFunctio
         const follows = await UserService.getUserFollows(userId);
         res.status(200).send(follows);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -176,7 +176,7 @@ UserRouter.get('/follows/:entityId', async (req: Request, res: Response, next: N
         const follows = await UserService.isUserFollowing(userId, entityId);
         res.status(200).send(follows);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -202,7 +202,7 @@ UserRouter.post('/follows', async (req: Request, res: Response, next: NextFuncti
         await UserService.follow(userId, entityId, entityType);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -228,7 +228,7 @@ UserRouter.post('/opinions', async (req: Request, res: Response, next: NextFunct
         await UserService.postOpinion(userId, topicId, opinion);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -249,7 +249,7 @@ UserRouter.get('/opinions', async (req: Request, res: Response, next: NextFuncti
         const opinions = await UserService.getUserOpinions(userId);
         res.status(200).send(opinions);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -276,7 +276,7 @@ UserRouter.delete('/opinions/:id', async (req: Request, res: Response, next: Nex
     }
 });
 
-UserRouter.put('/:id', async (req, res) => {
+UserRouter.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['User']
         #swagger.description = 'Update user by id'
@@ -295,7 +295,7 @@ UserRouter.put('/:id', async (req, res) => {
         //TODO
         res.status(200)
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -316,7 +316,7 @@ UserRouter.delete('/', async (req: Request, res: Response, next: NextFunction) =
         await UserService.deleteUserById(userId);
         res.status(200).send('User deleted');
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -334,7 +334,7 @@ UserRouter.get('/:id', async (req: Request, res: Response, next: NextFunction) =
         const user = await UserService.getPublicUserById(req.params.id);
         res.status(200).send(user);
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 

@@ -148,6 +148,7 @@ LoginRouter.post(
             actualSex: Joi.string(),
             sexualOrientation: Joi.string(),
             religion: Joi.string(),
+            origin: Joi.string(),
             sponsorshipCode: Joi.string()
         });
 
@@ -280,6 +281,7 @@ LoginRouter.post(
             actualSex: Joi.string(),
             sexualOrientation: Joi.string(),
             religion: Joi.string(),
+            origin: Joi.string(),
             sponsorshipCode: Joi.string()
         });
 
@@ -402,6 +404,7 @@ LoginRouter.post(
             actualSex: Joi.string(),
             sexualOrientation: Joi.string(),
             religion: Joi.string(),
+            origin: Joi.string(),
             sponsorshipCode: Joi.string()
         });
 

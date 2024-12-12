@@ -1,6 +1,7 @@
 import { ReportingType } from "@prisma/client";
 import PrismaRepository from "./PrismaRepository";
 import { connect } from "http2";
+import { ReportingEventInputDto } from "@/types/ModerationTypes";
 
 class ReportRepository extends PrismaRepository {
     
@@ -16,15 +17,11 @@ class ReportRepository extends PrismaRepository {
         return report;
     }
 
-    addEventToReport = async (reportId: string, userId: string, reason: string, type: string, duration?: number, targetedUserId?: string) => {
+    addEventToReport = async (userId: string, reportingEvent: ReportingEventInputDto) => {
         const event = await this.prismaClient.reportingEvent.create({
             data: {
-                reportingId: reportId,
-                userId,
-                type,
-                reason,
-                duration,
-                targetedUserId
+                userId: userId,
+                ...reportingEvent
             }
         });
         return event;

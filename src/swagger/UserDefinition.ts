@@ -32,6 +32,7 @@ export const UserOutputDefinition: UserOutputDto = {
     firstName: 'string',
     profilePicture: 'string',
     religion: 'string',
+    origin: 'string',
     birthSex: 'string',
     actualSex: 'string',
     sexualOrientation: 'string',
@@ -39,6 +40,7 @@ export const UserOutputDefinition: UserOutputDto = {
     language: 'string',
     politicSide: Affiliation.RIGHT,
     role: 'USER',
+    reputation: 1,
     sponsorshipCode: 'string',
     createdAt: new Date(),
     updatedAt: new Date()

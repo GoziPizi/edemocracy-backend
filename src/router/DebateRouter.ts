@@ -131,7 +131,6 @@ DebateRouter.post('/',authMiddleware, async (req: Request, res: Response, next: 
         }
      */
     try {
-        console.log('create debate');
         const token = req.headers.authorization;
         if(!token) {
             throw new JwtNotInHeaderException();
@@ -146,7 +145,6 @@ DebateRouter.post('/',authMiddleware, async (req: Request, res: Response, next: 
         const createdDebate = await DebateService.createDebate(debate, userId);
         res.status(200).send(createdDebate);
     } catch (error:any) {
-        console.log(error);
         next(error);
     }
 });

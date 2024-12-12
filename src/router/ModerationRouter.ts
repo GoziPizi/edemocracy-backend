@@ -5,8 +5,10 @@ import { ReportIntToReportType } from '@/mappers/ReportType';
 import AuthentificationService from '@/services/AuthentificationService';
 import ModerationService from '@/services/ModerationService';
 import { personalReport } from '@/types/dtos/ModerationDtos';
+import { ReportingEventInputDto } from '@/types/ModerationTypes';
 import { ReportingType } from '@prisma/client';
 import express, { NextFunction, Request, Response } from 'express'
+import Joi from 'joi';
 
 const ModerationRouter = express.Router();
 
@@ -78,21 +80,33 @@ ModerationRouter.post('/sanction', async (req: Request, res: Response, next: Nex
             throw new Forbidden();
         }
 
-        const reportId: string = req.body.reportId;
-        const sanctionType: string = req.body.sanctionType;
-        const sanctionDuration: number = req.body.sanctionDuration;
-        const reason: string = req.body.reason;
+        const schema = Joi.object({
+            reportingId: Joi.string().required(),
+            sanctionType: Joi.string().required(),
+            sanctionDuration: Joi.number().optional(),
+            reason: Joi.string().optional(),
+            targetedUserId: Joi.string().optional()
+        })
+
+        const { error } = schema.validate(req.body);
+
+        const reportingId = req.body.reportingId;
+
+        const reportingEvent: ReportingEventInputDto = {
+            type: req.body.sanctionType,
+            duration: req.body.sanctionDuration,
+            reason: req.body.reason,
+            reportingId: reportingId,
+            targetedUserId: req.body.targetedUserId
+        }
 
         const moderatorId = AuthentificationService.getUserId(token);
 
-        const newSanction = await ModerationService.postSanction(reportId, moderatorId, sanctionType, sanctionDuration, reason);
+
+        const newSanction = await ModerationService.postSanction(moderatorId, reportingId, reportingEvent);
         res.status(200).send(newSanction);
     } catch (error:any) {
-        console.log(error);
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -118,13 +132,7 @@ ModerationRouter.get('/reports', async (req: Request, res: Response, next: NextF
         const reports = await ModerationService.getReportsForModerationLvl1();
         res.status(200).send(reports);
     } catch (error:any) {
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        if (error instanceof Forbidden) {
-            return res.status(403).json({error:'Forbidden'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -150,13 +158,7 @@ ModerationRouter.get('/reports/:id/escalate-to-moderation-2', async (req: Reques
         await ModerationService.escalateToModeration2(id);
         res.status(200).send();
     } catch (error:any) {
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        if (error instanceof Forbidden) {
-            return res.status(403).json({error:'Forbidden'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -181,13 +183,7 @@ ModerationRouter.get('/moderation-2-reports', async (req: Request, res: Response
         const reports = await ModerationService.getModeration2Reports();
         res.status(200).send(reports);
     } catch (error:any) {
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        if (error instanceof Forbidden) {
-            return res.status(403).json({error:'Forbidden'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -216,13 +212,7 @@ ModerationRouter.get('/reports/:id', async (req: Request, res: Response, next: N
         const report = await ModerationService.getReport(req.params.id);
         res.status(200).send(report);
     } catch (error:any) {
-        if(error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        if(error instanceof Forbidden) {
-            return res.status(403).json({error:'Forbidden'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -251,13 +241,7 @@ ModerationRouter.get('/reports/:id/entity', async (req: Request, res: Response, 
         const report = await ModerationService.getEntityOfReport(req.params.id);
         res.status(200).send(report);
     } catch (error:any) {
-        if(error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        if(error instanceof Forbidden) {
-            return res.status(403).json({error:'Forbidden'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -344,7 +328,7 @@ ModerationRouter.delete('/user/:id', async (req: Request, res: Response, next: N
         await ModerationService.banUser(req.params.id);
         res.status(200).send();
     } catch (error) {
-        console.log(error);
+        next(error);
     }
 });
 
@@ -368,10 +352,7 @@ ModerationRouter.get('/personal-reports', async (req: Request, res: Response, ne
         const reports: personalReport[] = await ModerationService.getPersonalReports(userId);
         res.status(200).send(reports);
     } catch (error:any) {
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
@@ -401,14 +382,7 @@ ModerationRouter.post('/reports/:id/contest', async (req: Request, res: Response
         const contestEvent = await ModerationService.contestReport(reportId, userId, reason);
         res.status(200).send(contestEvent);
     } catch (error:any) {
-        console.log(error);
-        if (error instanceof JwtNotInHeaderException) {
-            return res.status(401).json({error:'Unauthorized, token not found'});
-        }
-        if(error instanceof Forbidden) {
-            return res.status(403).json({error:'Forbidden'});
-        }
-        return res.status(500).json({error: 'Internal server error'});
+        next(error);
     }
 });
 
