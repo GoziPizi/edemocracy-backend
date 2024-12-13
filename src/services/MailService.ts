@@ -32,7 +32,7 @@ export function sendEmail(email: string, subject: string, text: string) {
 
 export function sendReinitPasswordMail(email: string, token: string) {
   const subject = 'Réinitialisation de votre mot de passe'
-  const text = `Bonjour, veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : https://digital-democracy.eu/change-password/?token=${token}&email=${email}`
+  const text = `Bonjour, veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : https://digital-democracy.com/change-password/?token=${token}&email=${email}`
   sendEmail(email, subject, text)
 }
 

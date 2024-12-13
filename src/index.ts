@@ -15,7 +15,7 @@ function isProdEnvironment(): boolean {
 
 const PORT = process.env.PORT || 8080;
 
-const sslFileDirectory = process.env.SSL_FILE_DIRECTORY || '/etc/letsencrypt/live/digital-democracy.eu/';
+const sslFileDirectory = process.env.SSL_FILE_DIRECTORY || '/etc/letsencrypt/live/digital-democracy.com/';
 
 let corsOrigins;
 try {
