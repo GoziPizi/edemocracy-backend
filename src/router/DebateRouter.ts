@@ -184,7 +184,7 @@ DebateRouter.get('/:id/arguments', async (req: Request, res: Response, next: Nex
     }
 });
 
-DebateRouter.post('/:id/vote',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
+DebateRouter.post('/:id/vote', async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Debate']
         #swagger.summary = 'Endpoint to vote for a debate.'

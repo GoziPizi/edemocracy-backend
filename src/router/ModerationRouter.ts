@@ -102,6 +102,7 @@ ModerationRouter.post('/sanction', async (req: Request, res: Response, next: Nex
 
         const moderatorId = AuthentificationService.getUserId(token);
 
+        console.log(reportingEvent);
 
         const newSanction = await ModerationService.postSanction(moderatorId, reportingId, reportingEvent);
         res.status(200).send(newSanction);

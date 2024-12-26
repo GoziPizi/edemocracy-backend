@@ -243,6 +243,8 @@ class ModerationService {
                 throw new Error('Report not found');
             }
 
+            console.log("REPORT", report);
+
             //Check moderation
             if (report.isModeration2Required) {
                 const moderator = await this.userRepository.getUser(moderatorId);
@@ -259,6 +261,8 @@ class ModerationService {
                 ...reportingEvent,
                 targetedUserId: userId
             }
+
+            console.log("JAJOUTE LEVENT", finalEvent);
 
             const event = await this.reportRepository.addEventToReport(moderatorId, finalEvent);
             await this.reportRepository.updateReportTime(report.id);
