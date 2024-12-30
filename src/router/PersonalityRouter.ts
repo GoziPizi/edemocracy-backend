@@ -131,4 +131,9 @@ PersonalityRouter.put('/:id/description', async (req: Request, res: Response, ne
     }
 });
 
+PersonalityRouter.get('/:id/debates', async (req: Request, res: Response, next: NextFunction) => { 
+    //TODO
+});
+
+
 export default PersonalityRouter;

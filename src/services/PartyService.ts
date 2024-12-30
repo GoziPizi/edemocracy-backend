@@ -194,6 +194,13 @@ class PartyService {
         return comment.userId;
     }
 
+    //Debate related methods
+
+    static async getDebatesFromPartyId(partyId: string) {
+        const debates = this.partyRepository.getDebatesFromPartyId(partyId);
+        return debates;
+    }
+
     //Moderation
 
     static async setFlag(commentId: string, isFlaged: boolean) {

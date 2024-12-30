@@ -198,6 +198,17 @@ class PartyRepository extends PrismaRepository {
             }
         })
     }
+
+    //debates related methods
+
+    getDebatesFromPartyId = async (partyId: string) => {
+        const debates = await this.prismaClient.debate.findMany({
+            where: {
+                partyId
+            }
+        })
+        return debates
+    }
 }
 
 export default PartyRepository;

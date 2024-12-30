@@ -282,6 +282,8 @@ model Debate {
   updatedAt                  DateTime                         @updatedAt
   topicId                    String?
   argumentId                 String?
+  partyId                    String?
+  personalityId              String?
   DebateVote                 DebateVote[]
 }
 
