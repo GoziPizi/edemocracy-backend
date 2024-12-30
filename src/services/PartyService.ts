@@ -197,7 +197,14 @@ class PartyService {
     //Debate related methods
 
     static async getDebatesFromPartyId(partyId: string) {
+        //TO TEST
         const debates = this.partyRepository.getDebatesFromPartyId(partyId);
+        return debates;
+    }
+
+    static async getPersonalDebatesFromPartyId(partyId: string) {
+        //TO TEST
+        const debates = this.partyRepository.getPersonalDebatesFromPartyId(partyId);
         return debates;
     }
 

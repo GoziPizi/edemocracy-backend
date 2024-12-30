@@ -406,4 +406,17 @@ PartyRouter.get('/:id/debates', async (req: Request, res: Response, next: NextFu
 
 });
 
+PartyRouter.get('/:id/personal-debates', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const id = req.params.id;
+        if(!id) {
+            throw new Error('Party id is required');
+        }
+        const debates = await PartyService.getPersonalDebatesFromPartyId(id);
+        res.status(200).send(debates);
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default PartyRouter;
