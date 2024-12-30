@@ -205,6 +205,9 @@ class PartyRepository extends PrismaRepository {
         const debates = await this.prismaClient.debate.findMany({
             where: {
                 partyId
+            },
+            orderBy: {
+                popularityScore: 'desc'
             }
         })
         return debates
