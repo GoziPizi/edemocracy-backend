@@ -1,3 +1,4 @@
+import { authMiddleware } from '@/checkAuthMiddleware';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import PartyService from '@/services/PartyService';
@@ -10,7 +11,7 @@ const upload = multer({ storage: storage });
 
 const PartyRouter = express.Router();
 
-PartyRouter.post('/', async (req: Request, res: Response, next: NextFunction) => {
+PartyRouter.post('/',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']
         #swagger.description = 'Endpoint to create a party'
@@ -173,7 +174,7 @@ PartyRouter.get('/:id/history', async (req: Request, res: Response, next: NextFu
     }
 });
 
-PartyRouter.post('/:id/history', async (req: Request, res: Response, next: NextFunction) => {
+PartyRouter.post('/:id/history',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']
         #swagger.description = 'Endpoint to add a history event to a party'
@@ -238,7 +239,7 @@ PartyRouter.delete('/:id/history/:historyId', async (req: Request, res: Response
     }
 });
 
-PartyRouter.put('/:id', async (req: Request, res: Response, next: NextFunction) => {
+PartyRouter.put('/:id',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']
         #swagger.description = 'Endpoint to update a party'
@@ -269,6 +270,7 @@ PartyRouter.put('/:id', async (req: Request, res: Response, next: NextFunction) 
 
 PartyRouter.put(
     '/:id/logo',
+    authMiddleware,
     upload.single('logo'),
     async (req: Request, res: Response, next: NextFunction) => {
     /**
@@ -303,7 +305,7 @@ PartyRouter.put(
 
 //Comments related methods
 
-PartyRouter.post('/:id/comments', async (req: Request, res: Response, next: NextFunction) => {
+PartyRouter.post('/:id/comments',authMiddleware, async (req: Request, res: Response, next: NextFunction) => {
     /**
         #swagger.tags = ['Party']
         #swagger.description = 'Endpoint to add a comment to a party'
@@ -414,6 +416,26 @@ PartyRouter.get('/:id/personal-debates', async (req: Request, res: Response, nex
         }
         const debates = await PartyService.getPersonalDebatesFromPartyId(id);
         res.status(200).send(debates);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PartyRouter.post('/:id/first-debate-display', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const id = req.params.id;
+        if(!id) {
+            throw new Error('Party id is required');
+        }
+        const debateId = req.body.debateId;
+        const party = await PartyService.setFirstDebateDisplay(id, debateId, userId);
+        res.status(200).send(party);
     } catch (error) {
         next(error);
     }

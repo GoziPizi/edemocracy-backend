@@ -201,15 +201,27 @@ class PartyService {
     //Debate related methods
 
     static async getDebatesFromPartyId(partyId: string) {
-        //TO TEST
         const debates = this.partyRepository.getDebatesFromPartyId(partyId);
         return debates;
     }
 
     static async getPersonalDebatesFromPartyId(partyId: string) {
-        //TO TEST
         const debates = this.partyRepository.getPersonalDebatesFromPartyId(partyId);
         return debates;
+    }
+
+    static async setFirstDebateDisplay(partyId: string, debateId: string, userId: string) {
+        const party = await this.partyRepository.getPartyById(partyId);
+        if(!party) {
+            throw new Error('Party not found');
+        }
+        const hasAdminRights = await this.checkAdminRights(partyId, userId);
+        if(!hasAdminRights) {
+            throw new Error('You are not allowed to do this');
+        }
+        const party_ = this.partyRepository.setFirstDebateDisplay(partyId, debateId);
+        return party_;
+
     }
 
     //Moderation

@@ -171,17 +171,18 @@ model Notifications {
 }
 
 model Party {
-  id          String      @id @default(uuid())
-  founderId   String
-  name        String
-  logo        String      @default("")
-  politicSide Affiliation
-  description String      @default("")
-  reason      String      @default("")
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  for         String[]
-  against     String[]
+  id                 String      @id @default(uuid())
+  founderId          String
+  name               String
+  logo               String      @default("")
+  politicSide        Affiliation
+  description        String      @default("")
+  reason             String      @default("")
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  for                String[]
+  against            String[]
+  firstDebateDisplay String?
 
   Personality       Personality[]
   PartyMembership   PartyMembership[]

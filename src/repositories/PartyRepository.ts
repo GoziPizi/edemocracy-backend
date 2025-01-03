@@ -235,6 +235,18 @@ class PartyRepository extends PrismaRepository {
         })
         return debates
     }
+
+    setFirstDebateDisplay = async (partyId: string, debateId: string) => {
+        const party = await this.prismaClient.party.update({
+            where: {
+                id: partyId
+            },
+            data: {
+                firstDebateDisplay: debateId
+            }
+        })
+        return party
+    }
 }
 
 export default PartyRepository;
