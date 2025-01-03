@@ -284,8 +284,8 @@ model Debate {
   argumentId                 String?
   partyId                    String?
   personalityId              String?
-  isOwnedByParty             Boolean                          @default(false)
-  isOwnedByPersonality       Boolean                          @default(false)
+  partyCreatorId             String?
+  personalityCreatorId       String?
   DebateVote                 DebateVote[]
 }
 

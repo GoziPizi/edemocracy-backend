@@ -117,6 +117,10 @@ class PartyService {
         return returnUsers;
     }
 
+    static async isMember(partyId: string, userId: string) {
+        return this.partyRepository.isMember(partyId, userId);
+    }
+
     //history events related methods
 
     static async createPartyHistoryEvent(id: string,  data: any) {

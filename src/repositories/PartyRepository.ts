@@ -127,6 +127,17 @@ class PartyRepository extends PrismaRepository {
         return users
     }
 
+    isMember = async (partyId: string, userId: string): Promise<boolean> => {
+        const partyMembership = await this.prismaClient.partyMembership.findFirst({
+            where: {
+                partyId,
+                userId
+            }
+        })
+        if(partyMembership) return true
+        return false
+    }
+
     //Comments methods
 
     getCommentById = async (commentId: string) => {
@@ -204,8 +215,7 @@ class PartyRepository extends PrismaRepository {
     getDebatesFromPartyId = async (partyId: string) => {
         const debates = await this.prismaClient.debate.findMany({
             where: {
-                partyId,
-                isOwnedByParty: false
+                partyId
             },
             orderBy: {
                 popularityScore: 'desc'
@@ -217,8 +227,7 @@ class PartyRepository extends PrismaRepository {
     getPersonalDebatesFromPartyId = async (partyId: string) => {
         const debates = await this.prismaClient.debate.findMany({
             where: {
-                partyId,
-                isOwnedByParty: true
+                partyCreatorId: partyId
             },
             orderBy: {
                 popularityScore: 'desc'

@@ -8,6 +8,8 @@ import { Argument, DebateVoteType, MembershipStatus } from "@prisma/client";
 import ArgumentService from "./ArgumentService";
 import NotificationService from "./NotificationService";
 import PopularityService from "./PopularityService";
+import PartyService from "./PartyService";
+import { UserNotInPartyException } from "@/exceptions/PartyExceptions";
 
 class DebateService {
 
@@ -17,43 +19,57 @@ class DebateService {
     private static topicRepository: TopicRepository = new TopicRepository()
     private static userRepository: UserRepository = new UserRepository()
 
-    static async createDebate(debate: any, userId: string) {
-        const argument = debate.argumentId ? await this.argumentRepository.getArgumentById(debate.argumentId) : null;
-        if(argument && argument.childDebateId) {
-            throw new Error('Argument already has a debate');
+    static async createDebate(debate: any, userId: any) {
+        try {
+            const argument = debate.argumentId ? await this.argumentRepository.getArgumentById(debate.argumentId) : null;
+            if(argument && argument.childDebateId) {
+                throw new Error('Argument already has a debate');
+            }
+            if(debate.partyCreatorId) {
+                const isAllowed = PartyService.isMember(debate.partyCreatorId, userId);
+                if(!isAllowed) {
+                    throw new UserNotInPartyException();
+                }
+            }
+            //TODO personnality
+            //Initialisation of debate results
+            const debateResult = await this.debateRepository.createDebateResult();
+            const debateContributorsResult = await this.debateRepository.createDebateResult();
+            const newDebate = await this.debateRepository.createDebate({
+                userId,
+                ...debate,
+                debateResultId: debateResult.id,
+                debateContributorsResultId: debateContributorsResult.id
+            
+            });
+            if(!newDebate) {
+                throw new Error('Debate not created');
+            }
+
+            //Adding debate to argument and topic
+            if(newDebate.topicId) {
+                await this.topicRepository.addDebateToTopic(newDebate.topicId, newDebate.id);
+                NotificationService.incrementFollowUpdate(newDebate.topicId, "TOPIC");
+            }
+
+            if(newDebate.argumentId) {
+                await this.argumentRepository.addDebateToArgument(newDebate.argumentId, newDebate.id);
+            }
+
+            const reformulation = {
+                debateId: newDebate.id,
+                title: debate.title,
+                content: debate.content,
+                userId
+            }
+
+            await this.createDebateReformulation(reformulation);
+ 
+            return newDebate;
+
+        } catch (error) {
+            throw error;
         }
-        //Initialisation of debate results
-        const debateResult = await this.debateRepository.createDebateResult();
-        const debateContributorsResult = await this.debateRepository.createDebateResult();
-        const newDebate = await this.debateRepository.createDebate({
-            userId,
-            ...debate,
-            debateResultId: debateResult.id,
-            debateContributorsResultId: debateContributorsResult.id
-        
-        });
-        if(!newDebate) {
-            throw new Error('Debate not created');
-        }
-        //Adding debate to argument and topic
-        if(newDebate.topicId) {
-            await this.topicRepository.addDebateToTopic(newDebate.topicId, newDebate.id);
-        }
-        if(newDebate.argumentId) {
-            await this.argumentRepository.addDebateToArgument(newDebate.argumentId, newDebate.id);
-        }
-        //Creating the first reformulation (the description itself)
-        const data = {
-            debateId: newDebate.id,
-            title: debate.title,
-            content: debate.content,
-            userId
-        }
-        await this.createDebateReformulation(data);
-        if(newDebate.topicId) {
-            NotificationService.incrementFollowUpdate(newDebate.topicId, "TOPIC");
-        }
-        return newDebate;
     }
 
     static async getDebatesByTime(page_size: number = 10, page: number = 1) {
