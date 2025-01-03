@@ -58,7 +58,11 @@ class PartyService {
         const logoUrl = await AwsService.uploadPartyLogo(logo, id);
         const oldParty = await this.partyRepository.getPartyById(id);
         if(oldParty && oldParty.logo !== 'default-logo.png') {
-            await AwsService.deleteFile(oldParty.logo);
+            try {
+                await AwsService.deleteFile(oldParty.logo);
+            } catch (error) {
+                console.log('error while deleting old party logo', error);
+            }
         }
         let party = await this.partyRepository.updateParty(id, { logo: logoUrl});
         return party;
