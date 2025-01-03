@@ -2,6 +2,7 @@ import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import UserService from '@/services/UserService';
 import express, { NextFunction, Request, Response } from 'express'
+import Joi from 'joi';
 import multer from 'multer'
 
 const storage = multer.memoryStorage();
@@ -51,6 +52,20 @@ UserRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
             throw new JwtNotInHeaderException();
         }
         const userId = AuthentificationService.getUserId(token);
+
+        const allowedSchema = Joi.object({
+            telephone: Joi.string().optional(),
+            address: Joi.string().optional(),
+            profession: Joi.string().optional(),
+            religion: Joi.string().optional(),
+            origin: Joi.string().optional(),
+        })
+
+        const { error } = allowedSchema.validate(req.body);
+        if (error) {
+            throw new Error(error.message);
+        }
+
         const user = await UserService.updateUserById(userId, req.body);
         res.status(200).send(user);
     } catch (error) {
