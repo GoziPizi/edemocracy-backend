@@ -54,12 +54,20 @@ UserRouter.put('/', async (req: Request, res: Response, next: NextFunction) => {
         const userId = AuthentificationService.getUserId(token);
 
         const allowedSchema = Joi.object({
-            telephone: Joi.string().optional(),
-            address: Joi.string().optional(),
-            profession: Joi.string().optional(),
-            religion: Joi.string().optional(),
-            origin: Joi.string().optional(),
+            telephone: Joi.string().allow(null).optional(),
+            address: Joi.string().allow(null).optional(),
+            city: Joi.string().allow(null).optional(),
+            postalCode: Joi.string().allow(null).optional(),
+            profession: Joi.string().allow(null).optional(),
+            yearsOfExperience: Joi.number().allow(null).optional(),
+            religion: Joi.string().allow(null).optional(),
+            origin: Joi.string().allow(null).optional(),
+            birthSex: Joi.string().allow(null).optional(),
+            actualSex: Joi.string().allow(null).optional(),
+            sexualOrientation: Joi.string().allow(null).optional(),
         })
+
+        console.log(req.body);
 
         const { error } = allowedSchema.validate(req.body);
         if (error) {
