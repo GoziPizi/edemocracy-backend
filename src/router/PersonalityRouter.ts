@@ -132,7 +132,51 @@ PersonalityRouter.put('/:id/description', async (req: Request, res: Response, ne
 });
 
 PersonalityRouter.get('/:id/debates', async (req: Request, res: Response, next: NextFunction) => { 
-    //TODO
+
+    try {
+        const id = req.params.id;
+        if(!id) {
+            throw new Error('Party id is required');
+        }
+        const debates = await PersonalityService.getDebatesFromPersonalityId(id);
+        res.status(200).send(debates);        
+    } catch (error) {
+        next(error);
+    }
+
+});
+
+PersonalityRouter.get('/:id/personal-debates', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const id = req.params.id;
+        if(!id) {
+            throw new Error('Party id is required');
+        }
+        const debates = await PersonalityService.getPersonalDebatesFromPersonalityId(id);
+        res.status(200).send(debates);
+    } catch (error) {
+        next(error);
+    }
+});
+
+PersonalityRouter.post('/:id/first-debate-display', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        await AuthentificationService.checkToken(token);
+        const userId = AuthentificationService.getUserId(token);
+        const id = req.params.id;
+        if(!id) {
+            throw new Error('Party id is required');
+        }
+        const debateId = req.body.debateId;
+        const personality = await PersonalityService.setFirstDebateDisplay(id, debateId, userId);
+        res.status(200).send(personality);
+    } catch (error) {
+        next(error);
+    }
 });
 
 

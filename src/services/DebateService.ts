@@ -10,6 +10,7 @@ import NotificationService from "./NotificationService";
 import PopularityService from "./PopularityService";
 import PartyService from "./PartyService";
 import { UserNotInPartyException } from "@/exceptions/PartyExceptions";
+import PersonalityService from "./PersonalityService";
 
 class DebateService {
 
@@ -31,7 +32,14 @@ class DebateService {
                     throw new UserNotInPartyException();
                 }
             }
-            //TODO personnality
+            if(debate.personalityCreatorId) {
+                const isAllowed = PersonalityService.isUserPersonality(debate.personalityCreatorId, userId);
+                if(!isAllowed) {
+                    throw new Error('You are not the personality');
+                }
+            }
+
+
             //Initialisation of debate results
             const debateResult = await this.debateRepository.createDebateResult();
             const debateContributorsResult = await this.debateRepository.createDebateResult();

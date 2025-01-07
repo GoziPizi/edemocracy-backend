@@ -20,6 +20,13 @@ class PersonalityService {
         return personality;
     }
 
+    static async isUserPersonality(personalityId: string, userId: string) {
+        let personality = await this.personalityRepository.findPersonalityById(personalityId)
+        if(!personality) return false;
+        if(personality.userId !== userId) return false;
+        return true;
+    }
+
     static async createPersonality(userId: string) {
         return PersonalityService.personalityRepository.createPersonality(userId);
     }
@@ -68,6 +75,31 @@ class PersonalityService {
             personality.user = toPublicUserOutput(personality.user);
         });
         return result;
+    }
+
+    //Debate related emthods
+
+    static async getDebatesFromPersonalityId(personalityId: string) {
+        const debates = this.personalityRepository.getDebatesFromPersonalityId(personalityId);
+        return debates;
+    }
+
+    static async getPersonalDebatesFromPersonalityId(personalityId: string) {
+        const debates = this.personalityRepository.getPersonalDebatesFromPersonalityId(personalityId);
+        return debates;
+    }
+
+    static async setFirstDebateDisplay(personalityId: string, debateId: string, userId: string) {
+        const personality = await this.personalityRepository.getPersonalityWithUser(personalityId);
+        if(!personality) {
+            throw new Error('Personality not found');
+        }
+        if(personality.userId != userId) {
+            throw new Error('You are not allowed');
+        }
+        const personality_ = this.personalityRepository.setFirstDebateDisplay(personalityId, debateId);
+        return personality_;
+
     }
 
 }

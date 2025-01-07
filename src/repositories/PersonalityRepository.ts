@@ -93,6 +93,44 @@ class PersonalityRepository extends PrismaRepository {
         })
         return personalities
     }
+
+    //debates related methods
+
+    getDebatesFromPersonalityId = async (personalityId: string) => {
+        const debates = await this.prismaClient.debate.findMany({
+            where: {
+                personalityId
+            },
+            orderBy: {
+                popularityScore: 'desc'
+            }
+        })
+        return debates
+    }
+
+    getPersonalDebatesFromPersonalityId = async (personalityId: string) => {
+        const debates = await this.prismaClient.debate.findMany({
+            where: {
+                personalityCreatorId: personalityId
+            },
+            orderBy: {
+                popularityScore: 'desc'
+            }
+        })
+        return debates
+    }
+
+    setFirstDebateDisplay = async (personalityId: string, debateId: string) => {
+        const personality = await this.prismaClient.personality.update({
+            where: {
+                id: personalityId
+            },
+            data: {
+                firstDebateDisplay: debateId
+            }
+        })
+        return personality
+    }
 }
 
 export default PersonalityRepository;
