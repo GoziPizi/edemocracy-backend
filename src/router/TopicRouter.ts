@@ -1,4 +1,5 @@
 import { authMiddleware } from '@/checkAuthMiddleware';
+import { Forbidden } from '@/exceptions/AdminExceptions';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import AuthentificationService from '@/services/AuthentificationService';
 import BanWordService from '@/services/BanWordService';
@@ -42,6 +43,11 @@ TopicRouter.post(
         }
         await AuthentificationService.checkToken(token);
         const userId = AuthentificationService.getUserId(token)
+
+        const role = await AuthentificationService.getUserRole(token);
+        if(role !== 'ADMIN') {
+            throw new Forbidden();
+        }
 
         const topic = req.body;
         await BanWordService.checkStringForBanWords(topic.title)
