@@ -450,7 +450,7 @@ class DebateService {
         try {
             const debate = await this.debateRepository.getDebateById(debateId);
             if(!debate) {
-                throw new Error('Debate not found');
+                return;
             }
             //delete all reformulations
             const reformulationsIds = await this.debateRepository.getDebateReformulationsIds(debateId);
@@ -499,6 +499,115 @@ class DebateService {
 
     static async setReformulationFlag(id: string, isFlaged: boolean) {
         await this.debateRepository.updateReformulation(id, {isFlaged});
+    }
+
+    // static async mergeDebates(moderatorId:string, debateId1: string, debateId2: string) {
+    //     try {
+
+    //         // const debate1 = await this.debateRepository.getDebateById(debateId1);
+    //         // const debate2 = await this.debateRepository.getDebateById(debateId2);
+
+    //         // if(!debate1 || !debate2) {
+    //         //     throw new Error('Debate not found');
+    //         // }
+
+    //         // if(debate1.id === debate2.id) {
+    //         //     throw new Error('Debates are the same');
+    //         // }
+
+    //         // const debate1Reformulations = await this.debateRepository.getDebateReformulations(debateId1);
+    //         // const debate2Reformulations = await this.debateRepository.getDebateReformulations(debateId2);
+
+    //         // const allReformulations = [...debate1Reformulations, ...debate2Reformulations];
+    //         // let winnerReformulation = allReformulations.reduce((prev, current) => {
+    //         //     return (prev.score > current.score) ? prev : current
+    //         // });
+
+    //         // let winnerDebate : any = debate1;
+    //         // if(winnerReformulation.debateId !== debateId1) {
+    //         //     winnerDebate = debate2;
+    //         // }
+            
+    //         // if(!winnerDebate) {
+    //         //     throw new Error('Winner debate not found');
+    //         // }
+
+    //         // //Initiate results
+    //         // const debateResult = await this.debateRepository.createDebateResult();
+    //         // const debateContributorsResult = await this.debateRepository.createDebateResult();
+
+    //         // //Merge them
+    //         // const debateResult1 = await this.debateRepository.getDebateResult(debate1.debateResultId);
+    //         // const debateResult2 = await this.debateRepository.getDebateResult(debate2.debateResultId);
+    //         // const debateContributorsResult1 = await this.debateRepository.getDebateResult(debate1.debateContributorsResultId);
+    //         // const debateContributorsResult2 = await this.debateRepository.getDebateResult(debate2.debateContributorsResultId);
+            
+    //         // await this.debateRepository.updateDebateResult(debateResult.id, {
+    //         //     nbFor: debateResult1!.nbFor + debateResult2!.nbFor,
+    //         //     nbReallyFor: debateResult1!.nbReallyFor + debateResult2!.nbReallyFor,
+    //         //     nbAgainst: debateResult1!.nbAgainst + debateResult2!.nbAgainst,
+    //         //     nbReallyAgainst: debateResult1!.nbReallyAgainst + debateResult2!.nbReallyAgainst,
+    //         //     nbNeutral: debateResult1!.nbNeutral + debateResult2!.nbNeutral
+    //         // })
+    //         // await this.debateRepository.updateDebateResult(debateContributorsResult.id, {
+    //         //     nbFor: debateContributorsResult1!.nbFor + debateContributorsResult2!.nbFor,
+    //         //     nbReallyFor: debateContributorsResult1!.nbReallyFor + debateContributorsResult2!.nbReallyFor,
+    //         //     nbAgainst: debateContributorsResult1!.nbAgainst + debateContributorsResult2!.nbAgainst,
+    //         //     nbReallyAgainst: debateContributorsResult1!.nbReallyAgainst + debateContributorsResult2!.nbReallyAgainst,
+    //         //     nbNeutral: debateContributorsResult1!.nbNeutral + debateContributorsResult2!.nbNeutral
+    //         // })
+
+    //         // //Create the new debate
+    //         // delete winnerDebate.id;
+    //         // delete winnerDebate.createdAt;
+    //         // delete winnerDebate.updatedAt;
+    //         // delete winnerDebate.debateResultId;
+    //         // delete winnerDebate.debateContributorsResultId;
+
+    //         // const newDebate = await this.debateRepository.createDebate({
+    //         //     ...winnerDebate,
+    //         //     debateResultId: debateResult.id,
+    //         //     debateContributorsResultId: debateContributorsResult.id
+    //         // });
+
+    //         // //Merge the arguments
+    //         // if(debate1.argumentId && debate2.argumentId) {
+    //         //     const arg1 = await this.argumentRepository.getArgumentById(debate1.argumentId);
+    //         //     const arg2 = await this.argumentRepository.getArgumentById(debate2.argumentId);
+    //         //     const finalArg = await this.argumentRepository.createArgument({
+    //         //         debateId : arg1!.debateId,
+    //         //         title: arg1!.title,
+    //         //         content: arg1!.content,
+    //         //         childDebateId: newDebate.id,
+    //         //     })
+    //         // }
+
+    //         // //Updates all the past references
+
+
+    //     } catch (error) {
+    //         throw error;
+    //     }
+    // }
+
+    //Merges 2 into 1
+    static async mergeDebateIntoOtherDebate(debateId1: string, debateId2: string) {
+
+        const arguments2 = await this.debateRepository.getDebateArguments(debateId2);
+
+        for (const argument of arguments2) {
+            await this.argumentRepository.updateArgument(argument.id, { debateId: debateId1 });
+            console.log("Argument", argument.id, "moved to debate", debateId1);
+        }
+
+        const reformulations2 = await this.debateRepository.getDebateReformulations(debateId2);
+        for (const reformulation of reformulations2) {
+            await this.debateRepository.updateReformulation(reformulation.id, { debateId: debateId1 });
+        }
+
+        await this.updateWinnerDebateReformulation(debateId1);
+        await this.deleteDebate(debateId2);
+
     }
 
 }

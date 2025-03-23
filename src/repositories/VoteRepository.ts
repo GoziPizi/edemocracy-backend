@@ -30,6 +30,15 @@ class VoteRepository extends PrismaRepository {
             }
         });
     }
+
+    getArgumentsVotes = async (argumentId: string) => {
+        const votes = await this.prismaClient.vote.findMany({
+            where: {
+                argumentId
+            }
+        });
+        return votes;
+    }
 }
 
 export default VoteRepository;

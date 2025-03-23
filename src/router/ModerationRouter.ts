@@ -2,7 +2,9 @@ import { Forbidden } from '@/exceptions/AdminExceptions';
 import { MissingArgumentException } from '@/exceptions/BaseExceptions';
 import { JwtNotInHeaderException } from '@/exceptions/JwtExceptions';
 import { ReportIntToReportType } from '@/mappers/ReportType';
+import ArgumentService from '@/services/ArgumentService';
 import AuthentificationService from '@/services/AuthentificationService';
+import DebateService from '@/services/DebateService';
 import ModerationService from '@/services/ModerationService';
 import { personalReport } from '@/types/dtos/ModerationDtos';
 import { ReportingEventInputDto } from '@/types/ModerationTypes';
@@ -472,6 +474,49 @@ ModerationRouter.get('/historic/:moderatorId', async (req: Request, res: Respons
         const events = await ModerationService.getHistoricOfModerator(req.params.moderatorId);
         res.status(200).send(events);
     } catch (error:any) {
+        next(error);
+    }
+});
+
+//Merge 2 debates
+ModerationRouter.post('/debate/:id1/merge/:id2', async (req: Request, res: Response, next: NextFunction) => {
+    //TOTEST
+    try {
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const moderatorId = AuthentificationService.getUserId(token);
+        const debateId1 = req.params.id1;
+        const debateId2 = req.params.id2;
+
+        //Check modo
+
+        const mergedDebate = await DebateService.mergeDebateIntoOtherDebate(debateId1, debateId2);
+
+        res.status(200).send(mergedDebate);
+    } catch(error:any) {
+        next(error);
+    }
+});
+
+//Merge 2 arguments
+ModerationRouter.post('/argument/:id1/merge/:id2', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        console.log('Merge route called');
+        const token = req.headers.authorization;
+        if(!token) {
+            throw new JwtNotInHeaderException();
+        }
+        const moderatorId = AuthentificationService.getUserId(token);
+        //Check modo
+        const argumentId1 = req.params.id1;
+        const argumentId2 = req.params.id2;
+
+        await ArgumentService.mergeArgumentsFromTheSameDebate(argumentId1, argumentId2);
+
+        res.status(200).send();
+    } catch(error:any) {
         next(error);
     }
 });

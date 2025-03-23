@@ -5,7 +5,6 @@ import { ArgumentWithVoteOutputDto } from "@/types/dtos/ArgumentOutputDtos";
 import DebateService from "./DebateService";
 import UserRepository from "@/repositories/UserRepository";
 import NotificationService from "./NotificationService";
-import { ReportingType } from "@prisma/client";
 import PopularityService from "./PopularityService";
 
 class ArgumentService {
@@ -191,6 +190,91 @@ class ArgumentService {
         } catch (error) {
             return;
         }
+    }
+
+    //Moderation
+
+    static async mergeArgumentsFromTheSameDebate(argumentId1: string, argumentId2: string): Promise<void> {
+     
+        //Check same debate
+        //Select the most popular argument
+        //Create the new argument
+        //Merge votes
+        //Merge debates
+
+        try {
+
+            console.log("Fetching arguments");
+
+            const argument1 = await this.argumentRepository.getArgumentById(argumentId1);
+            const argument2 = await this.argumentRepository.getArgumentById(argumentId2);
+
+            console.log(argument1, argument2);
+
+            if(!argument1 || !argument2) {
+                throw new Error('Argument not found');
+            }
+
+            if(argument1.debateId !== argument2.debateId) {
+                throw new Error('Arguments are not from the same debate');
+            }
+
+            if(argument1.type !== argument2.type) {
+                throw new Error('Arguments are not the same type');
+            }
+
+            const argumentToKeep = argument1.nbGood >= argument2.nbGood ? argument1 : argument2;
+            const argumentToDelete = argument1.nbGood >= argument2.nbGood ? argument2 : argument1;
+
+            let newArgumentCreation: any = {
+                userId: argumentToKeep.userId,
+                debateId: argumentToKeep.debateId,
+                title: argumentToKeep.title,
+                content: argumentToKeep.content,
+                type: argumentToKeep.type,
+            }
+
+            console.log("Creating new argument");
+            console.log(newArgumentCreation);
+
+            let finalArgument = await this.createArgument(newArgumentCreation);
+
+            console.log("Final argument");
+            console.log(finalArgument);
+
+            const votes1 = await this.voteRepository.getArgumentsVotes(argumentId1);
+            const votes2 = await this.voteRepository.getArgumentsVotes(argumentId2);
+
+            const votesToMerge = [...votes1, ...votes2];
+            console.log("Votes to merge");
+            console.log(votesToMerge);
+            //Remove duplicates
+            const uniqueVotes = votesToMerge.filter((v, i, a) => a.findIndex(t => (t.userId === v.userId)) === i);
+            for(const vote of uniqueVotes) {
+                await this.voteRepository.createVote(vote.userId, finalArgument.id, vote.value);
+            }
+
+            //Remove old votes
+            for (const vote of votesToMerge) {
+                await this.voteRepository.deleteVote(vote.id);
+            }
+
+            //Merge debates
+            await DebateService.mergeDebateIntoOtherDebate(argumentToKeep.childDebateId!, argumentToDelete.childDebateId!);
+
+            await this.debateRepository.update(argumentToKeep.childDebateId!, {argumentId: finalArgument.id});
+            await this.argumentRepository.updateArgument(finalArgument.id, {childDebateId: argumentToKeep.childDebateId});
+
+            //Delete old arguments
+            await this.deleteArgument(argumentToDelete.id);
+
+            await this.argumentRepository.updateArgument(argumentToKeep.id, {childDebateId: null});
+
+            await this.deleteArgument(argumentToKeep.id);
+        } catch (error) {
+            throw error;
+        }
+
     }
 
 }
