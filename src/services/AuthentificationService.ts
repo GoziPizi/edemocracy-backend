@@ -218,7 +218,7 @@ class AuthentificationService {
       let user: any = {
         ...preRegistration,
         role: Role.USER,
-        membershipStatus,
+        contributionStatus: membershipStatus,
         isVerified: false,
       };
 
