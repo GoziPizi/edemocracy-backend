@@ -6,7 +6,7 @@ import Jwt from '@/classes/Jwt';
 import { JwtCheckException } from '@/exceptions/JwtExceptions';
 import { MembershipStatus, Role } from '@prisma/client';
 import AwsService from './AwsService';
-import { sendReinitPasswordMail } from './MailService';
+import { sendNewBienfaiteurMail, sendReinitPasswordMail } from './MailService';
 import {
   FreeUserCreateInputDto,
   StandardUserCreateInputDto,
@@ -273,6 +273,10 @@ class AuthentificationService {
         if (MCA_id) {
           await UserService.follow(createdUser.id, MCA_id, 'party');
         }
+      }
+
+      if (membershipStatus === MembershipStatus.BIENFAITEUR) {
+        sendNewBienfaiteurMail(email);
       }
 
       return;
