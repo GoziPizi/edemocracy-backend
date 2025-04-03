@@ -27,6 +27,7 @@ enum MembershipStatus {
   NONE
   STANDARD
   PREMIUM
+  BIENFAITEUR
 }
 
 model User {

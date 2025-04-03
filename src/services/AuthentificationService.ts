@@ -82,8 +82,9 @@ class AuthentificationService {
   }
 
   //Returns the checkout session url.
-  static async preRegisterStandard(
+  static async preRegisterPaid(
     userInput: StandardUserCreateInputDto,
+    registerType: string,
     recto1: Express.Multer.File,
     verso1: Express.Multer.File,
     recto2: Express.Multer.File | undefined,
@@ -171,115 +172,40 @@ class AuthentificationService {
         }
       }
 
-      const session = await StripeService.createCheckoutSessionForStandard(
-        userInput.email
-      );
+      let session;
+
+      if (registerType === 'standard') {
+        session = await StripeService.createCheckoutSessionForStandard(
+          userInput.email
+        );
+      }
+
+      if (registerType === 'premium') {
+        session = await StripeService.createCheckoutSessionForPremium(
+          userInput.email
+        );
+      }
+
+      if (registerType === 'bienfaiteur') {
+        session = await StripeService.createCheckoutSessionForBienfaiteur(
+          userInput.email
+        );
+      }
+
+      if (!session) {
+        throw new Error('Error while creating session');
+      }
+
       return session.url;
     } catch (error) {
       throw new Error('Error while registering user');
     }
   }
 
-  static async preRegisterPremium(
-    userInput: any,
-    recto1: Express.Multer.File,
-    verso1: Express.Multer.File,
-    recto2: Express.Multer.File | undefined,
-    verso2: Express.Multer.File | undefined,
-    recto3: Express.Multer.File | undefined,
-    verso3: Express.Multer.File | undefined
+  static async registerFromPreRegistration(
+    email: string,
+    membershipStatus: MembershipStatus
   ) {
-    try {
-      let data: any = {};
-
-      const recto1Url = await AwsService.uploadIdentityPicture(recto1);
-      const verso1Url = await AwsService.uploadIdentityPicture(verso1);
-
-      data.email = userInput.email;
-      data.recto1 = recto1Url;
-      data.verso1 = verso1Url;
-      data.idNumber1 = userInput.idNumber1;
-      data.idNationality1 = userInput.idNationality1;
-
-      let recto2Url: string | undefined = undefined;
-      let verso2Url: string | undefined = undefined;
-      if (recto2 && verso2) {
-        recto2Url = await AwsService.uploadIdentityPicture(recto2);
-        verso2Url = await AwsService.uploadIdentityPicture(verso2);
-        data.recto2 = recto2Url;
-        data.verso2 = verso2Url;
-        data.idNumber2 = userInput.idNumber2;
-        data.idNationality2 = userInput.idNationality2;
-      }
-
-      let recto3Url: string | undefined = undefined;
-      let verso3Url: string | undefined = undefined;
-
-      if (recto3 && verso3) {
-        recto3Url = await AwsService.uploadIdentityPicture(recto3);
-        verso3Url = await AwsService.uploadIdentityPicture(verso3);
-        data.recto3 = recto3Url;
-        data.verso3 = verso3Url;
-        data.idNumber3 = userInput.idNumber3;
-        data.idNationality3 = userInput.idNationality3;
-      }
-
-      await this.userRepository.createVerificationRequest(data);
-
-      let finalInput: any = { ...userInput };
-      delete finalInput.idNumber1;
-      delete finalInput.idNumber2;
-      delete finalInput.idNumber3;
-
-      let diplomas: { name: string; obtention: number }[] | undefined =
-        undefined;
-
-      if (finalInput.diplomas) {
-        diplomas = JSON.parse(finalInput.diplomas);
-        delete finalInput.diplomas;
-      }
-
-      if (finalInput.yearsOfExperience) {
-        finalInput.yearsOfExperience = Number(finalInput.yearsOfExperience);
-      }
-
-      let preRegistration =
-        await this.preRegistrationRepository.getPreRegistration(
-          userInput.email
-        );
-      if (preRegistration) {
-        await this.preRegistrationRepository.deletePreRegistration(
-          userInput.email
-        );
-      }
-
-      preRegistration =
-        await this.preRegistrationRepository.createPreRegistration(finalInput);
-
-      if (!preRegistration) {
-        throw new Error('Error while creating preRegistration');
-      }
-
-      if (diplomas && preRegistration) {
-        for (let diploma of diplomas) {
-          await this.preRegistrationRepository.createPreregistrationDiploma(
-            preRegistration.id,
-            diploma.name,
-            diploma.obtention
-          );
-        }
-      }
-
-      const session = await StripeService.createCheckoutSessionForPremium(
-        userInput.email
-      );
-      return session.url;
-    } catch (error) {
-      throw new Error('Error while registering user');
-    }
-  }
-
-  static async registerFromPreRegistration(email: string, isPremium: boolean) {
     try {
       const preRegistration =
         await this.preRegistrationRepository.getPreRegistration(email);
@@ -287,16 +213,12 @@ class AuthentificationService {
         throw new Error('PreRegistration not found');
       }
 
-      const contributionStatus = isPremium
-        ? MembershipStatus.PREMIUM
-        : MembershipStatus.STANDARD;
-
       let sponsorshipCode = preRegistration.sponsorshipCode;
 
       let user: any = {
         ...preRegistration,
         role: Role.USER,
-        contributionStatus,
+        membershipStatus,
         isVerified: false,
       };
 
@@ -343,7 +265,10 @@ class AuthentificationService {
 
       //Follows MCA if Premium
 
-      if (isPremium) {
+      if (
+        membershipStatus === MembershipStatus.PREMIUM ||
+        membershipStatus === MembershipStatus.BIENFAITEUR
+      ) {
         const MCA_id = process.env.MCA_ID;
         if (MCA_id) {
           await UserService.follow(createdUser.id, MCA_id, 'party');
