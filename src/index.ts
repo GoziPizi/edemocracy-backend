@@ -27,7 +27,7 @@ try {
 }
 
 const corsOptions = {
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   origin: corsOrigins,
   optionsSuccessStatus: 200,
 };
