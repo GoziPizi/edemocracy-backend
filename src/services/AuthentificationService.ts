@@ -6,7 +6,14 @@ import Jwt from '@/classes/Jwt';
 import { JwtCheckException } from '@/exceptions/JwtExceptions';
 import { MembershipStatus, Role } from '@prisma/client';
 import AwsService from './AwsService';
-import { sendNewBienfaiteurMail, sendReinitPasswordMail } from './MailService';
+import {
+  sendNewBienfaiteurMail,
+  sendReinitPasswordMail,
+  sendThankToNewBienfaiteurMember,
+  sendThankToNewFreeMember,
+  sendThankToNewPremiumMember,
+  sendThankToNewStandardMember,
+} from './MailService';
 import {
   FreeUserCreateInputDto,
   StandardUserCreateInputDto,
@@ -76,6 +83,8 @@ class AuthentificationService {
           );
         }
       }
+
+      sendThankToNewFreeMember(userInput.email, userInput.firstName);
     } catch (error) {
       throw new Error('Error while creating user');
     }
@@ -277,6 +286,19 @@ class AuthentificationService {
 
       if (membershipStatus === MembershipStatus.BIENFAITEUR) {
         sendNewBienfaiteurMail(email);
+        sendThankToNewBienfaiteurMember(email, user.firstName);
+      }
+
+      if (membershipStatus === MembershipStatus.NONE) {
+        sendThankToNewFreeMember(email, user.firstName);
+      }
+
+      if (membershipStatus === MembershipStatus.STANDARD) {
+        sendThankToNewStandardMember(email, user.firstName);
+      }
+
+      if (membershipStatus === MembershipStatus.PREMIUM) {
+        sendThankToNewPremiumMember(email, user.firstName);
       }
 
       return;

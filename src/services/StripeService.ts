@@ -4,7 +4,12 @@ import AuthentificationService from './AuthentificationService';
 import Stripe from 'stripe';
 import { MembershipStatus } from '@prisma/client';
 import DonationRepository from '@/repositories/DonationRepository';
-import { sendNewPayingMemberMail, sendThankDonationMail } from './MailService';
+import {
+  sendNewPayingMemberMail,
+  sendThankDonationMail,
+  sendThankToNewBienfaiteurMember,
+  sendThankToNewStandardMember,
+} from './MailService';
 
 class StripeService {
   private static stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -223,6 +228,15 @@ class StripeService {
           registerType
         );
         sendNewPayingMemberMail(email, registerType);
+        if (registerType === MembershipStatus.BIENFAITEUR) {
+          sendThankToNewBienfaiteurMember(email, user.firstName);
+        }
+        if (registerType === MembershipStatus.STANDARD) {
+          sendThankToNewStandardMember(email, user.firstName);
+        }
+        if (registerType === MembershipStatus.PREMIUM) {
+          sendThankToNewStandardMember(email, user.firstName);
+        }
         return;
       }
     } catch (e) {
