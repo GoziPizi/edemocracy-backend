@@ -3,6 +3,7 @@ import nodemailer from 'nodemailer';
 
 const emailAdress = process.env.EMAIL_ADRESS;
 const emailPassCode = process.env.EMAIL_PASS_CODE;
+const siteUrl = process.env.SITE_URL;
 
 const transporter = nodemailer.createTransport({
   host: 'ssl0.ovh.net',
@@ -33,7 +34,7 @@ export function sendEmail(email: string, subject: string, text: string) {
 
 export function sendReinitPasswordMail(email: string, token: string) {
   const subject = 'Réinitialisation de votre mot de passe';
-  const text = `Bonjour, veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : https://digital-democracy.com/change-password/?token=${token}&email=${email}`;
+  const text = `Bonjour, veuillez cliquer sur le lien suivant pour réinitialiser votre mot de passe : ${siteUrl}/change-password/?token=${token}&email=${email}`;
   sendEmail(email, subject, text);
 }
 
