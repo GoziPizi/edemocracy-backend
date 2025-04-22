@@ -4,7 +4,7 @@ import AuthentificationService from './AuthentificationService';
 import Stripe from 'stripe';
 import { MembershipStatus } from '@prisma/client';
 import DonationRepository from '@/repositories/DonationRepository';
-import { sendThankDonationMail } from './MailService';
+import { sendNewPayingMemberMail, sendThankDonationMail } from './MailService';
 
 class StripeService {
   private static stripe: Stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
@@ -222,6 +222,7 @@ class StripeService {
           user.id,
           registerType
         );
+        sendNewPayingMemberMail(email, registerType);
         return;
       }
     } catch (e) {

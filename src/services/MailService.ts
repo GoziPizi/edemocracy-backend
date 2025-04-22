@@ -1,3 +1,4 @@
+import { MembershipStatus } from '@prisma/client';
 import nodemailer from 'nodemailer';
 
 const emailAdress = process.env.EMAIL_ADRESS;
@@ -56,6 +57,16 @@ export function sendFollowUpdateMail(email: string, entityName: string) {
   const subject = "Mise à jour d'un sujet suivi";
   const text = `Bonjour, un sujet que vous suivez (${entityName}) a été mis à jour`;
   sendEmail(email, subject, text);
+}
+
+export function sendNewPayingMemberMail(
+  newMemberEmail: string,
+  status: MembershipStatus
+) {
+  const adminEmail = process.env.ADMIN_EMAIL!;
+  const subject = 'Nouveau membre payant';
+  const text = `Bonjour, un nouveau membre payant a été ajouté : ${newMemberEmail} avec le statut ${status}`;
+  sendEmail(adminEmail, subject, text);
 }
 
 export function sendNewBienfaiteurMail(newBienfaiteurEmail: string) {
